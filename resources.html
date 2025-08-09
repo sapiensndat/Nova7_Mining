@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mineral Marketplace - nova7</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --nova7-gold: #FFD700;
+            --nova7-dark: #121212;
+            --nova7-white: #FFFFFF;
+            --nova7-gray-light: #D1D5DB;
+            --nova7-gray-medium: #4B5563;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--nova7-dark);
+            color: var(--nova7-white);
+            display: flex;
+            min-height: 100vh;
+        }
+        .header-nova7 {
+            background-color: var(--nova7-white);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 0.75rem 1.5rem;
+            height: 60px;
+        }
+        .nova7-logo-header {
+            max-height: 36px;
+            width: auto;
+        }
+        .sidebar-nova7 {
+            background-color: var(--nova7-dark);
+            color: var(--nova7-white);
+            width: 260px;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding-top: 1rem;
+            transition: transform 0.3s ease-in-out;
+            z-index: 40;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-header {
+            padding: 0.75rem 1.5rem 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--nova7-gold);
+            margin-bottom: 0.75rem;
+        }
+        .sidebar-logo-img {
+            max-height: 120px;
+            width: auto;
+        }
+        .sidebar-nova7 .nav-link-sidebar {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            margin: 0.25rem 1rem;
+            font-weight: 500;
+            color: var(--nova7-white);
+            text-decoration: none;
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+        .sidebar-nova7 .nav-link-sidebar:hover {
+            background-color: var(--nova7-gold);
+            color: var(--nova7-dark);
+            transform: translateX(5px);
+        }
+        .sidebar-nova7 .nav-link-sidebar.active {
+            background-color: var(--nova7-gold);
+            color: var(--nova7-dark);
+            font-weight: 600;
+        }
+        .sidebar-nova7 .nav-link-sidebar i {
+            width: 20px;
+            margin-right: 0.75rem;
+            text-align: center;
+        }
+        .main-content-area {
+            margin-left: 260px;
+            padding: 1.5rem;
+            width: calc(100% - 260px);
+            min-height: 100vh;
+            background-color: var(--nova7-dark);
+        }
+        .card-styled {
+            background-color: var(--nova7-white);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s ease;
+            color: var(--nova7-dark);
+        }
+        .card-styled:hover {
+            transform: translateY(-3px);
+        }
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--nova7-dark);
+            margin-bottom: 0.5rem;
+        }
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            border: 1px solid var(--nova7-gray-medium);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            color: var(--nova7-dark);
+            background-color: var(--nova7-white);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--nova7-gold);
+            box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+        }
+        .form-input:invalid:not(:placeholder-shown) {
+            border-color: #EF4444;
+        }
+        .form-input:valid:not(:placeholder-shown) {
+            border-color: #22C55E;
+        }
+        .btn-primary-action {
+            background-color: var(--nova7-gold);
+            color: var(--nova7-dark);
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+        .btn-primary-action:hover {
+            background-color: #E6C200;
+            box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);
+        }
+        .btn-primary-action:disabled {
+            background-color: #6B7280;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .btn-resend {
+            background-color: var(--nova7-gold);
+            color: var(--nova7-dark);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-resend:hover {
+            background-color: #E6C200;
+        }
+        .btn-resend:disabled {
+            background-color: #6B7280;
+            cursor: not-allowed;
+        }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .product-card {
+            background-color: var(--nova7-white);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            color: var(--nova7-dark);
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+        .product-image-container {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            background-color: var(--nova7-gray-medium);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .product-info {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .product-title {
+            font-weight: 600;
+            font-size: 1.125rem;
+            color: var(--nova7-dark);
+            margin-bottom: 0.5rem;
+        }
+        .product-description {
+            font-size: 0.875rem;
+            color: var(--nova7-gray-medium);
+            margin-bottom: 0.75rem;
+            flex-grow: 1;
+        }
+        .product-price {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--nova7-gold);
+            margin-bottom: 1rem;
+        }
+        .buy-button {
+            background-color: var(--nova7-gold);
+            color: var(--nova7-dark);
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .buy-button:hover {
+            background-color: #E6C200;
+        }
+        .buy-button:disabled {
+            background-color: #6B7280;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .pagination-controls button {
+            background-color: var(--nova7-gold);
+            color: var(--nova7-dark);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+        .pagination-controls button:hover:not(:disabled) {
+            background-color: #E6C200;
+        }
+        .pagination-controls button:disabled {
+            background-color: #6B7280;
+            cursor: not-allowed;
+        }
+        .message-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #22C55E;
+            color: var(--nova7-white);
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            text-align: center;
+            min-width: 250px;
+        }
+        .message-box.error {
+            background-color: #EF4444;
+        }
+        .message-box.show {
+            display: block;
+            opacity: 1;
+        }
+        .greeting-summary-card {
+            background-color: var(--nova7-white);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            padding: 1.5rem 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--nova7-dark);
+        }
+        .greeting-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--nova7-dark);
+            margin-bottom: 0.5rem;
+        }
+        .ai-summary-text {
+            font-size: 0.95rem;
+            color: var(--nova7-gray-medium);
+            line-height: 1.6;
+        }
+        .ai-summary-text strong {
+            color: var(--nova7-gold);
+            font-weight: 600;
+        }
+        .tooltip {
+            position: relative;
+        }
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--nova7-dark);
+            color: var(--nova7-white);
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        .floating-action-button {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--nova7-gold);
+            color: var(--nova7-dark);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            cursor: pointer;
+            z-index: 50;
+            transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+        }
+        .floating-action-button:hover {
+            transform: scale(1.1);
+            background-color: #E6C200;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .modal-content {
+            background-color: var(--nova7-white);
+            color: var(--nova7-dark);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            transform: scale(0.95);
+            opacity: 0;
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        .modal-overlay.show .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--nova7-dark);
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        .modal-close-btn:hover {
+            color: var(--nova7-gold);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-nova7 {
+                transform: translateX(-100%);
+                top: 0;
+                height: 100vh;
+            }
+            .sidebar-nova7.open {
+                transform: translateX(0);
+            }
+            .main-content-area {
+                margin-left: 0;
+                width: 100%;
+                padding-top: calc(60px + 1rem);
+                padding: 1rem;
+            }
+            .desktop-header { display: none; }
+            .mobile-header {
+                display: flex;
+                background-color: var(--nova7-white);
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                padding: 0 1rem;
+                height: 60px;
+                align-items: center;
+                justify-content: space-between;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 50;
+            }
+            .mobile-header .text-gray-700 {
+                color: var(--nova7-dark);
+            }
+            .mobile-header .hover\:text-blue-600:hover {
+                color: var(--nova7-gold);
+            }
+            .card-styled { padding: 1.5rem; }
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+            .greeting-text {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <div id="messageBox" class="message-box"></div>
+
+    <header class="mobile-header md:hidden">
+        <button id="hamburgerBtnMobile" class="p-2 text-gray-700 hover:text-nova7-gold">
+            <i class="fas fa-bars text-2xl"></i>
+        </button>
+        <a href="dashboard.html">
+            <img src="xeltis-logo-CIxL2od-.png" alt="Xeltis Logo" class="nova7-logo-header" onerror="this.src='https://placehold.co/120x60/333333/FFD700?text=Xeltis'; this.onerror=null;">
+        </a>
+        <a href="#" id="mobileLogoutLink" class="p-2 text-gray-700 hover:text-nova7-gold">
+            <i class="fas fa-sign-out-alt text-xl"></i>
+        </a>
+    </header>
+
+    <aside id="sidebar" class="sidebar-nova7">
+        <div class="sidebar-header">
+            <a href="dashboard.html" class="flex items-center">
+                <img src="xeltis-logo-CIxL2od-.png" alt="Xeltis Logo" class="sidebar-logo-img" onerror="this.src='https://placehold.co/120x60/333333/FFD700?text=Xeltis'; this.onerror=null;">
+            </a>
+        </div>
+        <nav class="flex-grow">
+            <a href="dashboard.html" class="nav-link-sidebar">
+                <i class="fas fa-tachometer-alt"></i>Dashboard
+            </a>
+            <a href="map.html" class="nav-link-sidebar">
+                <i class="fas fa-map-marked-alt"></i>Map
+            </a>
+            <a href="resources.html" class="nav-link-sidebar active">
+                <i class="fas fa-store"></i>Marketplace
+            </a>
+            <a href="investment.html" class="nav-link-sidebar">
+                <i class="fas fa-chart-line"></i>Investment
+            </a>
+            <a href="settings.html" class="nav-link-sidebar">
+                <i class="fas fa-cog"></i>Settings
+            </a>
+        </nav>
+        <div class="pb-4">
+            <a href="profile.html" class="nav-link-sidebar">
+                <i class="fas fa-user-circle"></i>Profile
+            </a>
+            <a href="#" id="sidebarLogoutLink" class="nav-link-sidebar">
+                <i class="fas fa-sign-out-alt"></i>Logout
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content-area">
+        <header class="desktop-header hidden md:flex items-center justify-between mb-6">
+            <h1 class="text-3xl font-bold text-nova7-dark">Mineral Marketplace</h1>
+            <div class="flex items-center space-x-3">
+                <span id="desktopUserWelcome" class="text-sm text-nova7-dark">Welcome, User!</span>
+            </div>
+        </header>
+
+        <div id="verificationMessage" class="greeting-summary-card hidden">
+            <h1 class="greeting-text">Please Verify Your Email</h1>
+            <p class="ai-summary-text">
+                Your account is not yet verified. Please check your email for the verification link.
+                <button id="resendVerification" class="btn-resend mt-4">Resend Verification Email</button>
+            </p>
+        </div>
+
+        <div id="marketplaceContent" class="hidden">
+            <div class="greeting-summary-card">
+                <h1 id="personalizedGreeting" class="greeting-text">Good morning, User!</h1>
+                <p class="ai-summary-text" id="aiSummaryText">
+                    Discover and trade high-quality minerals in the nova7 Mineral Marketplace.
+                </p>
+            </div>
+
+            <div class="card-styled">
+                <h2 class="text-xl font-semibold text-nova7-dark mb-4">Available Minerals</h2>
+                <div class="flex flex-col md:flex-row gap-4 mb-6">
+                    <div class="flex-grow">
+                        <label for="marketSearch" class="sr-only">Search Minerals</label>
+                        <input type="text" id="marketSearch" class="form-input" placeholder="Search by mineral name or description...">
+                    </div>
+                    <div>
+                        <label for="marketCategory" class="sr-only">Mineral Type</label>
+                        <select id="marketCategory" class="form-select">
+                            <option value="">All Minerals</option>
+                            <option value="quartz">Quartz</option>
+                            <option value="gold">Gold</option>
+                            <option value="amethyst">Amethyst</option>
+                            <option value="emerald">Emerald</option>
+                            <option value="ruby">Ruby</option>
+                            <option value="sapphire">Sapphire</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="marketSort" class="sr-only">Sort By</label>
+                        <select id="marketSort" class="form-select">
+                            <option value="created_at.desc">Newest First</option>
+                            <option value="price.asc">Price: Low to High</option>
+                            <option value="price.desc">Price: High to Low</option>
+                        </select>
+                    </div>
+                    <button id="applyMarketFiltersBtn" class="btn-primary-action flex-shrink-0">
+                        <i class="fas fa-filter mr-2"></i>Apply Filters
+                    </button>
+                </div>
+                <div id="productListings" class="product-grid">
+                    <p class="md:col-span-full text-center text-nova7-gray-medium py-4">Loading minerals...</p>
+                </div>
+                <div id="noProductsMessage" class="text-center text-nova7-gray-medium py-4 hidden">No minerals found matching your criteria.</div>
+                <div id="paginationControls" class="pagination-controls"></div>
+            </div>
+        </div>
+    </main>
+
+    <button id="openPostModalBtn" class="floating-action-button">
+        <i class="fas fa-plus-circle"></i>
+    </button>
+
+    <div id="postProductModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button id="closePostModalBtn" class="modal-close-btn"><i class="fas fa-times"></i></button>
+            <h2 class="text-xl font-semibold text-nova7-dark mb-2">Post a New Mineral</h2>
+            <p class="text-sm text-nova7-gray-medium mb-4">
+                Share your mineral find! Include details like type, weight, and purity to attract buyers.
+            </p>
+            <form id="postProductForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="md:col-span-2">
+                    <label for="productImageUpload" class="form-label tooltip" data-tooltip="Upload a clear, high-quality image of the mineral">Mineral Image</label>
+                    <input type="file" id="productImageUpload" accept="image/*" class="form-input" required>
+                    <p class="text-xs text-nova7-gray-medium mt-1">Upload a high-quality image (JPG, PNG, GIF).</p>
+                </div>
+                <div>
+                    <label for="productName" class="form-label tooltip" data-tooltip="Enter a descriptive name, e.g., 'Raw Amethyst Cluster'">Mineral Name</label>
+                    <input type="text" id="productName" class="form-input" placeholder="e.g., Raw Amethyst Cluster" required>
+                </div>
+                <div>
+                    <label for="productPrice" class="form-label tooltip" data-tooltip="Price in USD, e.g., 150.00">Price (USD)</label>
+                    <input type="number" id="productPrice" class="form-input" placeholder="e.g., 150.00" step="0.01" min="0.01" required>
+                </div>
+                <div>
+                    <label for="mineralType" class="form-label tooltip" data-tooltip="Select the type of mineral">Mineral Type</label>
+                    <select id="mineralType" class="form-select" required>
+                        <option value="">Select Mineral Type</option>
+                        <option value="quartz">Quartz</option>
+                        <option value="gold">Gold</option>
+                        <option value="amethyst">Amethyst</option>
+                        <option value="emerald">Emerald</option>
+                        <option value="ruby">Ruby</option>
+                        <option value="sapphire">Sapphire</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="mineralWeight" class="form-label tooltip" data-tooltip="Weight in grams, e.g., 500">Weight (grams)</label>
+                    <input type="number" id="mineralWeight" class="form-input" placeholder="e.g., 500" step="0.01" min="0.01" required>
+                </div>
+                <div>
+                    <label for="mineralPurity" class="form-label tooltip" data-tooltip="Purity percentage, e.g., 99.9 for high-purity gold">Purity (%)</label>
+                    <input type="number" id="mineralPurity" class="form-input" placeholder="e.g., 99.9" step="0.01" min="0" max="100">
+                </div>
+                <div class="md:col-span-2">
+                    <label for="productDescription" class="form-label tooltip" data-tooltip="Describe the mineral's origin, quality, and unique features">Description</label>
+                    <textarea id="productDescription" class="form-textarea" rows="3" placeholder="e.g., High-quality quartz crystal from Brazil, clear with minor inclusions..." required></textarea>
+                </div>
+                <div class="md:col-span-2 text-right">
+                    <button type="submit" id="postProductBtn" class="btn-primary-action">
+                        <i class="fas fa-plus-circle mr-2"></i>Post Mineral
+                    </button>
+                </div>
+            </form>
+            <div id="postProductMessage" class="text-sm text-center mt-4 text-nova7-gray-medium"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const SUPABASE_URL = 'https://qudbehodnhevjxmdwvta.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1ZGJlaG9kbmhldmp4bWR3dnRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1MjExODksImV4cCI6MjA3MDA5NzE4OX0.YnK8UKd76PBLh3L0zAv5fY0JFK6EWq-UBHLY8jXz55w';
+            let supabase;
+            try {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log("Supabase client initialized.");
+            } catch (e) {
+                console.error("Error initializing Supabase client:", e.message);
+                showMessage("Failed to initialize mineral marketplace. Please try again.", "error");
+                return;
+            }
+
+            const PRODUCT_IMAGE_BUCKET = 'nova7-marketplace-products';
+            const TRANSACTION_FEE_RATE = 0.001;
+            let currentPage = 1;
+            let currentFilters = {};
+            let userName = 'User';
+            let userId = null;
+
+            const messageBox = document.getElementById('messageBox');
+            const aiSummaryText = document.getElementById('aiSummaryText');
+            const verificationMessage = document.getElementById('verificationMessage');
+            const marketplaceContent = document.getElementById('marketplaceContent');
+            const resendButton = document.getElementById('resendVerification');
+            const postProductModal = document.getElementById('postProductModal');
+            const openPostModalBtn = document.getElementById('openPostModalBtn');
+            const closePostModalBtn = document.getElementById('closePostModalBtn');
+
+            function showMessage(message, type = 'success', duration = 3000) {
+                messageBox.textContent = message;
+                messageBox.className = 'message-box show';
+                if (type === 'error') {
+                    messageBox.classList.add('error');
+                } else {
+                    messageBox.classList.remove('error');
+                }
+                setTimeout(() => {
+                    messageBox.classList.remove('show');
+                }, duration);
+            }
+
+            // Modal functionality
+            openPostModalBtn.addEventListener('click', () => {
+                postProductModal.classList.remove('hidden');
+                setTimeout(() => postProductModal.classList.add('show'), 10);
+            });
+
+            closePostModalBtn.addEventListener('click', () => {
+                postProductModal.classList.remove('show');
+                setTimeout(() => postProductModal.classList.add('hidden'), 300);
+            });
+
+            postProductModal.addEventListener('click', (e) => {
+                if (e.target === postProductModal) {
+                    postProductModal.classList.remove('show');
+                    setTimeout(() => postProductModal.classList.add('hidden'), 300);
+                }
+            });
+
+
+            async function getCalculatedBalance(userId) {
+                try {
+                    const { data, error } = await supabase
+                        .from('transactions')
+                        .select('amount, transaction_type, user_id, recipient_id, status')
+                        .or(`user_id.eq.${userId},recipient_id.eq.${userId}`)
+                        .eq('status', 'completed');
+
+                    if (error) {
+                        console.error('Error fetching balance transactions for calculation:', error.message);
+                        return 0;
+                    }
+
+                    let balance = 0;
+                    if (data) {
+                        data.forEach(tx => {
+                            const amount = parseFloat(tx.amount);
+                            if (tx.transaction_type === 'deposit' && tx.user_id === userId) {
+                                balance += amount;
+                            } else if (tx.transaction_type === 'product_sell' && tx.user_id === userId) {
+                                balance += amount;
+                            } else if (tx.transaction_type === 'loan_received' && tx.user_id === userId) {
+                                balance += amount;
+                            } else if (tx.transaction_type === 'transfer') {
+                                if (tx.recipient_id === userId) {
+                                    balance += amount * (1 - TRANSACTION_FEE_RATE);
+                                } else if (tx.user_id === userId) {
+                                    balance -= amount;
+                                }
+                            } else if (tx.transaction_type === 'money_request' && tx.user_id === userId && tx.status === 'completed') {
+                                balance += amount;
+                            } else if (tx.user_id === userId && ['withdrawal', 'bill_payment', 'loan_payment', 'insurance_payment', 'product_buy'].includes(tx.transaction_type)) {
+                                balance -= amount;
+                            }
+                        });
+                    }
+                    return balance;
+                } catch (error) {
+                    console.error('Network error during balance calculation:', error);
+                    return 0;
+                }
+            }
+
+            async function handleLogout() {
+                try {
+                    await supabase.auth.signOut();
+                    window.location.href = 'login.html';
+                } catch (error) {
+                    console.error("Logout error:", error.message);
+                    showMessage("Logout failed. Please try again.", "error");
+                }
+            }
+
+            const sidebarLogoutLink = document.getElementById('sidebarLogoutLink');
+            if (sidebarLogoutLink) sidebarLogoutLink.addEventListener('click', (e) => { e.preventDefault(); handleLogout(); });
+            const mobileLogoutLink = document.getElementById('mobileLogoutLink');
+            if (mobileLogoutLink) mobileLogoutLink.addEventListener('click', (e) => { e.preventDefault(); handleLogout(); });
+
+            const hamburgerBtnMobile = document.getElementById('hamburgerBtnMobile');
+            const sidebar = document.getElementById('sidebar');
+            if (hamburgerBtnMobile && sidebar) {
+                hamburgerBtnMobile.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.toggle('open'); });
+            }
+            document.addEventListener('click', (e) => {
+                if (sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target) && (!hamburgerBtnMobile || !hamburgerBtnMobile.contains(e.target))) {
+                    sidebar.classList.remove('open');
+                }
+            });
+
+            try {
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+                if (sessionError || !session) {
+                    console.log("No active Supabase session. Redirecting to login.");
+                    showMessage("Please log in to access the Mineral Marketplace.", "error");
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                const user = session.user;
+                userId = user.id;
+                console.log("Supabase User:", user);
+
+                if (!user.email_confirmed_at && user.email) {
+                    verificationMessage.classList.remove('hidden');
+                    marketplaceContent.classList.add('hidden');
+                    showMessage(`Your account is not yet verified. Please check your email (${user.email}) for the verification link.`, 'error');
+
+                    if (resendButton) {
+                        resendButton.addEventListener('click', async () => {
+                            resendButton.disabled = true;
+                            resendButton.textContent = 'Sending...';
+                            try {
+                                const { error } = await supabase.auth.resend({
+                                    type: 'signup',
+                                    email: user.email,
+                                    options: { emailRedirectTo: 'http://localhost:3000/verify-email.html' }
+                                });
+                                if (error) {
+                                    console.error('Resend error:', error.message);
+                                    showMessage(`Failed to resend verification email: ${error.message}`, 'error');
+                                } else {
+                                    showMessage(`Verification email resent to ${user.email}`, 'success');
+                                }
+                            } catch (err) {
+                                console.error('Unexpected resend error:', err);
+                                showMessage('Unexpected error. Please try again.', 'error');
+                            } finally {
+                                resendButton.disabled = false;
+                                resendButton.textContent = 'Resend Verification Email';
+                            }
+                        });
+                    }
+                    return;
+                }
+
+                verificationMessage.classList.add('hidden');
+                marketplaceContent.classList.remove('hidden');
+
+                const { data: profile, error: profileError } = await supabase
+                .from('profiles')
+                .select('full_name')
+                .eq('user_id', user.id)
+                .maybeSingle();
+
+                if (profileError) {
+                    console.error('Error fetching user profile:', profileError.message);
+                    showMessage('Failed to load user profile. Using default name.', 'error', 5000);
+                } else if (profile && profile.full_name) {
+                    userName = profile.full_name;
+                }
+
+                const greetingElement = document.getElementById('personalizedGreeting');
+                const desktopUserWelcomeElement = document.getElementById('desktopUserWelcome');
+                if (greetingElement) {
+                    const currentHour = new Date().getHours();
+                    let timeOfDayGreeting = 'Hello';
+                    if (currentHour < 12) timeOfDayGreeting = 'Good morning';
+                    else if (currentHour < 18) timeOfDayGreeting = 'Good afternoon';
+                    else timeOfDayGreeting = 'Good evening';
+                    greetingElement.textContent = `${timeOfDayGreeting}, ${userName}!`;
+                }
+                if (desktopUserWelcomeElement) desktopUserWelcomeElement.textContent = `Welcome, ${userName}!`;
+
+                fetchMarketplaceItems(currentPage, currentFilters);
+
+                document.getElementById('postProductForm').addEventListener('submit', handlePostProduct);
+                document.getElementById('applyMarketFiltersBtn').addEventListener('click', () => {
+                    currentFilters = {
+                        search: document.getElementById('marketSearch').value.trim(),
+                        category: document.getElementById('marketCategory').value,
+                        sort: document.getElementById('marketSort').value
+                    };
+                    currentPage = 1;
+                    fetchMarketplaceItems(currentPage, currentFilters);
+                });
+
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                showMessage('Failed to load mineral marketplace. Please try again.', 'error');
+                window.location.href = 'login.html';
+            }
+
+            async function handlePostProduct(event) {
+                event.preventDefault();
+                const productImageInput = document.getElementById('productImageUpload');
+                const productName = document.getElementById('productName').value.trim();
+                const productPrice = parseFloat(document.getElementById('productPrice').value);
+                const mineralType = document.getElementById('mineralType').value;
+                const mineralWeight = parseFloat(document.getElementById('mineralWeight').value);
+                const mineralPurity = parseFloat(document.getElementById('mineralPurity').value) || null;
+                const productDescription = document.getElementById('productDescription').value.trim();
+                const postProductBtn = document.getElementById('postProductBtn');
+                const messageDiv = document.getElementById('postProductMessage');
+
+                if (!productImageInput.files.length) {
+                    showMessage('Please upload a mineral image.', 'error');
+                    return;
+                }
+                if (!productName || isNaN(productPrice) || productPrice <= 0 || !mineralType || isNaN(mineralWeight) || mineralWeight <= 0) {
+                    showMessage('Please fill in all required mineral details correctly.', 'error');
+                    return;
+                }
+                if (mineralPurity !== null && (isNaN(mineralPurity) || mineralPurity < 0 || mineralPurity > 100)) {
+                    showMessage('Purity must be between 0 and 100.', 'error');
+                    return;
+                }
+
+                postProductBtn.disabled = true;
+                postProductBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Posting...';
+                messageDiv.textContent = '';
+
+                try {
+                    const file = productImageInput.files[0];
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `${userId}/${Date.now()}_${Math.random().toString(36).slice(2)}.${fileExt}`;
+                    const { error: uploadError } = await supabase.storage
+                        .from(PRODUCT_IMAGE_BUCKET)
+                        .upload(fileName, file, {
+                            cacheControl: '3600',
+                            upsert: false
+                        });
+
+                    if (uploadError) {
+                        console.error('Image upload error:', uploadError.message);
+                        showMessage('Failed to upload mineral image.', 'error');
+                        return;
+                    }
+
+                    const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${PRODUCT_IMAGE_BUCKET}/${fileName}`;
+
+                    const { data, error } = await supabase
+                        .from('products')
+                        .insert({
+                            name: productName,
+                            description: productDescription,
+                            price: productPrice,
+                            category: mineralType,
+                            image_url: imageUrl,
+                            seller_id: userId,
+                            mineral_weight: mineralWeight,
+                            mineral_purity: mineralPurity,
+                            created_at: new Date().toISOString()
+                        })
+                        .select()
+                        .single();
+
+                    if (error) {
+                        console.error('Error posting mineral:', error.message);
+                        showMessage(`Failed to post mineral: ${error.message}`, 'error');
+                        await supabase.storage.from(PRODUCT_IMAGE_BUCKET).remove([fileName]);
+                        return;
+                    }
+
+                    showMessage('Mineral posted successfully!', 'success');
+                    document.getElementById('postProductForm').reset();
+                    productImageInput.value = '';
+                    closePostModalBtn.click();
+                    fetchMarketplaceItems(currentPage, currentFilters);
+
+                } catch (error) {
+                    console.error('Unexpected error posting mineral:', error);
+                    showMessage('An error occurred while posting the mineral.', 'error');
+                } finally {
+                    postProductBtn.disabled = false;
+                    postProductBtn.innerHTML = '<i class="fas fa-plus-circle mr-2"></i>Post Mineral';
+                }
+            }
+
+            async function fetchMarketplaceItems(page = 1, filters = {}) {
+                const productListingsDiv = document.getElementById('productListings');
+                const noProductsMessage = document.getElementById('noProductsMessage');
+                const paginationControls = document.getElementById('paginationControls');
+                const limit = 10;
+
+                productListingsDiv.innerHTML = '<p class="md:col-span-full text-center text-nova7-gray-medium py-4">Loading minerals...</p>';
+                noProductsMessage.classList.add('hidden');
+                paginationControls.innerHTML = '';
+
+                try {
+                    let query = supabase
+                        .from('products')
+                        .select('id, name, description, price, category, image_url, seller_id, created_at, mineral_weight, mineral_purity', { count: 'exact' })
+                        .range((page - 1) * limit, page * limit - 1)
+                        .eq('status', 'available');
+
+                    if (filters.search) {
+                        query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+                    }
+                    if (filters.category) {
+                        query = query.eq('category', filters.category);
+                    }
+                    if (filters.sort) {
+                        const [sortField, sortOrder] = filters.sort.split('.');
+                        query = query.order(sortField, { ascending: sortOrder === 'asc' });
+                    } else {
+                        query = query.order('created_at', { ascending: false });
+                    }
+
+                    const { data: products, error, count } = await query;
+
+                    if (error) {
+                        console.error('Error fetching minerals:', error.message);
+                        productListingsDiv.innerHTML = `<p class="md:col-span-full text-center text-red-500 py-4">Failed to load minerals: ${error.message}</p>`;
+                        showMessage('Failed to load minerals.', 'error');
+                        return;
+                    }
+
+                    productListingsDiv.innerHTML = '';
+                    if (!products || products.length === 0) {
+                        noProductsMessage.classList.remove('hidden');
+                    } else {
+                        products.forEach(product => {
+                            const productCard = document.createElement('div');
+                            productCard.className = 'product-card';
+                            productCard.innerHTML = `
+                                <div class="product-image-container">
+                                    <img src="${product.image_url || 'https://placehold.co/280x200/4B5563/D1D5DB?text=No+Mineral+Image'}" alt="${product.name}" class="product-image" onerror="this.src='https://placehold.co/280x200/4B5563/D1D5DB?text=No+Mineral+Image';">
+                                </div>
+                                <div class="product-info">
+                                    <h3 class="product-title">${product.name}</h3>
+                                    <p class="product-description">${product.description}</p>
+                                    <p class="text-sm text-nova7-gray-medium">Type: ${product.category.charAt(0).toUpperCase() + product.category.slice(1)}</p>
+                                    <p class="text-sm text-nova7-gray-medium">Weight: ${product.mineral_weight}g</p>
+                                    ${product.mineral_purity ? `<p class="text-sm text-nova7-gray-medium">Purity: ${product.mineral_purity}%</p>` : ''}
+                                    <p class="product-price">$${parseFloat(product.price).toFixed(2)}</p>
+                                    <button class="buy-button" data-product-id="${product.id}" data-product-price="${product.price}" data-seller-id="${product.seller_id}" ${product.seller_id === userId ? 'disabled' : ''}>
+                                        <i class="fas fa-shopping-cart mr-2"></i>${product.seller_id === userId ? 'Your Mineral' : 'Buy Now'}
+                                    </button>
+                                    <div id="buyMessage-${product.id}" class="text-sm text-center mt-2 text-nova7-gray-medium"></div>
+                                </div>
+                            `;
+                            productListingsDiv.appendChild(productCard);
+
+                            const buyButton = productCard.querySelector('.buy-button');
+                            if (buyButton && !buyButton.disabled) {
+                                buyButton.addEventListener('click', (event) => handleBuyProduct(event, product.id, product.price, product.seller_id));
+                            }
+                        });
+
+                        const totalPages = Math.ceil(count / limit);
+                        renderPagination(totalPages, page);
+                    }
+
+                    if (aiSummaryText) {
+                        const summaryMessage = products && products.length
+                            ? `Explore <strong>${products.length}</strong> minerals in the Marketplace.`
+                            : `No minerals available in the Marketplace yet.`;
+                        aiSummaryText.innerHTML = summaryMessage;
+                    }
+
+                } catch (error) {
+                    console.error('Error fetching marketplace items:', error);
+                    productListingsDiv.innerHTML = '<p class="md:col-span-full text-center text-red-500 py-4">Network error while loading minerals.</p>';
+                    showMessage('Network error while loading minerals.', 'error');
+                }
+            }
+
+            async function handleBuyProduct(event, productId, productPrice, sellerId) {
+                const buyButton = event.currentTarget;
+                const messageDiv = document.getElementById(`buyMessage-${productId}`);
+                const totalAmount = productPrice * (1 + TRANSACTION_FEE_RATE);
+
+                if (!confirm(`Are you sure you want to buy this mineral for $${totalAmount.toFixed(2)} (including ${TRANSACTION_FEE_RATE * 100}% fee)?`)) {
+                    return;
+                }
+
+                buyButton.disabled = true;
+                buyButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+                if (messageDiv) messageDiv.textContent = '';
+
+                try {
+                    if (userId === sellerId) {
+                        showMessage('You cannot buy your own mineral.', 'error');
+                        if (messageDiv) messageDiv.textContent = 'Cannot buy your own mineral.';
+                        return;
+                    }
+
+                    const balance = await getCalculatedBalance(userId);
+                    if (balance < totalAmount) {
+                        showMessage('Insufficient balance. Please top up your account.', 'error');
+                        if (messageDiv) messageDiv.textContent = 'Insufficient balance.';
+                        return;
+                    }
+
+                    const { error: buyerTransactionError } = await supabase
+                        .from('transactions')
+                        .insert({
+                            user_id: userId,
+                            amount: -totalAmount,
+                            transaction_type: 'product_buy',
+                            status: 'completed',
+                            description: `Purchase of mineral ID ${productId}`,
+                            product_id: productId,
+                            created_at: new Date().toISOString()
+                        });
+
+                    if (buyerTransactionError) {
+                        console.error('Error recording buyer transaction:', buyerTransactionError.message);
+                        showMessage(`Purchase failed: ${buyerTransactionError.message}`, 'error');
+                        if (messageDiv) messageDiv.textContent = `Error: ${buyerTransactionError.message}`;
+                        return;
+                    }
+
+                    const { error: sellerTransactionError } = await supabase
+                        .from('transactions')
+                        .insert({
+                            recipient_id: sellerId,
+                            amount: productPrice,
+                            transaction_type: 'product_sell',
+                            status: 'completed',
+                            description: `Sale of mineral ID ${productId} to user ID: ${userId}`,
+                            product_id: productId,
+                            created_at: new Date().toISOString()
+                        });
+
+                    if (sellerTransactionError) {
+                        console.error('Error recording seller transaction:', sellerTransactionError.message);
+                        showMessage('Purchase completed, but seller transaction failed.', 'error');
+                        if (messageDiv) messageDiv.textContent = 'Failed to credit seller.';
+                        return;
+                    }
+
+                    const { error: updateProductError } = await supabase
+                        .from('products')
+                        .update({ status: 'sold' })
+                        .eq('id', productId);
+
+                    if (updateProductError) {
+                        console.error('Error updating mineral status:', updateProductError.message);
+                        showMessage('Purchase completed, but mineral status update failed.', 'error');
+                        if (messageDiv) messageDiv.textContent = 'Failed to update mineral status.';
+                        return;
+                    }
+
+                    showMessage('Purchase completed successfully!', 'success');
+                    if (messageDiv) messageDiv.textContent = 'Purchase completed successfully!';
+                    fetchMarketplaceItems(currentPage, currentFilters);
+
+                } catch (error) {
+                    console.error('Error buying mineral:', error);
+                    showMessage(`Purchase failed: ${error.message}`, 'error');
+                    if (messageDiv) messageDiv.textContent = `Error: ${error.message}`;
+                } finally {
+                    buyButton.disabled = false;
+                    buyButton.innerHTML = '<i class="fas fa-shopping-cart mr-2"></i>Buy Now';
+                }
+            }
+
+            function renderPagination(totalPages, currentPageNum) {
+                const paginationControls = document.getElementById('paginationControls');
+                paginationControls.innerHTML = '';
+
+                const prevButton = document.createElement('button');
+                prevButton.innerHTML = '<i class="fas fa-chevron-left"></i> Prev';
+                prevButton.disabled = currentPageNum === 1;
+                prevButton.addEventListener('click', () => {
+                    currentPage = currentPageNum - 1;
+                    fetchMarketplaceItems(currentPage, currentFilters);
+                });
+                paginationControls.appendChild(prevButton);
+
+                const pageInfo = document.createElement('span');
+                pageInfo.classList.add('page-info');
+                pageInfo.textContent = `Page ${currentPageNum} of ${totalPages}`;
+                pageInfo.style.color = '#D1D5DB';
+                paginationControls.appendChild(pageInfo);
+
+                const nextButton = document.createElement('button');
+                nextButton.innerHTML = 'Next <i class="fas fa-chevron-right"></i>';
+                nextButton.disabled = currentPageNum >= totalPages;
+                nextButton.addEventListener('click', () => {
+                    currentPage = currentPageNum + 1;
+                    fetchMarketplaceItems(currentPage, currentFilters);
+                });
+                paginationControls.appendChild(nextButton);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paramètres - Xeltis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --xeltis-gold: #FFD700;
+            --xeltis-dark: #000000;
+            --xeltis-white: #FFFFFF;
+            --xeltis-gray-light: #F3F2EF;
+            --xeltis-gray-medium: #CED0D4;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--xeltis-dark);
+            color: var(--xeltis-white);
+            display: flex;
+            min-height: 100vh;
+        }
+        .header-nova7 {
+            background-color: var(--xeltis-white);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 0.75rem 1.5rem;
+            height: 60px;
+        }
+        .nova7-logo-header {
+            max-height: 36px;
+            width: auto;
+        }
+        .sidebar-nova7 {
+            background-color: var(--xeltis-dark);
+            color: var(--xeltis-white);
+            width: 260px;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding-top: 1rem;
+            transition: transform 0.3s ease-in-out;
+            z-index: 40;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-header {
+            padding: 0.75rem 1.5rem 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--xeltis-gold);
+            margin-bottom: 0.75rem;
+        }
+        .sidebar-logo-img {
+            max-height: 120px;
+            width: auto;
+            filter: brightness(0) invert(1);
+        }
+        .sidebar-nova7 .nav-link-sidebar {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            margin: 0.25rem 1rem;
+            font-weight: 500;
+            color: var(--xeltis-white);
+            text-decoration: none;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .sidebar-nova7 .nav-link-sidebar:hover {
+            background-color: var(--xeltis-gold);
+            color: var(--xeltis-dark);
+        }
+        .sidebar-nova7 .nav-link-sidebar.active {
+            background-color: var(--xeltis-gold);
+            color: var(--xeltis-dark);
+            font-weight: 600;
+        }
+        .sidebar-nova7 .nav-link-sidebar i {
+            width: 20px;
+            margin-right: 0.75rem;
+            text-align: center;
+        }
+        .main-content-area {
+            margin-left: 260px;
+            padding: 1.5rem;
+            width: calc(100% - 260px);
+            min-height: 100vh;
+        }
+        .desktop-header {
+            display: none;
+        }
+        .mobile-header {
+            display: none;
+            background-color: var(--xeltis-white);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 0 1rem;
+            height: 60px;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+        }
+        .greeting-summary-card {
+            background-color: var(--xeltis-white);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            padding: 1.5rem 2rem;
+            margin-bottom: 1.5rem;
+        }
+        .greeting-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--xeltis-dark);
+            margin-bottom: 0.5rem;
+        }
+        .form-label {
+            display: block;
+            font-size: 0.8925rem;
+            font-weight: 500;
+            color: var(--xeltis-dark);
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
+        .form-input-xeltis, .form-select-styled {
+            width: 100%;
+            border: 1px solid var(--xeltis-gray-medium);
+            border-radius: 6px;
+            padding: 12px 14px;
+            font-size: 0.969rem;
+            color: var(--xeltis-dark);
+            background-color: var(--xeltis-white);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-input-xeltis:focus, .form-select-styled:focus {
+            outline: none;
+            border-color: var(--xeltis-gold);
+            box-shadow: 0 0 0 1px var(--xeltis-gold);
+        }
+        .btn-resend {
+            background-color: var(--xeltis-gold);
+            color: var(--xeltis-dark);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-resend:hover {
+            background-color: #E6C200;
+        }
+        .btn-resend:disabled {
+            background-color: #A0AEC0;
+            cursor: not-allowed;
+            opacity: 0.7;
+            transform: none;
+        }
+        .btn-primary-action {
+            background-color: var(--xeltis-gold);
+            color: var(--xeltis-dark);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .btn-primary-action:hover {
+            background-color: #E6C200;
+        }
+        .message-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            text-align: center;
+            min-width: 250px;
+            font-size: 0.969rem;
+        }
+        .message-box.error {
+            background-color: #F44336;
+        }
+        .message-box.show {
+            display: block;
+            opacity: 1;
+        }
+        .image-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; background-color: #e2e8f0; border: 2px solid var(--xeltis-gray-medium); }
+        .fingerprint-preview, .signature-preview { width: 80px; height: 80px; object-fit: contain; background-color: #e2e8f0; border: 2px solid var(--xeltis-gray-medium); border-radius: 8px; }
+        .setting-section { margin-bottom: 2.5rem; padding-bottom: 2rem; border-bottom: 1px solid var(--xeltis-gray-medium); }
+        .setting-section:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+        .loading-message { text-align: center; color: #A0AEC0; padding: 2rem; }
+        @media (max-width: 768px) {
+            .sidebar-nova7 {
+                transform: translateX(-100%);
+                height: 100vh;
+            }
+            .sidebar-nova7.open {
+                transform: translateX(0);
+            }
+            .main-content-area {
+                margin-left: 0;
+                width: 100%;
+                padding-top: calc(60px + 1rem);
+                padding: 1rem;
+            }
+            .mobile-header { display: flex; }
+            .desktop-header { display: none; }
+        }
+        @media (min-width: 768px) {
+            .desktop-header {
+                display: flex;
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <div id="messageBox" class="message-box"></div>
+
+    <header class="mobile-header md:hidden">
+        <button id="hamburgerBtnMobile" class="p-2 text-gray-700 hover:text-xeltis-gold">
+            <i class="fas fa-bars text-2xl"></i>
+        </button>
+        <a href="dashboard.html">
+            <img src="xeltis-logo-CIxL2od-.png" alt="Xeltis Logo" class="sidebar-logo-img" style="filter: brightness(0) invert(1);" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+            <span style="display:none;" class="text-xl font-semibold text-xeltis-dark">Xeltis</span>
+        </a>
+        <a href="#" id="mobileLogoutLink" class="p-2 text-gray-700 hover:text-xeltis-gold">
+            <i class="fas fa-sign-out-alt text-xl"></i>
+        </a>
+    </header>
+
+    <aside id="sidebar" class="sidebar-nova7">
+        <div class="sidebar-header">
+            <a href="dashboard.html" class="flex items-center">
+                <img src="xeltis-logo-CIxL2od-.png" alt="Xeltis Logo" class="sidebar-logo-img" style="filter: brightness(0) invert(1);" onerror="this.onerror=null; this.src='https://placehold.co/120x60/333333/FFD700?text=Xeltis';">
+            </a>
+        </div>
+        <nav class="flex-grow">
+            <a href="dashboard.html" class="nav-link-sidebar"><i class="fas fa-tachometer-alt"></i>Tableau de bord</a>
+            <a href="map.html" class="nav-link-sidebar"><i class="fas fa-map-marked-alt"></i>Carte</a>
+            <a href="resources.html" class="nav-link-sidebar"><i class="fas fa-store"></i>Marketplace</a>
+            <a href="investment.html" class="nav-link-sidebar"><i class="fas fa-chart-line"></i>Investment</a>
+            <a href="settings.html" class="nav-link-sidebar active"><i class="fas fa-cog"></i>Paramètres</a>
+        </nav>
+        <div class="pb-4">
+            <a href="profile.html" class="nav-link-sidebar"><i class="fas fa-user-circle"></i>Profil</a>
+            <a href="#" id="sidebarLogoutLink" class="nav-link-sidebar"><i class="fas fa-sign-out-alt"></i>Déconnexion</a>
+        </div>
+    </aside>
+
+    <main class="main-content-area">
+        <header class="desktop-header hidden md:flex items-center justify-between mb-6">
+            <div></div>
+            <div class="flex items-center space-x-3">
+                <span id="desktopUserWelcome" class="text-sm text-xeltis-dark">Bienvenue, Utilisateur!</span>
+            </div>
+        </header>
+
+        <div id="verificationMessage" class="greeting-summary-card hidden">
+            <h1 class="greeting-text">Veuillez vérifier votre email</h1>
+            <div class="space-y-4 mt-4">
+                <p class="text-sm text-gray-600">Votre compte n'est pas encore vérifié. Veuillez vérifier votre boîte de réception pour le lien de vérification.</p>
+                <button id="resendVerification" class="btn-resend mt-4">Renvoyer l'email de vérification</button>
+            </div>
+        </div>
+
+        <div id="settingsContent" class="hidden">
+            <div id="loadingMessage" class="loading-message">Chargement des données du profil...</div>
+
+            <div id="personalInfoCard" class="greeting-summary-card hidden">
+                <div class="setting-section">
+                    <h3 class="text-xl font-semibold text-xeltis-dark">Informations du profil</h3>
+                    <div class="space-y-4 mt-4">
+                        <div>
+                            <label for="settingFullName" class="form-label">Nom complet</label>
+                            <input type="text" id="settingFullName" class="form-input-xeltis" placeholder="Votre nom complet" required>
+                        </div>
+                        <div>
+                            <label class="form-label">Photo de profil</label>
+                            <div class="flex items-center gap-4 mt-2">
+                                <img id="image-preview" class="image-preview" src="" alt="Photo de profil">
+                                <label for="profilePictureInput" class="cursor-pointer btn-primary-action">
+                                    <span>Changer de photo</span>
+                                    <input id="profilePictureInput" type="file" class="sr-only" accept="image/*">
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="settingFingerprint" class="form-label">Empreinte digitale</label>
+                            <div class="flex items-center gap-4 mt-2">
+                                <img id="fingerprint-preview" class="fingerprint-preview" src="" alt="Aperçu de l'empreinte">
+                                <label for="fingerprintInput" class="cursor-pointer btn-primary-action">
+                                    <span>Télécharger l'empreinte</span>
+                                    <input id="fingerprintInput" type="file" class="sr-only" accept="image/*">
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="settingSignature" class="form-label">Signature</label>
+                            <div class="flex items-center gap-4 mt-2">
+                                <img id="signature-preview" class="signature-preview" src="" alt="Aperçu de la signature">
+                                <label for="signatureInput" class="cursor-pointer btn-primary-action">
+                                    <span>Télécharger la signature</span>
+                                    <input id="signatureInput" type="file" class="sr-only" accept="image/*">
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="settingAddress" class="form-label">Adresse (Facultatif)</label>
+                            <input type="text" id="settingAddress" class="form-input-xeltis" placeholder="123 Rue Principale, Anytown, France">
+                        </div>
+                        <div>
+                            <label for="settingDateOfBirth" class="form-label">Date de naissance (Facultatif)</label>
+                            <input type="date" id="settingDateOfBirth" class="form-input-xeltis">
+                        </div>
+                        <div class="pt-4">
+                            <button type="button" id="updateProfileBtn" class="btn-primary-action"><i class="fas fa-save mr-2"></i>Enregistrer le profil</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="accountSecurityCard" class="greeting-summary-card hidden">
+                <div class="setting-section">
+                    <h3 class="text-xl font-semibold text-xeltis-dark">Sécurité du compte</h3>
+                    <div class="space-y-4 mt-4">
+                        <div>
+                            <label for="currentEmail" class="form-label">Email actuel</label>
+                            <input type="email" id="currentEmail" class="form-input-xeltis" value="Chargement..." readonly>
+                        </div>
+                        <div>
+                            <label for="newEmail" class="form-label">Nouvelle adresse email</label>
+                            <input type="email" id="newEmail" class="form-input-xeltis" placeholder="Entrez la nouvelle adresse email" required>
+                        </div>
+                        <button type="button" id="updateEmailBtn" class="btn-primary-action"><i class="fas fa-envelope mr-2"></i>Mettre à jour l'email</button>
+                    </div>
+                </div>
+                <div class="setting-section">
+                    <h3 class="text-xl font-semibold text-xeltis-dark">Changer le mot de passe</h3>
+                    <div class="space-y-4 mt-4">
+                        <div>
+                            <label for="newPassword" class="form-label">Nouveau mot de passe</label>
+                            <input type="password" id="newPassword" class="form-input-xeltis" placeholder="Entrez le nouveau mot de passe" required>
+                        </div>
+                        <div>
+                            <label for="confirmNewPassword" class="form-label">Confirmer le nouveau mot de passe</label>
+                            <input type="password" id="confirmNewPassword" class="form-input-xeltis" placeholder="Confirmez le nouveau mot de passe" required>
+                        </div>
+                        <button type="button" id="updatePasswordBtn" class="btn-primary-action"><i class="fas fa-lock mr-2"></i>Mettre à jour le mot de passe</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const SUPABASE_URL = 'https://qudbehodnhevjxmdwvta.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1ZGJlaG9kbmhldmp4bWR3dnRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1MjExODksImV4cCI6MjA3MDA5NzE4OX0.YnK8UKd76PBLh3L0zAv5fY0JFK6EWq-UBHLY8jXz55w';
+            const SUPABASE_PROFILE_BUCKET = 'profile-pictures';
+            const SUPABASE_FINGERPRINT_BUCKET = 'fingerprints';
+            const SUPABASE_SIGNATURE_BUCKET = 'signatures';
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            let currentUserId = null;
+            const messageBox = document.getElementById('messageBox');
+            const verificationMessage = document.getElementById('verificationMessage');
+            const settingsContent = document.getElementById('settingsContent');
+            const personalInfoCard = document.getElementById('personalInfoCard');
+            const accountSecurityCard = document.getElementById('accountSecurityCard');
+            const loadingMessage = document.getElementById('loadingMessage');
+            const resendButton = document.getElementById('resendVerification');
+            const imagePreview = document.getElementById('image-preview');
+            const fingerprintPreview = document.getElementById('fingerprint-preview');
+            const signaturePreview = document.getElementById('signature-preview');
+            const profilePictureInput = document.getElementById('profilePictureInput');
+            const fingerprintInput = document.getElementById('fingerprintInput');
+            const signatureInput = document.getElementById('signatureInput');
+            const updateProfileBtn = document.getElementById('updateProfileBtn');
+            const updateEmailBtn = document.getElementById('updateEmailBtn');
+            const updatePasswordBtn = document.getElementById('updatePasswordBtn');
+
+            function showMessage(message, type = 'success', duration = 3000) {
+                messageBox.textContent = message;
+                messageBox.className = 'message-box show';
+                if (type === 'error') messageBox.classList.add('error');
+                else messageBox.classList.remove('error');
+                setTimeout(() => messageBox.classList.remove('show'), duration);
+            }
+
+            async function handleLogout() {
+                await supabase.auth.signOut();
+                window.location.href = 'login.html';
+            }
+
+            const sidebarLogoutLink = document.getElementById('sidebarLogoutLink');
+            if (sidebarLogoutLink) {
+                sidebarLogoutLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    handleLogout();
+                });
+            }
+
+            const mobileLogoutLink = document.getElementById('mobileLogoutLink');
+            if (mobileLogoutLink) {
+                mobileLogoutLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    handleLogout();
+                });
+            }
+
+            const hamburgerBtnMobile = document.getElementById('hamburgerBtnMobile');
+            const sidebar = document.getElementById('sidebar');
+            if (hamburgerBtnMobile) {
+                hamburgerBtnMobile.addEventListener('click', () => {
+                    sidebar.classList.toggle('open');
+                });
+            }
+            document.querySelector('main').addEventListener('click', () => {
+                sidebar.classList.remove('open');
+            });
+            document.querySelector('.sidebar-nova7').addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+
+            async function fetchUserData() {
+                try {
+                    const { data: { user }, error: authError } = await supabase.auth.getUser();
+                    if (authError || !user) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    currentUserId = user.id;
+
+                    if (!user.email_confirmed_at) {
+                        settingsContent.classList.add('hidden');
+                        verificationMessage.classList.remove('hidden');
+                        resendButton.addEventListener('click', resendVerificationEmail);
+                    } else {
+                        verificationMessage.classList.add('hidden');
+                        settingsContent.classList.remove('hidden');
+                        loadProfileData();
+                    }
+                } catch (error) {
+                    console.error("Erreur de récupération des données utilisateur:", error);
+                    window.location.href = 'login.html';
+                }
+            }
+
+            async function resendVerificationEmail() {
+                resendButton.disabled = true;
+                const { error } = await supabase.auth.resend({ type: 'signup', email: document.getElementById('currentEmail').value });
+                if (error) {
+                    showMessage("Erreur lors du renvoi de l'email de vérification.", 'error');
+                } else {
+                    showMessage("Email de vérification renvoyé. Veuillez vérifier votre boîte de réception.");
+                }
+                resendButton.disabled = false;
+            }
+
+            async function loadProfileData() {
+                loadingMessage.classList.remove('hidden');
+                personalInfoCard.classList.add('hidden');
+                accountSecurityCard.classList.add('hidden');
+                try {
+                    const { data: profile, error } = await supabase.from('profiles').select('*').eq('user_id', currentUserId).single();
+                    if (error) throw error;
+                    if (profile) {
+                        document.getElementById('settingFullName').value = profile.full_name || '';
+                        document.getElementById('settingAddress').value = profile.address || '';
+                        document.getElementById('settingDateOfBirth').value = profile.date_of_birth || '';
+                        document.getElementById('currentEmail').value = profile.email || 'N/A';
+                        document.getElementById('desktopUserWelcome').textContent = `Bienvenue, ${profile.full_name || 'Utilisateur'}!`;
+                        updateProfileImage(profile.avatar_url);
+                        updateFingerprintImage(profile.fingerprint_url);
+                        updateSignatureImage(profile.signature_url);
+                    }
+                } catch (error) {
+                    console.error("Erreur lors du chargement des données du profil:", error);
+                    showMessage("Erreur lors du chargement des données du profil.", 'error');
+                } finally {
+                    loadingMessage.classList.add('hidden');
+                    personalInfoCard.classList.remove('hidden');
+                    accountSecurityCard.classList.remove('hidden');
+                }
+            }
+
+            function updateProfileImage(url) {
+                imagePreview.src = url || 'https://placehold.co/80x80/E2E8F0/A0AEC0?text=';
+            }
+
+            function updateFingerprintImage(url) {
+                fingerprintPreview.src = url || 'https://placehold.co/80x80/E2E8F0/A0AEC0?text=';
+            }
+
+            function updateSignatureImage(url) {
+                signaturePreview.src = url || 'https://placehold.co/80x80/E2E8F0/A0AEC0?text=';
+            }
+
+            async function uploadAndGetUrl(file, bucketName) {
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${currentUserId}_${Date.now()}.${fileExt}`;
+                const filePath = `${fileName}`;
+                const { error } = await supabase.storage.from(bucketName).upload(filePath, file);
+                if (error) {
+                    throw error;
+                }
+                const { data } = supabase.storage.from(bucketName).getPublicUrl(filePath);
+                return data.publicUrl;
+            }
+
+            updateProfileBtn.addEventListener('click', async () => {
+                const fullName = document.getElementById('settingFullName').value;
+                const address = document.getElementById('settingAddress').value;
+                const dateOfBirth = document.getElementById('settingDateOfBirth').value;
+                let avatarUrl = imagePreview.src.includes('placehold.co') ? null : imagePreview.src;
+                let fingerprintUrl = fingerprintPreview.src.includes('placehold.co') ? null : fingerprintPreview.src;
+                let signatureUrl = signaturePreview.src.includes('placehold.co') ? null : signaturePreview.src;
+
+                updateProfileBtn.disabled = true;
+                try {
+                    if (profilePictureInput.files[0]) {
+                        avatarUrl = await uploadAndGetUrl(profilePictureInput.files[0], SUPABASE_PROFILE_BUCKET);
+                    }
+                    if (fingerprintInput.files[0]) {
+                        fingerprintUrl = await uploadAndGetUrl(fingerprintInput.files[0], SUPABASE_FINGERPRINT_BUCKET);
+                    }
+                    if (signatureInput.files[0]) {
+                        signatureUrl = await uploadAndGetUrl(signatureInput.files[0], SUPABASE_SIGNATURE_BUCKET);
+                    }
+                    const { error } = await supabase.from('profiles').update({
+                        full_name: fullName,
+                        address: address,
+                        date_of_birth: dateOfBirth,
+                        avatar_url: avatarUrl,
+                        fingerprint_url: fingerprintUrl,
+                        signature_url: signatureUrl,
+                        updated_at: new Date()
+                    }).eq('user_id', currentUserId);
+
+                    if (error) throw error;
+                    showMessage("Profil mis à jour avec succès!");
+                    loadProfileData();
+                } catch (error) {
+                    console.error('Erreur lors de la mise à jour du profil:', error);
+                    showMessage(`Erreur: ${error.message}`, 'error');
+                } finally {
+                    updateProfileBtn.disabled = false;
+                }
+            });
+
+            updateEmailBtn.addEventListener('click', async () => {
+                const newEmail = document.getElementById('newEmail').value;
+                if (!newEmail) {
+                    showMessage("Veuillez entrer une nouvelle adresse email.", 'error');
+                    return;
+                }
+                updateEmailBtn.disabled = true;
+                try {
+                    const { data, error } = await supabase.auth.updateUser({ email: newEmail });
+                    if (error) throw error;
+                    showMessage("Un email de confirmation a été envoyé à votre nouvelle adresse.");
+                } catch (error) {
+                    console.error('Erreur lors de la mise à jour de l\'email:', error);
+                    showMessage(`Erreur: ${error.message}`, 'error');
+                } finally {
+                    updateEmailBtn.disabled = false;
+                }
+            });
+
+            updatePasswordBtn.addEventListener('click', async () => {
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+                if (newPassword !== confirmNewPassword) {
+                    showMessage("Les mots de passe ne correspondent pas.", 'error');
+                    return;
+                }
+                if (!newPassword || newPassword.length < 6) {
+                    showMessage("Le mot de passe doit contenir au moins 6 caractères.", 'error');
+                    return;
+                }
+                updatePasswordBtn.disabled = true;
+                try {
+                    const { data, error } = await supabase.auth.updateUser({ password: newPassword });
+                    if (error) throw error;
+                    showMessage("Mot de passe mis à jour avec succès!");
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmNewPassword').value = '';
+                } catch (error) {
+                    console.error('Erreur lors de la mise à jour du mot de passe:', error);
+                    showMessage(`Erreur: ${error.message}`, 'error');
+                } finally {
+                    updatePasswordBtn.disabled = false;
+                }
+            });
+
+            profilePictureInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => imagePreview.src = e.target.result;
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            fingerprintInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => fingerprintPreview.src = e.target.result;
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            signatureInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => signaturePreview.src = e.target.result;
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            fetchUserData();
+        });
+    </script>
+</body>
+</html>

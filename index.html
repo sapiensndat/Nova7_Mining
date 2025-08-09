@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de bord - Xeltis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --xeltis-gold: #FFD700;
+            --xeltis-dark: #000000;
+            --xeltis-white: #FFFFFF;
+        }
+
+        .sidebar-xeltis {
+            background-color: var(--xeltis-dark);
+            color: var(--xeltis-white);
+            /* ... other styles ... */
+        }
+
+        .nav-link-sidebar.active {
+            background-color: var(--xeltis-dark);
+            color: var(--xeltis-gold);
+            border-left: 4px solid var(--xeltis-gold);
+        }
+
+        .nav-link-sidebar:hover {
+            color: var(--xeltis-gold);
+        }
+        
+        .sidebar-logo-img {
+            filter: none;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <header class="mobile-header md:hidden">
+        <button id="hamburgerBtnMobile" class="p-2 text-gray-700 hover:text-yellow-500">
+            <i class="fas fa-bars text-2xl"></i>
+        </button>
+        <a href="/index.html">
+            <img src="/images/xeltis-logo.png" alt="Logo Xeltis" class="xeltis-logo-header"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+            <span style="display:none;" class="text-xl font-semibold text-gray-700">Xeltis</span>
+        </a>
+        <a href="#" id="mobileLogoutLink" class="p-2 text-gray-700 hover:text-yellow-500">
+            <i class="fas fa-sign-out-alt text-xl"></i>
+        </a>
+    </header>
+
+    <aside id="sidebar" class="sidebar-xeltis">
+        <div class="sidebar-header">
+            <a href="/index.html" class="flex items-center">
+                <img src="/images/xeltis-logo.png" alt="Logo Xeltis" class="sidebar-logo-img">
+            </a>
+        </div>
+        <nav class="flex-grow">
+            <a href="/index.html" class="nav-link-sidebar active">
+                <i class="fas fa-tachometer-alt"></i>Tableau de bord
+            </a>
+            <a href="/marketplace.html" class="nav-link-sidebar">
+                <i class="fas fa-store"></i>Marché
+            </a>
+            <a href="/wallet.html" class="nav-link-sidebar">
+                <i class="fas fa-wallet"></i>Portefeuille
+            </a>
+            <a href="/admin-kyc.html" class="nav-link-sidebar">
+                <i class="fas fa-user-check"></i>Admin KYC
+            </a>
+            <a href="/register.html" class="nav-link-sidebar">
+                <i class="fas fa-user-plus"></i>S'inscrire
+            </a>
+            <a href="/login.html" class="nav-link-sidebar">
+                <i class="fas fa-sign-in-alt"></i>Se connecter
+            </a>
+            <a href="/verify-email.html" class="nav-link-sidebar">
+                <i class="fas fa-envelope"></i>Vérification d'e-mail
+            </a>
+            <a href="/reset-password.html" class="nav-link-sidebar">
+                <i class="fas fa-key"></i>Réinitialiser le mot de passe
+            </a>
+            <a href="/view-transactions.html" class="nav-link-sidebar">
+                <i class="fas fa-exchange-alt"></i>Transactions
+            </a>
+            <a href="/reports.html" class="nav-link-sidebar">
+                <i class="fas fa-chart-pie"></i>Rapports
+            </a>
+            <a href="/community.html" class="nav-link-sidebar">
+                <i class="fas fa-users"></i>Communauté
+            </a>
+            <a href="/chatbot.html" class="nav-link-sidebar">
+                <i class="fas fa-comments-dollar"></i>Conseiller IA
+            </a>
+            <a href="/resources.html" class="nav-link-sidebar">
+                <i class="fas fa-book-open"></i>Ressources
+            </a>
+            <a href="/settings.html" class="nav-link-sidebar">
+                <i class="fas fa-cog"></i>Paramètres
+            </a>
+        </nav>
+        <div class="pb-4">
+            <a href="/profile.html" class="nav-link-sidebar">
+                <i class="fas fa-user-circle"></i>Profil
+            </a>
+            <a href="#" id="sidebarLogoutLink" class="nav-link-sidebar">
+                <i class="fas fa-sign-out-alt"></i>Se déconnecter
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content-area">
+        <header class="desktop-header hidden md:flex items-center justify-between mb-6">
+            <div></div>
+            <div class="flex items-center space-x-3">
+                <span id="desktopUserWelcome" class="text-sm text-gray-700">Bienvenue, Utilisateur !</span>
+            </div>
+        </header>
+
+        <div class="greeting-summary-card">
+            <h1 id="personalizedGreeting" class="greeting-text">Bonjour, Utilisateur !</h1>
+            <p class="ai-summary-text" id="aiSummaryText">
+                Chargement de votre résumé financier...
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-6">
+            <div class="metric-card">
+                <div>
+                    <div class="metric-card-header">
+                        <h2>Revenu total</h2>
+                        <i class="fas fa-dollar-sign metric-card-icon text-green-500"></i>
+                    </div>
+                    <p class="metric-card-value text-green-600" id="totalIncomeDisplay">$0.00</p>
+                </div>
+                <p class="metric-card-footer">Cette période</p>
+            </div>
+            <div class="metric-card">
+                <div>
+                    <div class="metric-card-header">
+                        <h2>Dépenses totales</h2>
+                        <i class="fas fa-receipt metric-card-icon text-red-500"></i>
+                    </div>
+                    <p class="metric-card-value text-red-600" id="totalExpensesDisplay">$0.00</p>
+                </div>
+                <p class="metric-card-footer">Cette période</p>
+            </div>
+            <div class="metric-card">
+                <div>
+                    <div class="metric-card-header">
+                        <h2>Solde net</h2>
+                        <i class="fas fa-balance-scale-right metric-card-icon text-blue-500"></i>
+                    </div>
+                    <p class="metric-card-value text-blue-600" id="netBalanceDisplay">$0.00</p>
+                </div>
+                <p class="metric-card-footer">Cette période</p>
+            </div>
+            <div class="metric-card">
+                <div>
+                    <div class="metric-card-header">
+                        <h2>Marge bénéficiaire</h2>
+                        <i class="fas fa-percentage metric-card-icon text-purple-500"></i>
+                    </div>
+                    <p class="metric-card-value text-purple-600" id="profitMarginDisplay">0%</p>
+                </div>
+                <p class="metric-card-footer">Cette période</p>
+            </div>
+            <div class="metric-card">
+                <div>
+                    <div class="metric-card-header">
+                        <h2>Factures en retard</h2>
+                        <i class="fas fa-file-invoice-dollar metric-card-icon text-yellow-500"></i>
+                    </div>
+                    <p class="metric-card-value text-yellow-600" id="overdueInvoicesDisplay">$0.00</p>
+                </div>
+                <p class="metric-card-footer">(<span id="overdueInvoicesCount">0</span>) Total impayé</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="chart-container">
+                <h3 class="chart-title">Tendance des ventes (graphique à barres)</h3>
+                <canvas id="salesTrendChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3 class="chart-title">Répartition des dépenses (graphique en anneau)</h3>
+                <canvas id="expenseBreakdownChart"></canvas>
+            </div>
+        </div>
+        <div class="chart-container">
+            <h3 class="chart-title">Flux de trésorerie dans le temps (graphique en aires)</h3>
+            <canvas id="cashFlowChart"></canvas>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const token = localStorage.getItem('xeltisToken');
+            const userString = localStorage.getItem('xeltisUser');
+            // Assuming the backend URL needs to be updated to match the new brand
+            const backendUrl = 'https://xeltis-backend.vercel.app';
+
+            console.log("Tableau de bord : Jeton du stockage local :", token);
+            console.log("Tableau de bord : Chaîne utilisateur du stockage local :", userString);
+
+            if (!token || !userString || token === "undefined" || token === "null") {
+                console.log("Tableau de bord : Jeton ou chaîne utilisateur manquant/invalide. Redirection vers la page de connexion.");
+                window.location.href = '/login.html';
+                return;
+            }
+
+            let userName = "Utilisateur";
+            try {
+                const user = JSON.parse(userString);
+                userName = user.fullName || "Utilisateur";
+                const greetingElement = document.getElementById('personalizedGreeting');
+                const desktopUserWelcomeElement = document.getElementById('desktopUserWelcome');
+                if (greetingElement) {
+                    const currentHour = new Date().getHours();
+                    let timeOfDayGreeting = "Bonjour";
+                    if (currentHour < 12) timeOfDayGreeting = "Bonjour";
+                    else if (currentHour < 18) timeOfDayGreeting = "Bon après-midi";
+                    else timeOfDayGreeting = "Bonsoir";
+                    greetingElement.textContent = `${timeOfDayGreeting}, ${userName}!`;
+                }
+                if (desktopUserWelcomeElement) desktopUserWelcomeElement.textContent = `Bienvenue, ${userName}!`;
+            } catch (error) {
+                console.error("Tableau de bord : Erreur lors de l'analyse des données utilisateur du stockage local :", error);
+                handleLogout();
+                return;
+            }
+
+            const aiSummaryText = document.getElementById('aiSummaryText');
+
+            // Fetch CSRF token
+            let csrfToken = localStorage.getItem('xeltisCsrfToken');
+            if (!csrfToken) {
+                try {
+                    const csrfResponse = await fetch(`${backendUrl}/api/csrf-token`, {
+                        method: 'GET',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const csrfData = await csrfResponse.json();
+                    if (csrfResponse.ok && csrfData.csrf_token) {
+                        csrfToken = csrfData.csrf_token;
+                        localStorage.setItem('xeltisCsrfToken', csrfToken);
+                    } else {
+                        console.error("Tableau de bord : Échec de la récupération du jeton CSRF :", csrfData.message);
+                        aiSummaryText.textContent = "Erreur : Impossible d'initialiser la session.";
+                        return;
+                    }
+                } catch (error) {
+                    console.error("Tableau de bord : Erreur lors de la récupération du jeton CSRF :", error);
+                    aiSummaryText.textContent = "Échec de la connexion au serveur.";
+                    return;
+                }
+            }
+
+            // Fetch Dashboard Summary Data
+            try {
+                const authHeader = `Bearer ${token}`;
+                console.log("Tableau de bord : Envoi de l'en-tête d'autorisation :", authHeader);
+                const response = await fetch(`${backendUrl}/api/dashboard/summary`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': authHeader,
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken
+                    }
+                });
+
+                const responseText = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (e) {
+                    console.error("Tableau de bord : Échec de l'analyse de la réponse en JSON. Texte de la réponse :", responseText);
+                    aiSummaryText.textContent = "Erreur : Données invalides reçues du serveur.";
+                    return;
+                }
+
+                console.log("Tableau de bord : Statut de la réponse de l'API de résumé :", response.status);
+                console.log("Tableau de bord : Données de la réponse de l'API de résumé :", data);
+
+                if (response.ok && data.status === 'success') {
+                    const summary = data.summary;
+                    document.getElementById('totalIncomeDisplay').textContent = `$${summary.totalIncome.toFixed(2)}`;
+                    document.getElementById('totalExpensesDisplay').textContent = `$${summary.totalExpenses.toFixed(2)}`;
+                    document.getElementById('netBalanceDisplay').textContent = `$${summary.netBalance.toFixed(2)}`;
+                    document.getElementById('profitMarginDisplay').textContent = `${summary.profitMargin.toFixed(1)}%`;
+                    document.getElementById('overdueInvoicesDisplay').textContent = `$${summary.overdueInvoicesAmount.toFixed(2)}`;
+                    document.getElementById('overdueInvoicesCount').textContent = summary.overdueInvoicesCount;
+
+                    if (aiSummaryText) {
+                        let summaryMessage = `Votre solde net actuel est de <strong>$${summary.netBalance.toFixed(2)}</strong>. `;
+                        if (summary.totalIncome > summary.totalExpenses) {
+                            summaryMessage += `Vous êtes rentable avec une marge de <strong>${summary.profitMargin.toFixed(1)}%</strong>. Continuez votre bon travail !`;
+                        } else if (summary.totalExpenses > 0) {
+                            summaryMessage += `Vous avez dépensé plus que vous n'avez gagné au cours de cette période. Examinez vos dépenses.`;
+                        } else {
+                            summaryMessage += `Commencez par ajouter des transactions de revenus et de dépenses pour voir votre situation financière.`;
+                        }
+                        aiSummaryText.innerHTML = summaryMessage;
+                    }
+
+                    // Render Charts
+                    try {
+                        const salesResponse = await fetch(`${backendUrl}/api/reports/income-expense`, {
+                            method: 'GET',
+                            headers: {
+                                'Authorization': authHeader,
+                                'Content-Type': 'application/json',
+                                'X-CSRF-Token': csrfToken
+                            }
+                        });
+                        const salesData = await salesResponse.json();
+                        if (salesResponse.ok && salesData.status === 'success') {
+                            new Chart(document.getElementById('salesTrendChart'), {
+                                type: 'bar',
+                                data: {
+                                    labels: salesData.data.labels,
+                                    datasets: [{
+                                        label: 'Tendance des ventes',
+                                        data: salesData.data.income,
+                                        backgroundColor: 'rgba(34, 197, 94, 0.5)',
+                                        borderColor: 'rgba(34, 197, 94, 1)',
+                                        borderWidth: 1
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    scales: { y: { beginAtZero: true } }
+                                }
+                            });
+
+                            new Chart(document.getElementById('expenseBreakdownChart'), {
+                                type: 'doughnut',
+                                data: {
+                                    labels: salesData.data.categories,
+                                    datasets: [{
+                                        label: 'Répartition des dépenses',
+                                        data: salesData.data.expenses,
+                                        backgroundColor: ['rgba(239, 68, 68, 0.5)', 'rgba(59, 130, 246, 0.5)', 'rgba(168, 85, 247, 0.5)'],
+                                        borderColor: ['rgba(239, 68, 68, 1)', 'rgba(59, 130, 246, 1)', 'rgba(168, 85, 247, 1)'],
+                                        borderWidth: 1
+                                    }]
+                                },
+                                options: { responsive: true }
+                            });
+
+                            new Chart(document.getElementById('cashFlowChart'), {
+                                type: 'line',
+                                data: {
+                                    labels: salesData.data.labels,
+                                    datasets: [{
+                                        label: 'Flux de trésorerie',
+                                        data: salesData.data.netBalance,
+                                        fill: true,
+                                        backgroundColor: 'rgba(255, 215, 0, 0.2)', // Using the Xeltis gold color
+                                        borderColor: 'rgba(255, 215, 0, 1)', // Using the Xeltis gold color
+                                        tension: 0.4
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    scales: { y: { beginAtZero: true } }
+                                }
+                            });
+                        } else {
+                            console.error("Tableau de bord : Erreur lors de la récupération des données de graphique :", salesData.message);
+                            aiSummaryText.textContent = salesData.message || "Impossible de charger les données du graphique.";
+                        }
+                    } catch (error) {
+                        console.error("Tableau de bord : Erreur lors du rendu des graphiques :", error);
+                        aiSummaryText.textContent = "Échec du chargement des données du graphique.";
+                    }
+                } else {
+                    console.error("Tableau de bord : Erreur lors de la récupération du résumé du tableau de bord. Statut :", response.status, "Message :", data.message);
+                    aiSummaryText.textContent = data.message || "Impossible de charger le résumé du tableau de bord.";
+                    if (response.status === 401 || response.status === 422) {
+                        console.log(`Tableau de bord : Reçu ${response.status}, déconnexion.`);
+                        handleLogout();
+                    }
+                }
+            } catch (error) {
+                console.error("Tableau de bord : Erreur réseau ou autre lors de la récupération du résumé du tableau de bord :", error);
+                aiSummaryText.textContent = "Échec de la connexion au serveur pour le résumé.";
+            }
+        });
+
+        function handleLogout() {
+            console.log("Tableau de bord : Déconnexion et redirection vers login.html");
+            localStorage.removeItem('xeltisToken');
+            localStorage.removeItem('xeltisUser');
+            localStorage.removeItem('xeltisCsrfToken');
+            window.location.href = '/login.html';
+        }
+
+        const sidebarLogoutLink = document.getElementById('sidebarLogoutLink');
+        if (sidebarLogoutLink) sidebarLogoutLink.addEventListener('click', (e) => { e.preventDefault(); handleLogout(); });
+        const mobileLogoutLink = document.getElementById('mobileLogoutLink');
+        if (mobileLogoutLink) mobileLogoutLink.addEventListener('click', (e) => { e.preventDefault(); handleLogout(); });
+        const hamburgerBtnMobile = document.getElementById('hamburgerBtnMobile');
+        const sidebar = document.getElementById('sidebar');
+        if (hamburgerBtnMobile && sidebar) {
+            hamburgerBtnMobile.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.toggle('open'); });
+        }
+        document.addEventListener('click', (e) => {
+            if (sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target) && (!hamburgerBtnMobile || !hamburgerBtnMobile.contains(e.target))) {
+                sidebar.classList.remove('open');
+            }
+        });
+        console.log("Page de tableau de bord chargée et scripts attachés.");
+    </script>
+</body>
+</html>

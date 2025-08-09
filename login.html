@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="pageTitle">Connexion - Xeltis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --xeltis-gold: #FFD700;
+            --xeltis-dark: #000000;
+            --xeltis-white: #FFFFFF;
+            --xeltis-gray-light: #F3F2EF;
+            --xeltis-gray-medium: #CED0D4;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--xeltis-dark);
+            color: var(--xeltis-white);
+        }
+        .form-input-xeltis {
+            border: 1px solid var(--xeltis-gray-medium);
+            border-radius: 6px;
+            padding: 12px 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background-color: var(--xeltis-white);
+            color: var(--xeltis-dark);
+        }
+        .form-input-xeltis:focus {
+            border-color: var(--xeltis-gold);
+            box-shadow: 0 0 0 1px var(--xeltis-gold);
+            outline: none;
+        }
+        .form-input-xeltis.border-red-500 {
+            border-color: #EF4444 !important;
+            box-shadow: 0 0 0 1px #EF4444 !important;
+        }
+        .btn-primary-xeltis {
+            background-color: var(--xeltis-gold);
+            color: var(--xeltis-dark);
+            border-radius: 20px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary-xeltis:hover {
+            background-color: #E6C200;
+        }
+        .btn-primary-xeltis:disabled {
+            background-color: #A0AEC0;
+            cursor: not-allowed;
+            color: #6B7280;
+        }
+        .xeltis-logo-container {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .xeltis-logo {
+            max-width: 120px;
+            height: auto;
+            display: inline-block;
+        }
+        .card-xeltis {
+            background-color: var(--xeltis-white);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+        }
+        .link-xeltis {
+            color: var(--xeltis-gold);
+            font-weight: 500;
+        }
+        .link-xeltis:hover {
+            text-decoration: underline;
+            color: #E6C200;
+        }
+        .message-success {
+            color: #10B981;
+        }
+        .message-error {
+            color: #EF4444;
+        }
+        /* Modal specific styles */
+        .policy-modal {
+            background-color: var(--xeltis-white);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            padding: 2.5rem;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .policy-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .policy-modal-close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #718096;
+        }
+        .policy-modal-close-button:hover {
+            color: #4A5568;
+        }
+        /* Language selector styles */
+        #languageSelector {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            background-color: #2D3748;
+            color: var(--xeltis-white);
+            cursor: pointer;
+        }
+        /* New User Button */
+        .btn-new-user {
+            display: inline-block;
+            background-color: var(--xeltis-gold);
+            color: var(--xeltis-dark);
+            border-radius: 20px;
+            padding: 12px 24px;
+            font-weight: 600;
+            text-align: center;
+            transition: background-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .btn-new-user:hover {
+            background-color: #E6C200;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div id="languageSelector" class="hover:bg-gray-700 transition">FR</div>
+    <div class="w-full max-w-md">
+        <div class="xeltis-logo-container">
+            <img src="xeltis-logo-CIxL2od-.png" alt="Xeltis Logo" class="xeltis-logo" onerror="this.onerror=null; this.src='https://placehold.co/120x60/333333/FFD700?text=Xeltis'; console.error('Image not found: xeltis-logo-CIxL2od-.png');">
+        </div>
+
+        <div class="card-xeltis">
+            <h2 class="text-2xl font-semibold text-gray-900 text-center mb-2" data-i18n="welcomeHeader">Bienvenue</h2>
+            <p class="text-sm text-gray-600 text-center mb-8" data-i18n="welcomeMessage">
+                Connectez-vous pour continuer vers votre tableau de bord Xeltis.
+            </p>
+
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="emailLabel">Adresse e-mail</label>
+                    <input type="email" name="email" id="email" required
+                        class="form-input-xeltis w-full"
+                        placeholder="vous@exemple.com">
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label for="password" class="block text-sm font-medium text-gray-700" data-i18n="passwordLabel">Mot de passe</label>
+                        <a href="forgot-password.html" class="text-xs link-xeltis" data-i18n="forgotPasswordLink">
+                            Mot de passe oublié ?
+                        </a>
+                    </div>
+                    <input type="password" name="password" id="password" required
+                        class="form-input-xeltis w-full"
+                        placeholder="Entrez votre mot de passe">
+                </div>
+
+                <div id="messageDiv" class="text-sm text-center font-medium pt-1 message-error"></div>
+
+                <div class="pt-2">
+                    <button type="submit" id="loginButton"
+                            class="w-full btn-primary-xeltis" data-i18n="loginButtonText">
+                        Se connecter
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-8 text-center">
+                 <a href="register.html" class="btn-new-user" data-i18n="newAccountPrompt">
+                    Nouveau sur Xeltis ?
+                </a>
+            </div>
+            
+            <div class="text-sm text-center mt-4">
+                <a href="#" id="viewPrivacy" class="link-xeltis" data-i18n="privacyPolicyLink">Politique de confidentialité</a>
+                <span class="text-gray-600 mx-2">|</span>
+                <a href="#" id="viewTerms" class="link-xeltis" data-i18n="termsOfServiceLink">Conditions d'utilisation</a>
+            </div>
+        </div>
+
+        <p class="text-xs text-gray-500 text-center mt-8">
+            &copy; <span id="currentYear"></span> Xeltis. <span data-i18n="copyrightText">Tous droits réservés.</span>
+        </p>
+    </div>
+
+    <div id="privacy-modal" class="policy-modal-overlay hidden">
+        <div class="policy-modal">
+            <h2 class="text-2xl font-semibold text-gray-900 mb-4" data-i18n="privacyPolicyHeader">Politique de confidentialité</h2>
+            <div id="privacy-content" class="text-gray-700 text-sm leading-relaxed" data-i18n="loadingText">
+                Chargement...
+            </div>
+            <button class="policy-modal-close-button" onclick="document.getElementById('privacy-modal').classList.add('hidden');">&times;</button>
+        </div>
+    </div>
+
+    <div id="terms-modal" class="policy-modal-overlay hidden">
+        <div class="policy-modal">
+            <h2 class="text-2xl font-semibold text-gray-900 mb-4" data-i18n="termsOfServiceHeader">Conditions d'utilisation</h2>
+            <div id="terms-content" class="text-gray-700 text-sm leading-relaxed" data-i18n="loadingText">
+                Chargement...
+            </div>
+            <button class="policy-modal-close-button" onclick="document.getElementById('terms-modal').classList.add('hidden');">&times;</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        const translations = {
+            fr: {
+                pageTitle: "Connexion - Xeltis",
+                welcomeHeader: "Bienvenue",
+                welcomeMessage: "Connectez-vous pour continuer vers votre tableau de bord Xeltis.",
+                emailLabel: "Adresse e-mail",
+                passwordLabel: "Mot de passe",
+                forgotPasswordLink: "Mot de passe oublié ?",
+                loginButtonText: "Se connecter",
+                newAccountPrompt: "Nouveau sur Xeltis ?",
+                createAccountLink: "Créer un compte",
+                privacyPolicyLink: "Politique de confidentialité",
+                termsOfServiceLink: "Conditions d'utilisation",
+                copyrightText: "Tous droits réservés.",
+                privacyPolicyHeader: "Politique de confidentialité",
+                termsOfServiceHeader: "Conditions d'utilisation",
+                loadingText: "Chargement...",
+                placeholderPassword: "Entrez votre mot de passe",
+                placeholderEmail: "vous@exemple.com",
+                errorEmailPasswordRequired: "L'adresse e-mail et le mot de passe sont requis.",
+                errorLoginFailed: "Échec de la connexion :",
+                errorUnexpected: "Une erreur inattendue est survenue lors de la connexion. Veuillez réessayer.",
+                successLogin: "Connexion réussie ! Redirection vers votre tableau de bord...",
+                errorPolicyContent: "Erreur : Impossible de charger le contenu de la politique.",
+                errorPolicyLoading: "Échec du chargement du contenu. Veuillez réessayer plus tard.",
+            },
+            en: {
+                pageTitle: "Login - Xeltis",
+                welcomeHeader: "Welcome",
+                welcomeMessage: "Log in to continue to your Xeltis dashboard.",
+                emailLabel: "Email address",
+                passwordLabel: "Password",
+                forgotPasswordLink: "Forgot password?",
+                loginButtonText: "Log In",
+                newAccountPrompt: "New to Xeltis?",
+                createAccountLink: "Create an account",
+                privacyPolicyLink: "Privacy Policy",
+                termsOfServiceLink: "Terms of Service",
+                copyrightText: "All rights reserved.",
+                privacyPolicyHeader: "Privacy Policy",
+                termsOfServiceHeader: "Terms of Service",
+                loadingText: "Loading...",
+                placeholderPassword: "Enter your password",
+                placeholderEmail: "you@example.com",
+                errorEmailPasswordRequired: "Email address and password are required.",
+                errorLoginFailed: "Login failed:",
+                errorUnexpected: "An unexpected error occurred during login. Please try again.",
+                successLogin: "Login successful! Redirecting to your dashboard...",
+                errorPolicyContent: "Error: Failed to load policy content.",
+                errorPolicyLoading: "Failed to load content. Please try again later.",
+            }
+        };
+
+        let currentLang = 'fr'; // Default language
+
+        // Function to get language from URL parameter or localStorage
+        function getLanguage() {
+            const params = new URLSearchParams(window.location.search);
+            const lang = params.get('lang');
+            if (lang) {
+                localStorage.setItem('lang', lang);
+                return lang;
+            }
+            return localStorage.getItem('lang') || 'fr';
+        }
+
+        // Function to apply translations
+        function applyTranslations(lang) {
+            currentLang = lang;
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (translations[lang] && translations[lang][key]) {
+                    if (element.tagName === 'INPUT' && element.hasAttribute('placeholder')) {
+                        element.placeholder = translations[lang][key];
+                    } else {
+                        element.textContent = translations[lang][key];
+                    }
+                }
+            });
+
+            // Handle hard-coded messages from JavaScript
+            const msgDiv = document.getElementById('messageDiv');
+            if (msgDiv) {
+                msgDiv.textContent = ''; // Clear previous messages
+            }
+
+            // Update the language selector button text
+            const langSelector = document.getElementById('languageSelector');
+            if (langSelector) {
+                langSelector.textContent = lang.toUpperCase() === 'FR' ? 'EN' : 'FR';
+                document.documentElement.lang = lang; // Update HTML lang attribute
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", async function() {
+            // Initial language setup
+            applyTranslations(getLanguage());
+
+            const currentYearSpan = document.getElementById("currentYear");
+            if (currentYearSpan) {
+                currentYearSpan.textContent = new Date().getFullYear();
+            }
+
+            const SUPABASE_URL = 'https://qudbehodnhevjxmdwvta.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1ZGJlaG9kbmhldmp4bWR3dnRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1MjExODksImV4cCI6MjA3MDA5NzE4OX0.YnK8UKd76PBLh3L0zAv5fY0JFK6EWq-UBHLY8jXz55w';
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log("Supabase client initialized.");
+
+            const loginForm = document.getElementById("loginForm");
+            const messageDiv = document.getElementById("messageDiv");
+            const loginButton = document.getElementById("loginButton");
+            const emailInput = document.getElementById("email");
+            const passwordInput = document.getElementById("password");
+            
+            // Set input placeholders based on language
+            if (emailInput) emailInput.placeholder = translations[currentLang].placeholderEmail;
+            if (passwordInput) passwordInput.placeholder = translations[currentLang].placeholderPassword;
+
+
+            if (!loginForm || !messageDiv) {
+                console.error("Login form or message div not found.");
+                if (document.body) {
+                    const errorMsg = document.createElement('p');
+                    errorMsg.textContent = "Error: Page components missing. Please contact support.";
+                    errorMsg.style.color = "red"; errorMsg.style.textAlign = "center"; errorMsg.style.padding = "1rem";
+                    document.body.prepend(errorMsg);
+                }
+                return;
+            }
+
+            loginForm.addEventListener("submit", async function(event) {
+                event.preventDefault();
+                const email = emailInput.value;
+                const password = passwordInput.value;
+                
+                messageDiv.textContent = "";
+                messageDiv.className = 'text-sm text-center font-medium pt-1';
+                if(loginButton) {
+                    loginButton.disabled = true;
+                    loginButton.textContent = translations[currentLang].loadingText;
+                }
+
+                if (!email || !password) {
+                    messageDiv.textContent = translations[currentLang].errorEmailPasswordRequired;
+                    messageDiv.classList.add("message-error");
+                    if(loginButton) {
+                        loginButton.disabled = false;
+                        loginButton.textContent = translations[currentLang].loginButtonText;
+                    }
+                    return;
+                }
+
+                try {
+                    const { data, error } = await supabase.auth.signInWithPassword({
+                        email: email,
+                        password: password,
+                    });
+
+                    if (error) {
+                        console.error('Supabase Login Error:', error.message);
+                        messageDiv.textContent = `${translations[currentLang].errorLoginFailed} ${error.message}`;
+                        messageDiv.classList.remove("message-success");
+                        messageDiv.classList.add("message-error");
+                    } else {
+                        console.log('Login successful!', data);
+                        messageDiv.textContent = translations[currentLang].successLogin;
+                        messageDiv.classList.remove("message-error");
+                        messageDiv.classList.add("message-success");
+                        
+                        localStorage.setItem('xeltisToken', data.session.access_token);
+                        localStorage.setItem('xeltisUser', JSON.stringify(data.user));
+                        
+                        setTimeout(() => {
+                            window.location.href = `dashboard.html?lang=${currentLang}`;
+                        }, 1500);
+                    }
+                } catch (error) {
+                    console.error("Login submission error:", error);
+                    messageDiv.textContent = translations[currentLang].errorUnexpected;
+                    messageDiv.classList.remove("message-success");
+                    messageDiv.classList.add("message-error");
+                } finally {
+                    if(loginButton) {
+                        loginButton.disabled = false;
+                        loginButton.textContent = translations[currentLang].loginButtonText;
+                    }
+                }
+            });
+
+            // Language selector logic
+            const langSelector = document.getElementById('languageSelector');
+            if (langSelector) {
+                langSelector.addEventListener('click', () => {
+                    const newLang = currentLang === 'fr' ? 'en' : 'fr';
+                    localStorage.setItem('lang', newLang);
+                    window.location.href = `login.html?lang=${newLang}`; // Reload the page with the new lang parameter
+                });
+            }
+
+            const viewTermsLink = document.getElementById('viewTerms');
+            const viewPrivacyLink = document.getElementById('viewPrivacy');
+
+            async function showPolicyModal(policyType, policyUrl) {
+                const modalId = `${policyType}-modal`;
+                const modal = document.getElementById(modalId);
+                const contentDiv = document.getElementById(`${policyType}-content`);
+
+                modal.classList.remove('hidden');
+                contentDiv.textContent = translations[currentLang].loadingText;
+
+                try {
+                    const response = await fetch(policyUrl);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const htmlContent = await response.text();
+
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(htmlContent, 'text/html');
+                    const mainContent = doc.querySelector('.container'); 
+                    if (mainContent) {
+                        mainContent.querySelector('header')?.remove();
+                        mainContent.querySelector('footer')?.remove();
+                        mainContent.querySelector('script')?.remove();
+                        mainContent.querySelector('.table-of-contents')?.remove(); 
+                        
+                        contentDiv.innerHTML = mainContent.innerHTML;
+                        contentDiv.querySelectorAll('img').forEach(img => {
+                            if (img.src.includes('nova-logo.png')) {
+                                img.src = 'xeltis-logo-CIxL2od-.png';
+                            }
+                        });
+                    } else {
+                        contentDiv.textContent = translations[currentLang].errorPolicyContent;
+                        console.error("Could not find .container in policy HTML for modal.");
+                    }
+
+                } catch (error) {
+                    console.error('Error loading policy content:', error);
+                    contentDiv.textContent = translations[currentLang].errorPolicyLoading;
+                }
+            }
+
+            viewTermsLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                const termsUrl = currentLang === 'fr' ? 'terms-of-service.html' : 'terms-of-service_en.html';
+                showPolicyModal('terms', termsUrl);
+            });
+
+            viewPrivacyLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                const privacyUrl = currentLang === 'fr' ? 'privacy-policy.html' : 'privacy-policy_en.html';
+                showPolicyModal('privacy', privacyUrl);
+            });
+        });
+    </script>
+</body>
+</html>

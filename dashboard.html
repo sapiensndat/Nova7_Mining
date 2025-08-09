@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="pageTitle">Tableau de bord - Xeltis</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter font for a clean, modern look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Luxon for better date handling in Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.min.js"></script>
+    <style>
+      :root {
+        --xeltis-gold: #FFD700;
+        --xeltis-dark: #000000;
+        --xeltis-white: #FFFFFF;
+        --xeltis-gray-light: #F3F2EF;
+        --xeltis-gray-medium: #CED0D4;
+      }
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--xeltis-dark);
+        color: var(--xeltis-white);
+      }
+      .header-nova7 {
+        background-color: var(--xeltis-white);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        padding: 0.75rem 1.5rem;
+        height: 60px;
+      }
+      .nova7-logo-header {
+        max-height: 36px;
+        width: auto;
+      }
+      .sidebar-nova7 {
+        background-color: var(--xeltis-dark);
+        color: var(--xeltis-white);
+        width: 260px;
+        box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        padding-top: 1rem;
+        transition: transform 0.3s ease-in-out;
+        z-index: 40;
+        display: flex;
+        flex-direction: column;
+      }
+      .sidebar-header {
+        padding: 0.75rem 1.5rem 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-bottom: 1px solid var(--xeltis-gold);
+        margin-bottom: 0.75rem;
+      }
+      .sidebar-logo-img {
+        max-height: 120px;
+        width: auto;
+      }
+      .sidebar-nova7 .nav-link-sidebar {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        margin: 0.25rem 1rem;
+        font-weight: 500;
+        color: var(--xeltis-white);
+        transition: background-color 0.2s, color 0.2s;
+      }
+      .sidebar-nova7 .nav-link-sidebar:hover {
+        background-color: var(--xeltis-gold);
+        color: var(--xeltis-dark);
+      }
+      .sidebar-nova7 .nav-link-sidebar.active {
+        background-color: var(--xeltis-gold);
+        color: var(--xeltis-dark);
+        font-weight: 600;
+      }
+      .sidebar-nova7 .nav-link-sidebar i {
+        width: 20px;
+        margin-right: 0.75rem;
+        text-align: center;
+      }
+      .main-content-area {
+        margin-left: 260px;
+        padding: 1.5rem;
+        width: calc(100% - 260px);
+        min-height: 100vh;
+      }
+      .metric-card {
+        background-color: var(--xeltis-white);
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 140px;
+      }
+      .metric-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+      }
+      .metric-card-header h2 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--xeltis-dark);
+      }
+      .metric-card-icon {
+        font-size: 1.5rem;
+      }
+      .metric-card-value {
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1.2;
+      }
+      .metric-card-footer {
+        font-size: 0.75rem;
+        color: #718096;
+        margin-top: auto;
+      }
+      .chart-placeholder-container {
+        background-color: var(--xeltis-white);
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        padding: 1.5rem;
+        min-height: 300px;
+        display: flex;
+        flex-direction: column;
+      }
+      .chart-placeholder-container h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--xeltis-dark);
+        margin-bottom: 1rem;
+      }
+      .chart-placeholder-content {
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px dashed var(--xeltis-gray-medium);
+        border-radius: 8px;
+        color: #A0AEC0;
+      }
+      .mobile-header {
+        display: none;
+      }
+      .greeting-summary-card {
+        background-color: var(--xeltis-white);
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.5rem;
+      }
+      .greeting-text {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--xeltis-dark);
+        margin-bottom: 0.5rem;
+      }
+      .ai-summary-text {
+        font-size: 0.95rem;
+        color: #4A5568;
+        line-height: 1.6;
+      }
+      .ai-summary-text strong {
+        color: var(--xeltis-gold);
+        font-weight: 600;
+      }
+      .btn-resend {
+        background-color: var(--xeltis-gold);
+        color: var(--xeltis-dark);
+        border-radius: 20px;
+        padding: 8px 16px;
+        font-weight: 600;
+        transition: background-color 0.2s;
+        border: none;
+        cursor: pointer;
+      }
+      .btn-resend:hover {
+        background-color: #E6C200;
+      }
+      .btn-resend:disabled {
+        background-color: #A0AEC0;
+        cursor: not-allowed;
+      }
+      .form-input-xeltis {
+        border: 1px solid var(--xeltis-gray-medium);
+        border-radius: 6px;
+        padding: 12px 14px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        background-color: var(--xeltis-white);
+        color: var(--xeltis-dark);
+      }
+      .form-input-xeltis:focus {
+        border-color: var(--xeltis-gold);
+        box-shadow: 0 0 0 1px var(--xeltis-gold);
+        outline: none;
+      }
+      .market-insights-container {
+        background-color: var(--xeltis-white);
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+      .market-insights-container h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--xeltis-dark);
+        margin-bottom: 1rem;
+      }
+      .search-results {
+        margin-top: 1rem;
+        padding: 1rem;
+        border: 1px solid var(--xeltis-gray-medium);
+        border-radius: 8px;
+      }
+      .search-results p {
+        color: var(--xeltis-dark);
+        margin: 0.5rem 0;
+      }
+      .search-results strong {
+        color: var(--xeltis-gold);
+      }
+      @media (max-width: 1024px) {
+        .lg\:grid-cols-5 {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+      @media (max-width: 768px) {
+        .sidebar-nova7 {
+          transform: translateX(-100%);
+          top: 0;
+          height: 100vh;
+        }
+        .sidebar-nova7.open {
+          transform: translateX(0);
+        }
+        .main-content-area {
+          margin-left: 0;
+          width: 100%;
+          padding-top: calc(60px + 1rem);
+        }
+        .desktop-header {
+          display: none;
+        }
+        .mobile-header {
+          display: flex;
+          background-color: var(--xeltis-white);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          padding: 0 1rem;
+          height: 60px;
+          align-items: center;
+          justify-content: space-between;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 50;
+        }
+        .greeting-text {
+          font-size: 1.25rem;
+        }
+        .lg\:grid-cols-5 {
+          grid-template-columns: repeat(1, minmax(0, 1fr));
+        }
+      }
+    </style>
+  </head>
+  <body class="flex flex-col min-h-screen">
+    <!-- Mobile Header -->
+    <header class="mobile-header md:hidden">
+      <button id="hamburgerBtnMobile" class="p-2 text-gray-700 hover:text-xeltis-gold">
+        <i class="fas fa-bars text-2xl"></i>
+      </button>
+      <a href="dashboard.html">
+        <img src="xeltis-logo-CIxL2od-.png" alt="Xeltis Logo" class="sidebar-logo-img" style="filter: brightness(0) invert(1);" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+        <span style="display:none;" class="text-xl font-semibold text-xeltis-dark">Xeltis</span>
+      </a>
+      <a href="#" id="mobileLogoutLink" class="p-2 text-gray-700 hover:text-xeltis-gold">
+        <i class="fas fa-sign-out-alt text-xl"></i>
+      </a>
+    </header>
+    <!-- Sidebar for desktop and mobile menu -->
+    <aside id="sidebar" class="sidebar-nova7">
+      <div class="sidebar-header">
+  <a href="dashboard.html" class="flex items-center">
+    <img src="xeltis-logo-CIxL2od-.png" alt="Xeltis Logo" class="sidebar-logo-img" style="filter: brightness(0) invert(1);" onerror="this.onerror=null; this.src='https://placehold.co/120x60/333333/FFD700?text=Xeltis';">
+  </a>
+</div>
+<nav class="flex-grow">
+  <a href="dashboard.html" class="nav-link-sidebar active">
+    <i class="fas fa-tachometer-alt"></i>Tableau de bord
+  </a>
+  <a href="map.html" class="nav-link-sidebar">
+    <i class="fas fa-map-marked-alt"></i>Carte
+  </a>
+  <a href="resources.html" class="nav-link-sidebar">
+    <i class="fas fa-store"></i>Marketplace
+  </a>
+  <a href="investment.html" class="nav-link-sidebar">
+    <i class="fas fa-chart-line"></i>Investment
+  </a>
+  <a href="settings.html" class="nav-link-sidebar">
+    <i class="fas fa-cog"></i>Paramètres
+  </a>
+</nav>
+<div class="pb-4">
+  <a href="profile.html" class="nav-link-sidebar">
+    <i class="fas fa-user-circle"></i>Profil
+  </a>
+  <a href="#" id="sidebarLogoutLink" class="nav-link-sidebar">
+    <i class="fas fa-sign-out-alt"></i>Déconnexion
+  </a>
+</div>
+    </aside>
+    <!-- Main Content Area -->
+    <main class="main-content-area">
+      <!-- Desktop Header -->
+      <header class="desktop-header hidden md:flex items-center justify-between mb-6">
+        <div></div>
+        <div class="flex items-center space-x-3">
+          <span id="desktopUserWelcome" class="text-sm text-xeltis-dark">Bienvenue, Utilisateur!</span>
+        </div>
+      </header>
+      <!-- Verification Message Section -->
+      <div id="verificationMessage" class="greeting-summary-card hidden">
+        <h1 class="greeting-text">Veuillez vérifier votre courriel</h1>
+        <p class="ai-summary-text">
+          Votre compte n'est pas encore vérifié. Veuillez consulter votre courriel pour le lien de vérification.
+          <button id="resendVerification" class="btn-resend mt-4">Renvoyer le courriel de vérification</button>
+        </p>
+      </div>
+      <!-- Main Dashboard Content -->
+      <div id="dashboardContent" class="hidden">
+        <div class="greeting-summary-card">
+          <h1 id="personalizedGreeting" class="greeting-text">Bonjour, Utilisateur!</h1>
+          <p class="ai-summary-text" id="aiSummaryText">
+            Chargement de votre sommaire financier...
+          </p>
+        </div>
+        <!-- Market Insights Section -->
+        <div class="market-insights-container">
+          <h2>Perspectives du Marché des Minéraux</h2>
+          <div class="flex items-center mb-4">
+            <input type="text" id="mineralSearch" class="form-input-xeltis w-full mr-2" placeholder="Rechercher un minéral (ex. Or, Cuivre)">
+            <button id="searchMineralBtn" class="btn-resend">Rechercher</button>
+          </div>
+          <div id="searchResults" class="search-results hidden">
+            <p><strong>Minéral:</strong> <span id="resultMineral"></span></p>
+            <p><strong>Prix actuel:</strong> <span id="resultPrice"></span></p>
+            <p><strong>Tendance (7 jours):</strong> <span id="resultTrend"></span></p>
+            <p><strong>Projection (prochain 30 jours):</strong> <span id="resultProjection"></span></p>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+            <div class="chart-placeholder-container">
+              <h3>Vos Ventes de Minéraux</h3>
+              <canvas id="userSalesChart" width="400" height="200"></canvas>
+            </div>
+            <div class="chart-placeholder-container">
+              <h3>Vos Achats de Minéraux</h3>
+              <canvas id="userPurchasesChart" width="400" height="200"></canvas>
+            </div>
+          </div>
+        </div>
+        <!-- Financial Metrics Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-6">
+          <div class="metric-card">
+            <div>
+              <div class="metric-card-header">
+                <h2>Revenus totaux</h2>
+                <i class="fas fa-dollar-sign metric-card-icon text-green-500"></i>
+              </div>
+              <p class="metric-card-value text-green-600" id="totalIncomeDisplay">0,00 $</p>
+            </div>
+            <p class="metric-card-footer">Cette période</p>
+          </div>
+          <div class="metric-card">
+            <div>
+              <div class="metric-card-header">
+                <h2>Dépenses totales</h2>
+                <i class="fas fa-receipt metric-card-icon text-red-500"></i>
+              </div>
+              <p class="metric-card-value text-red-600" id="totalExpensesDisplay">0,00 $</p>
+            </div>
+            <p class="metric-card-footer">Cette période</p>
+          </div>
+          <div class="metric-card">
+            <div>
+              <div class="metric-card-header">
+                <h2>Solde net</h2>
+                <i class="fas fa-balance-scale-right metric-card-icon text-blue-500"></i>
+              </div>
+              <p class="metric-card-value text-blue-600" id="netBalanceDisplay">0,00 $</p>
+            </div>
+            <p class="metric-card-footer">Cette période</p>
+          </div>
+          <div class="metric-card">
+            <div>
+              <div class="metric-card-header">
+                <h2>Marge de profit</h2>
+                <i class="fas fa-percentage metric-card-icon text-purple-500"></i>
+              </div>
+              <p class="metric-card-value text-purple-600" id="profitMarginDisplay">0%</p>
+            </div>
+            <p class="metric-card-footer">Cette période</p>
+          </div>
+          <div class="metric-card">
+            <div>
+              <div class="metric-card-header">
+                <h2>Factures en retard</h2>
+                <i class="fas fa-file-invoice-dollar metric-card-icon text-orange-500"></i>
+              </div>
+              <p class="metric-card-value text-orange-600" id="overdueInvoicesDisplay">0,00 $</p>
+            </div>
+            <p class="metric-card-footer">(<span id="overdueInvoicesCount">0</span>) Total impayé</p>
+          </div>
+        </div>
+        <!-- Chart Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div class="chart-placeholder-container">
+            <h3>Tendance des ventes (Graphique à barres)</h3>
+            <canvas id="salesTrendChart" width="400" height="200"></canvas>
+          </div>
+          <div class="chart-placeholder-container">
+            <h3>Répartition des dépenses (Graphique en anneau)</h3>
+            <canvas id="expenseBreakdownChart" width="400" height="200"></canvas>
+          </div>
+        </div>
+        <div class="chart-placeholder-container">
+          <h3>Flux de trésorerie (Graphique en aires)</h3>
+          <canvas id="cashFlowChart" width="400" height="200"></canvas>
+        </div>
+      </div>
+    </main>
+    <!-- Supabase Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', async function() {
+        // Initialize Supabase client
+        const SUPABASE_URL = 'https://qudbehodnhevjxmdwvta.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1ZGJlaG9kbmhldmp4bWR3dnRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1MjExODksImV4cCI6MjA3MDA5NzE4OX0.YnK8UKd76PBLh3L0zAv5fY0JFK6EWq-UBHLY8jXz55w';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log("Client Supabase initialisé.");
+
+        // DOM element references
+        const aiSummaryText = document.getElementById('aiSummaryText');
+        const verificationMessage = document.getElementById('verificationMessage');
+        const dashboardContent = document.getElementById('dashboardContent');
+        const resendButton = document.getElementById('resendVerification');
+        const mineralSearch = document.getElementById('mineralSearch');
+        const searchMineralBtn = document.getElementById('searchMineralBtn');
+        const searchResults = document.getElementById('searchResults');
+        const resultMineral = document.getElementById('resultMineral');
+        const resultPrice = document.getElementById('resultPrice');
+        const resultTrend = document.getElementById('resultTrend');
+        const resultProjection = document.getElementById('resultProjection');
+        
+        let userName = "Utilisateur";
+        let userBalance = 0.00;
+        let recentTransactions = [];
+
+        // Sample mineral price data (replace with real API if available)
+        const mineralPrices = {
+          'or': { price: 50000, trend: [49500, 49800, 50200, 50000, 50500, 50300, 50000], projection: 51000 },
+          'cuivre': { price: 8000, trend: [7900, 7950, 8000, 8050, 8100, 8080, 8000], projection: 8200 },
+          'lithium': { price: 12000, trend: [11800, 11900, 12000, 12100, 12200, 12150, 12000], projection: 12500 }
+        };
+
+        // Function to format currency for Québec/Canada French
+        function formatCurrency(value) {
+          const number = Number(value) || 0;
+          return number.toLocaleString('fr-CA', { style: 'currency', currency: 'CAD' });
+        }
+
+        // Display a message on a specific element
+        function showMessage(element, message, type = 'success') {
+          element.innerHTML = message;
+          element.className = `ai-summary-text ${type === 'success' ? 'text-green-600' : 'text-red-600'}`;
+        }
+
+        // Handle user logout
+        async function handleLogout() {
+          console.log("Tableau de bord : Déconnexion et redirection vers login.html");
+          await supabase.auth.signOut();
+          window.location.href = 'login.html';
+        }
+
+        // Search mineral functionality
+        function searchMineral() {
+          const query = mineralSearch.value.toLowerCase().trim();
+          if (!query || !mineralPrices[query]) {
+            showMessage(searchResults, "Minéral non trouvé. Essayez 'Or', 'Cuivre', ou 'Lithium'.", 'error');
+            searchResults.classList.remove('hidden');
+            return;
+          }
+          const data = mineralPrices[query];
+          resultMineral.textContent = query.charAt(0).toUpperCase() + query.slice(1);
+          resultPrice.textContent = formatCurrency(data.price);
+          const trendChange = ((data.trend[data.trend.length - 1] - data.trend[0]) / data.trend[0] * 100).toFixed(2);
+          resultTrend.textContent = `${trendChange}% ${trendChange >= 0 ? '↑' : '↓'} sur 7 jours`;
+          resultProjection.textContent = formatCurrency(data.projection);
+          searchResults.classList.remove('hidden');
+        }
+
+        // Event listeners for market insights
+        if (searchMineralBtn) {
+          searchMineralBtn.addEventListener('click', searchMineral);
+          mineralSearch.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchMineral();
+          });
+        }
+
+        // Event listeners for logout links
+        const sidebarLogoutLink = document.getElementById('sidebarLogoutLink');
+        if (sidebarLogoutLink) sidebarLogoutLink.addEventListener('click', (e) => { e.preventDefault(); handleLogout(); });
+        const mobileLogoutLink = document.getElementById('mobileLogoutLink');
+        if (mobileLogoutLink) mobileLogoutLink.addEventListener('click', (e) => { e.preventDefault(); handleLogout(); });
+
+        // Event listeners for mobile sidebar
+        const hamburgerBtnMobile = document.getElementById('hamburgerBtnMobile');
+        const sidebar = document.getElementById('sidebar');
+        if (hamburgerBtnMobile && sidebar) {
+          hamburgerBtnMobile.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.toggle('open'); });
+        }
+        document.addEventListener('click', (e) => {
+          if (sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target) && (!hamburgerBtnMobile || !hamburgerBtnMobile.contains(e.target))) {
+            sidebar.classList.remove('open');
+          }
+        });
+
+        // Supabase session check and user data retrieval
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !session) {
+          console.log("Tableau de bord : Aucune session Supabase active. Redirection vers la connexion.");
+          handleLogout();
+          return;
+        }
+
+        const user = session.user;
+        console.log("Utilisateur Supabase:", user);
+
+        // Check if user email is verified
+        if (user && !user.email_confirmed_at && user.email) {
+          verificationMessage.classList.remove('hidden');
+          dashboardContent.classList.add('hidden');
+          showMessage(
+            verificationMessage.querySelector('.ai-summary-text'),
+            `Votre compte n'est pas encore vérifié. Veuillez consulter votre courriel (${user.email}) pour le lien de vérification.`,
+            'error'
+          );
+
+          if (resendButton) {
+            resendButton.addEventListener('click', async () => {
+              resendButton.disabled = true;
+              resendButton.textContent = 'Envoi en cours...';
+              try {
+                const { error } = await supabase.auth.resend({
+                  type: 'signup',
+                  email: user.email,
+                  options: { emailRedirectTo: 'http://www.lifeline-wdc.com/email-verification.html' }
+                });
+                if (error) {
+                  console.error('Erreur de renvoi:', error.message);
+                  showMessage(
+                    verificationMessage.querySelector('.ai-summary-text'),
+                    `Échec du renvoi du courriel de vérification : ${error.message}`,
+                    'error'
+                  );
+                } else {
+                  showMessage(
+                    verificationMessage.querySelector('.ai-summary-text'),
+                    `Courriel de vérification renvoyé à ${user.email}`,
+                    'success'
+                  );
+                }
+              } catch (err) {
+                console.error('Erreur de renvoi inattendue:', err);
+                showMessage(
+                  verificationMessage.querySelector('.ai-summary-text'),
+                  'Erreur inattendue. Veuillez réessayer.',
+                  'error'
+                );
+              } finally {
+                resendButton.disabled = false;
+                resendButton.textContent = 'Renvoyer le courriel de vérification';
+              }
+            });
+          }
+          return;
+        }
+
+        // Show dashboard content if user is verified
+        verificationMessage.classList.add('hidden');
+        dashboardContent.classList.remove('hidden');
+
+        try {
+          // Fetch user profile to get the name
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+          if (profileError) {
+            console.error('Erreur lors de la récupération du profil utilisateur:', profileError.message);
+            userName = "Utilisateur";
+          } else {
+            userName = profile?.full_name || "Utilisateur";
+          }
+
+          // Update greeting based on time of day and user name
+          const greetingElement = document.getElementById('personalizedGreeting');
+          const desktopUserWelcomeElement = document.getElementById('desktopUserWelcome');
+          if (greetingElement) {
+            const currentHour = new Date().getHours();
+            let timeOfDayGreeting = "Bonjour";
+            if (currentHour >= 18) {
+              timeOfDayGreeting = "Bonsoir";
+            } else if (currentHour >= 12) {
+              timeOfDayGreeting = "Bon après-midi";
+            }
+            greetingElement.textContent = `${timeOfDayGreeting}, ${userName}!`;
+          }
+          if (desktopUserWelcomeElement) desktopUserWelcomeElement.textContent = `Bienvenue, ${userName}!`;
+
+          // Fetch user transactions
+          const { data: transactions, error: transactionsError } = await supabase
+            .from('transactions')
+            .select('amount, transaction_type, created_at, mineral')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(100);
+
+          if (transactionsError) {
+            console.error('Erreur lors de la récupération des transactions:', transactionsError.message);
+            showMessage(aiSummaryText, "Impossible de charger les données des transactions. Veuillez vous assurer que les politiques RLS sont définies et que la colonne 'user_id' existe dans votre table 'transactions'.", 'error');
+            recentTransactions = [];
+          } else {
+            recentTransactions = transactions || [];
+          }
+
+          // Financial calculations
+          let totalIncome = 0;
+          let totalExpenses = 0;
+          recentTransactions.forEach(t => {
+            const amount = parseFloat(t.amount) || 0;
+            // Income transactions are positive amounts with specific types
+            if (amount > 0 && ['deposit', 'transfer_received', 'product_sell', 'loan_received'].includes(t.transaction_type)) {
+              totalIncome += amount;
+            // Expense transactions are negative amounts or positive amounts with specific expense types
+            } else if (amount < 0 || ['product_buy', 'insurance_payment'].includes(t.transaction_type)) {
+              totalExpenses += Math.abs(amount);
+            }
+          });
+          userBalance = totalIncome - totalExpenses;
+
+          // Update financial metrics on the dashboard
+          document.getElementById('totalIncomeDisplay').textContent = formatCurrency(totalIncome);
+          document.getElementById('totalExpensesDisplay').textContent = formatCurrency(totalExpenses);
+          document.getElementById('netBalanceDisplay').textContent = formatCurrency(userBalance);
+
+          let profitMargin = 0;
+          if (totalIncome > 0) {
+            profitMargin = ((totalIncome - totalExpenses) / totalIncome) * 100;
+          }
+          document.getElementById('profitMarginDisplay').textContent = `${profitMargin.toFixed(1).replace('.', ',')}%`;
+
+          document.getElementById('overdueInvoicesDisplay').textContent = formatCurrency(0);
+          document.getElementById('overdueInvoicesCount').textContent = `0`;
+
+          // Update AI summary text
+          if (aiSummaryText) {
+            let summaryMessage = `Votre solde net actuel est de <strong>${formatCurrency(userBalance)}</strong>. `;
+            if (totalIncome > totalExpenses) {
+              summaryMessage += `Vous êtes rentable avec une marge de <strong>${profitMargin.toFixed(1).replace('.', ',')}%</strong>. Continuez votre bon travail !`;
+            } else if (totalExpenses > totalIncome) {
+              summaryMessage += `Vous avez dépensé plus que vous n'avez gagné cette période. Révisez vos dépenses.`;
+            } else {
+              summaryMessage += `Commencez par ajouter des transactions de revenus et de dépenses pour voir votre portrait financier.`;
+            }
+            aiSummaryText.innerHTML = summaryMessage;
+          }
+
+          // Render all charts
+          renderSalesTrendChart(recentTransactions);
+          renderExpenseBreakdownChart(recentTransactions);
+          renderCashFlowChart(recentTransactions);
+          renderUserSalesChart(recentTransactions);
+          renderUserPurchasesChart(recentTransactions);
+
+        } catch (error) {
+          console.error("Tableau de bord : Erreur lors de la récupération des données de Supabase:", error);
+          showMessage(aiSummaryText, "Échec du chargement des données du tableau de bord. Veuillez réessayer.", 'error');
+        }
+
+        // Function to render the sales trend bar chart
+        function renderSalesTrendChart(transactions) {
+          const salesData = transactions.filter(t => t.transaction_type === 'product_sell');
+          const labels = salesData.map(t => new Date(t.created_at).toLocaleDateString('fr-CA'));
+          const data = salesData.map(t => parseFloat(t.amount));
+          const ctx = document.getElementById('salesTrendChart').getContext('2d');
+          if (window.salesTrendChartInstance) window.salesTrendChartInstance.destroy();
+          window.salesTrendChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: labels,
+              datasets: [{
+                label: 'Ventes',
+                data: data,
+                backgroundColor: 'rgba(255, 215, 0, 0.2)',
+                borderColor: 'var(--xeltis-gold)',
+                borderWidth: 1
+              }]
+            },
+            options: { scales: { y: { beginAtZero: true } } }
+          });
+        }
+
+        // Function to render the expense breakdown doughnut chart
+        function renderExpenseBreakdownChart(transactions) {
+          const expenseData = transactions.filter(t => ['product_buy', 'transfer_sent', 'insurance_payment'].includes(t.transaction_type) || t.transaction_type.startsWith('withdrawal'));
+          const categories = {'Achat de produit': 'product_buy', 'Retrait': 'withdrawal', 'Transfert envoyé': 'transfer_sent', 'Paiement d\'assurance': 'insurance_payment'};
+          const data = Object.values(categories).map(catKey => {
+            return expenseData.filter(t => {
+              const normalizedType = t.transaction_type.toLowerCase().replace(/ /g, '_');
+              if (catKey === 'withdrawal') return normalizedType.startsWith('withdrawal');
+              return normalizedType === catKey;
+            }).reduce((sum, t) => sum + Math.abs(parseFloat(t.amount)), 0);
+          });
+          const ctx = document.getElementById('expenseBreakdownChart').getContext('2d');
+          if (window.expenseBreakdownChartInstance) window.expenseBreakdownChartInstance.destroy();
+          window.expenseBreakdownChartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: Object.keys(categories),
+              datasets: [{
+                label: 'Dépenses',
+                data: data,
+                backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)', 'rgba(153, 102, 255, 0.6)'],
+                borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)', 'rgba(153, 102, 255, 1)'],
+                borderWidth: 1
+              }]
+            },
+            options: { responsive: true, plugins: { legend: { position: 'top' } } }
+          });
+        }
+
+        // Function to render the sales of a specific mineral
+        function renderUserSalesChart(transactions) {
+          const salesData = transactions.filter(t => t.transaction_type === 'product_sell');
+          const mineralSales = salesData.reduce((acc, t) => {
+            const mineral = t.mineral || 'Inconnu';
+            acc[mineral] = (acc[mineral] || 0) + parseFloat(t.amount);
+            return acc;
+          }, {});
+
+          const ctx = document.getElementById('userSalesChart').getContext('2d');
+          if (window.userSalesChartInstance) window.userSalesChartInstance.destroy();
+          window.userSalesChartInstance = new Chart(ctx, {
+            type: 'pie',
+            data: {
+              labels: Object.keys(mineralSales),
+              datasets: [{
+                data: Object.values(mineralSales),
+                backgroundColor: ['#FFD700', '#C0C0C0', '#CD7F32', '#A0AEC0'],
+                hoverBackgroundColor: ['#E6C200', '#B0B0B0', '#B5682D', '#909EB0'],
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: 'top',
+                },
+                title: {
+                  display: false,
+                }
+              }
+            }
+          });
+        }
+        
+        // Function to render the purchases of a specific mineral
+        function renderUserPurchasesChart(transactions) {
+          const purchaseData = transactions.filter(t => t.transaction_type === 'product_buy');
+          const mineralPurchases = purchaseData.reduce((acc, t) => {
+            const mineral = t.mineral || 'Inconnu';
+            acc[mineral] = (acc[mineral] || 0) + parseFloat(t.amount);
+            return acc;
+          }, {});
+
+          const ctx = document.getElementById('userPurchasesChart').getContext('2d');
+          if (window.userPurchasesChartInstance) window.userPurchasesChartInstance.destroy();
+          window.userPurchasesChartInstance = new Chart(ctx, {
+            type: 'pie',
+            data: {
+              labels: Object.keys(mineralPurchases),
+              datasets: [{
+                data: Object.values(mineralPurchases),
+                backgroundColor: ['#FFD700', '#C0C0C0', '#CD7F32', '#A0AEC0'],
+                hoverBackgroundColor: ['#E6C200', '#B0B0B0', '#B5682D', '#909EB0'],
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: 'top',
+                },
+                title: {
+                  display: false,
+                }
+              }
+            }
+          });
+        }
+
+        // Function to render the cash flow area chart
+        function renderCashFlowChart(transactions) {
+          // Sort transactions by date for a chronological chart
+          const cashFlowData = transactions.map(t => ({
+            date: new Date(t.created_at),
+            amount: parseFloat(t.amount)
+          })).sort((a,b) => a.date - b.date);
+          
+          // Aggregate daily inflow and outflow
+          const aggregatedCashFlow = cashFlowData.reduce((acc, current) => {
+            const dateKey = current.date.toLocaleDateString('fr-CA');
+            if (!acc[dateKey]) {
+              acc[dateKey] = { inflow: 0, outflow: 0 };
+            }
+            if (current.amount > 0) {
+              acc[dateKey].inflow += current.amount;
+            } else {
+              acc[dateKey].outflow += Math.abs(current.amount);
+            }
+            return acc;
+          }, {});
+
+          const labels = Object.keys(aggregatedCashFlow);
+          const inflowData = labels.map(label => aggregatedCashFlow[label].inflow);
+          const outflowData = labels.map(label => aggregatedCashFlow[label].outflow);
+          
+          const ctx = document.getElementById('cashFlowChart').getContext('2d');
+          if (window.cashFlowChartInstance) window.cashFlowChartInstance.destroy();
+          window.cashFlowChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: labels,
+              datasets: [
+                {
+                  label: 'Revenus (Inflow)',
+                  data: inflowData,
+                  backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                  borderColor: 'rgba(75, 192, 192, 1)',
+                  fill: true,
+                  tension: 0.3
+                },
+                {
+                  label: 'Dépenses (Outflow)',
+                  data: outflowData,
+                  backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                  borderColor: 'rgba(255, 99, 132, 1)',
+                  fill: true,
+                  tension: 0.3
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: 'top',
+                },
+                tooltip: {
+                  mode: 'index',
+                  intersect: false,
+                }
+              },
+              scales: {
+                x: {
+                  type: 'category',
+                  title: {
+                    display: true,
+                    text: 'Date'
+                  }
+                },
+                y: {
+                  beginAtZero: true,
+                  title: {
+                    display: true,
+                    text: 'Montant ($)'
+                  }
+                }
+              }
+            }
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

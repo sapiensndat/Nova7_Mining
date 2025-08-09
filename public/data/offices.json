@@ -1,0 +1,34 @@
+[
+    {
+      "name": "London",
+      "lat": 51.5074,
+      "lng": -0.1278,
+      "address": "123 Innovation Street, London, UK",
+      "description": "Headquarters driving innovation in mineral intelligence.",
+      "image": "/images/london-office.jpg"
+    },
+    {
+      "name": "Washington, DC",
+      "lat": 38.9072,
+      "lng": -77.0369,
+      "address": "456 Partnership Avenue, Washington, DC, USA",
+      "description": "Hub for government and international partnerships.",
+      "image": "/images/washington-office.jpg"
+    },
+    {
+      "name": "Ottawa",
+      "lat": 45.4215,
+      "lng": -75.6972,
+      "address": "789 Policy Road, Ottawa, Canada",
+      "description": "Center for policy advocacy and space collaboration.",
+      "image": "/images/ottawa-office.jpg"
+    },
+    {
+      "name": "Sandton, Johannesburg",
+      "lat": -26.1076,
+      "lng": 28.0567,
+      "address": "101 Science Boulevard, Sandton, Johannesburg, South Africa",
+      "description": "Continental hub uniting science and innovation.",
+      "image": "/images/sandton-office.jpg"
+    }
+  ]

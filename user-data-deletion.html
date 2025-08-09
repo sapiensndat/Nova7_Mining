@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="pageTitle">Demande de suppression de données - XELTIS LTD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        :root {
+            --xeltis-dark: #000000;
+            --xeltis-orange: #F97316;
+            --xeltis-white: #FFFFFF;
+            --xeltis-gray-light: #F3F2EF;
+            --xeltis-gray-medium: #CED0D4;
+            --xeltis-text-dark: #1F2937;
+            --xeltis-text-medium: #4B5563;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--xeltis-dark);
+            color: var(--xeltis-white);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+        .form-input-xeltis {
+            border: 1px solid var(--xeltis-gray-medium);
+            border-radius: 6px;
+            padding: 12px 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background-color: var(--xeltis-white);
+            color: var(--xeltis-text-dark);
+            width: 100%;
+        }
+        .form-input-xeltis:focus {
+            border-color: var(--xeltis-orange);
+            box-shadow: 0 0 0 1px var(--xeltis-orange);
+            outline: none;
+        }
+        .btn-primary-xeltis {
+            background-color: var(--xeltis-orange);
+            color: var(--xeltis-dark);
+            border-radius: 20px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+        }
+        .btn-primary-xeltis:hover {
+            background-color: #C05621;
+        }
+        .btn-primary-xeltis:disabled {
+            background-color: #A0AEC0;
+            cursor: not-allowed;
+            color: #6B7280;
+        }
+        .card-xeltis {
+            background-color: var(--xeltis-white);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 600px;
+        }
+        .link-xeltis {
+            color: var(--xeltis-orange);
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .link-xeltis:hover {
+            text-decoration: underline;
+            color: #C05621;
+        }
+        .xeltis-logo-container {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .xeltis-logo {
+            max-width: 120px;
+            height: auto;
+            display: inline-block;
+        }
+        .message-box {
+            border-radius: 6px;
+            padding: 1rem;
+            font-weight: 500;
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .message-box.success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        .message-box.error {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        #languageSelector {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            background-color: #2D3748;
+            color: var(--xeltis-white);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #languageSelector:hover {
+            background-color: #4A5568;
+        }
+    </style>
+</head>
+<body>
+    <div id="languageSelector" class="hover:bg-gray-700 transition">EN</div>
+    <div class="w-full max-w-xl">
+        <div class="xeltis-logo-container">
+            <img src="/images/xeltis-logo.png" alt="XELTIS LTD Logo" class="xeltis-logo">
+            <h1 class="text-3xl font-bold text-gray-100 mt-4" data-i18n="header">Demande de suppression de données</h1>
+        </div>
+        <div class="card-xeltis">
+            <p class="text-gray-700 mb-4" data-i18n="description">
+                Conformément au RGPD et aux règles de la plateforme, vous pouvez demander la suppression de toutes les données associées à votre compte. Veuillez remplir le formulaire ci-dessous pour soumettre votre demande. Vous recevrez une confirmation par e-mail dans les 72 heures.
+            </p>
+            <form id="deletionForm" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1" for="name" data-i18n="nameLabel">Nom complet</label>
+                    <input type="text" id="name" name="name" required class="form-input-xeltis" data-i18n="placeholderName" placeholder="Jean Dupont">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1" for="email" data-i18n="emailLabel">Adresse e-mail</label>
+                    <input type="email" id="email" name="email" required class="form-input-xeltis" data-i18n="placeholderEmail" placeholder="vous@exemple.com">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1" for="message" data-i18n="messageLabel">Informations supplémentaires (facultatif)</label>
+                    <textarea id="message" name="message" rows="4" class="form-input-xeltis" data-i18n="placeholderMessage" placeholder="Fournissez des détails supplémentaires, si nécessaire"></textarea>
+                </div>
+                <div class="pt-2">
+                    <button type="submit" id="submitButton" class="btn-primary-xeltis" data-i18n="submitButton">Soumettre la demande de suppression</button>
+                </div>
+                <div id="messageBox" class="hidden message-box"></div>
+            </form>
+            <div class="text-center mt-6">
+                <a href="login.html" class="link-xeltis" data-i18n="backToLogin">&larr; Retour à la connexion</a>
+            </div>
+        </div>
+        <p class="text-xs text-gray-500 text-center mt-8">
+            &copy; <span id="currentYear"></span> XELTIS LTD. <span data-i18n="copyrightText">Tous droits réservés.</span>
+        </p>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const translations = {
+            fr: {
+                pageTitle: "Demande de suppression de données - XELTIS LTD",
+                header: "Demande de suppression de données",
+                description: "Conformément au RGPD et aux règles de la plateforme, vous pouvez demander la suppression de toutes les données associées à votre compte. Veuillez remplir le formulaire ci-dessous pour soumettre votre demande. Vous recevrez une confirmation par e-mail dans les 72 heures.",
+                nameLabel: "Nom complet",
+                placeholderName: "Jean Dupont",
+                emailLabel: "Adresse e-mail",
+                placeholderEmail: "vous@exemple.com",
+                messageLabel: "Informations supplémentaires (facultatif)",
+                placeholderMessage: "Fournissez des détails supplémentaires, si nécessaire",
+                submitButton: "Soumettre la demande de suppression",
+                backToLogin: "&larr; Retour à la connexion",
+                copyrightText: "Tous droits réservés.",
+                successMessage: "Votre demande de suppression a été soumise avec succès. Vous recevrez une confirmation par e-mail dans les 72 heures.",
+                errorMessage: "Une erreur est survenue lors de la soumission de votre demande. Veuillez réessayer.",
+                loadingButton: "Soumission en cours..."
+            },
+            en: {
+                pageTitle: "Data Deletion Request - XELTIS LTD",
+                header: "Data Deletion Request",
+                description: "In accordance with GDPR and platform policies, you can request the deletion of all data associated with your account. Please fill out the form below to submit your request. You will receive a confirmation email within 72 hours.",
+                nameLabel: "Full Name",
+                placeholderName: "John Doe",
+                emailLabel: "Email Address",
+                placeholderEmail: "you@example.com",
+                messageLabel: "Additional Information (Optional)",
+                placeholderMessage: "Provide additional details if necessary",
+                submitButton: "Submit Deletion Request",
+                backToLogin: "&larr; Back to Login",
+                copyrightText: "All rights reserved.",
+                successMessage: "Your deletion request has been submitted successfully. You will receive a confirmation email within 72 hours.",
+                errorMessage: "An error occurred while submitting your request. Please try again.",
+                loadingButton: "Submitting..."
+            }
+        };
+
+        let currentLang = 'fr';
+
+        function getLanguage() {
+            const params = new URLSearchParams(window.location.search);
+            const lang = params.get('lang');
+            if (lang) {
+                localStorage.setItem('lang', lang);
+                return lang;
+            }
+            return localStorage.getItem('lang') || 'fr';
+        }
+
+        function applyTranslations(lang) {
+            currentLang = lang;
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (translations[lang] && translations[lang][key]) {
+                    const translation = translations[lang][key];
+                    if (element.tagName === 'INPUT' && element.hasAttribute('placeholder')) {
+                        element.placeholder = translation;
+                    } else {
+                        element.textContent = translation;
+                    }
+                }
+            });
+            const langSelector = document.getElementById('languageSelector');
+            if (langSelector) {
+                langSelector.textContent = lang.toUpperCase() === 'FR' ? 'EN' : 'FR';
+                document.documentElement.lang = lang;
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Set current year
+            document.getElementById("currentYear").textContent = new Date().getFullYear();
+
+            // Apply language
+            applyTranslations(getLanguage());
+
+            // Language selector logic
+            const langSelector = document.getElementById('languageSelector');
+            if (langSelector) {
+                langSelector.addEventListener('click', () => {
+                    const newLang = currentLang === 'fr' ? 'en' : 'fr';
+                    localStorage.setItem('lang', newLang);
+                    window.location.href = `data-deletion.html?lang=${newLang}`;
+                });
+            }
+            
+            // Supabase client initialization
+            const SUPABASE_URL = 'https://qudbehodnhevjxmdwvta.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1ZGJlaG9kbmhldmp4bWR3dnRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1MjExODksImV4cCI6MjA3MDA5NzE4OX0.YnK8UKd76PBLh3L0zAv5fY0JFK6EWq-UBHLY8jXz55w';
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log("Client Supabase initialisé pour la page de suppression de données.");
+
+            const deletionForm = document.getElementById('deletionForm');
+            const submitButton = document.getElementById('submitButton');
+            const messageBox = document.getElementById('messageBox');
+
+            function showMessage(message, type) {
+                messageBox.textContent = message;
+                messageBox.className = `message-box ${type}`;
+                messageBox.classList.remove('hidden');
+            }
+
+            deletionForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                messageBox.classList.add('hidden');
+                submitButton.disabled = true;
+                submitButton.textContent = translations[currentLang].loadingButton;
+
+                const formData = {
+                    name: document.getElementById('name').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    message: document.getElementById('message').value.trim(),
+                    submitted_at: new Date().toISOString()
+                };
+
+                try {
+                    const { error } = await supabase
+                        .from('deletion_requests')
+                        .insert([formData]);
+
+                    if (error) {
+                        console.error('Erreur lors de la soumission de la demande de suppression :', error.message);
+                        showMessage(translations[currentLang].errorMessage, 'error');
+                    } else {
+                        console.log('Demande de suppression soumise avec succès.');
+                        showMessage(translations[currentLang].successMessage, 'success');
+                        deletionForm.reset();
+                    }
+                } catch (error) {
+                    console.error('Erreur inattendue :', error);
+                    showMessage(translations[currentLang].errorMessage, 'error');
+                } finally {
+                    submitButton.disabled = false;
+                    submitButton.textContent = translations[currentLang].submitButton;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

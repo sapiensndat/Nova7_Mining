@@ -1,0 +1,40 @@
+{
+  "rewrites": [
+    {
+      "source": "/login",
+      "destination": "/login.html?lang=fr"
+    },
+    {
+      "source": "/en/login",
+      "destination": "/login.html?lang=en"
+    },
+    {
+      "source": "/fr/login",
+      "destination": "/login.html?lang=fr"
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/dashboard.html?lang=fr"
+    },
+    {
+      "source": "/en/dashboard",
+      "destination": "/dashboard.html?lang=en"
+    },
+    {
+      "source": "/fr/dashboard",
+      "destination": "/dashboard.html?lang=fr"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "s-maxage=1, stale-while-revalidate"
+        }
+      ]
+    }
+  ],
+  "cleanUrls": true
+}

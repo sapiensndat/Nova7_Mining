@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Utilisateur - Xeltis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --xeltis-gold: #FFD700;
+            --xeltis-dark: #000000;
+            --xeltis-white: #FFFFFF;
+            --xeltis-gray-light: #F3F2EF;
+            --xeltis-gray-medium: #CED0D4;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--xeltis-dark);
+            color: var(--xeltis-white);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .sidebar-nova7 {
+            background-color: var(--xeltis-dark);
+            color: var(--xeltis-white);
+            width: 260px;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding-top: 1rem;
+            transition: transform 0.3s ease-in-out;
+            z-index: 40;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-header {
+            padding: 0.75rem 1.5rem 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--xeltis-gold);
+            margin-bottom: 0.75rem;
+        }
+        .sidebar-logo-img {
+            max-height: 120px;
+            width: auto;
+        }
+        .sidebar-nova7 .nav-link-sidebar {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            margin: 0.25rem 1rem;
+            font-weight: 500;
+            color: var(--xeltis-white);
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .sidebar-nova7 .nav-link-sidebar:hover {
+            background-color: var(--xeltis-gold);
+            color: var(--xeltis-dark);
+        }
+        .sidebar-nova7 .nav-link-sidebar.active {
+            background-color: var(--xeltis-gold);
+            color: var(--xeltis-dark);
+            font-weight: 600;
+        }
+        .sidebar-nova7 .nav-link-sidebar i {
+            width: 20px;
+            margin-right: 0.75rem;
+            text-align: center;
+        }
+        .main-content-area {
+            margin-left: 260px;
+            padding: 1.5rem;
+            width: calc(100% - 260px);
+            min-height: 100vh;
+            background-color: var(--xeltis-gray-light);
+            color: var(--xeltis-dark);
+        }
+        .mobile-header {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .sidebar-nova7 {
+                transform: translateX(-100%);
+                top: 0;
+                height: 100vh;
+            }
+            .sidebar-nova7.open {
+                transform: translateX(0);
+            }
+            .main-content-area {
+                margin-left: 0;
+                width: 100%;
+                padding-top: calc(60px + 1rem);
+            }
+            .desktop-header {
+                display: none;
+            }
+            .mobile-header {
+                display: flex;
+                background-color: var(--xeltis-white);
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                padding: 0 1rem;
+                height: 60px;
+                align-items: center;
+                justify-content: space-between;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 50;
+            }
+        }
+        .profile-card {
+            background-color: var(--xeltis-white);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            padding: 2rem;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            border-bottom: 1px solid var(--xeltis-gray-medium);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .profile-picture {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--xeltis-gold);
+        }
+        .profile-name {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--xeltis-dark);
+            margin-bottom: 0.25rem;
+        }
+        .profile-role {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #4A5568;
+        }
+        .profile-section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--xeltis-dark);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--xeltis-gold);
+            padding-bottom: 0.5rem;
+        }
+        .profile-info-grid {
+            display: grid;
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+            gap: 1.5rem;
+        }
+        @media (min-width: 640px) {
+            .profile-info-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+        .info-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #718096;
+            margin-bottom: 0.25rem;
+        }
+        .info-value {
+            font-size: 1rem;
+            color: var(--xeltis-dark);
+            font-weight: 600;
+        }
+        .tag {
+            display: inline-block;
+            background-color: var(--xeltis-gold);
+            color: var(--xeltis-dark);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <header class="mobile-header md:hidden">
+        <button id="hamburgerBtnMobile" class="p-2 text-gray-700 hover:text-xeltis-gold">
+            <i class="fas fa-bars text-2xl"></i>
+        </button>
+        <a href="dashboard.html">
+            <img src="xeltis-logo-CIxL2od-.png" alt="Xeltis Logo" class="sidebar-logo-img" style="filter: brightness(0) invert(1);" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+            <span style="display:none;" class="text-xl font-semibold text-xeltis-dark">Xeltis</span>
+        </a>
+        <a href="#" id="mobileLogoutLink" class="p-2 text-gray-700 hover:text-xeltis-gold">
+            <i class="fas fa-sign-out-alt text-xl"></i>
+        </a>
+    </header>
+
+    <aside id="sidebar" class="sidebar-nova7">
+        <div class="sidebar-header">
+            <a href="dashboard.html" class="flex items-center">
+                <img src="xeltis-logo-CIxL2od-.png" alt="Xeltis Logo" class="sidebar-logo-img" style="filter: brightness(0) invert(1);" onerror="this.onerror=null; this.src='https://placehold.co/120x60/333333/FFD700?text=Xeltis';">
+            </a>
+        </div>
+        <nav class="flex-grow">
+            <a href="dashboard.html" class="nav-link-sidebar">
+                <i class="fas fa-tachometer-alt"></i>Tableau de bord
+            </a>
+            <a href="map.html" class="nav-link-sidebar">
+                <i class="fas fa-map-marked-alt"></i>Carte
+            </a>
+            <a href="resources.html" class="nav-link-sidebar">
+                <i class="fas fa-store"></i>Marketplace
+            </a>
+            <a href="investment.html" class="nav-link-sidebar">
+                <i class="fas fa-chart-line"></i>Investment
+            </a>
+            <a href="settings.html" class="nav-link-sidebar">
+                <i class="fas fa-cog"></i>Paramètres
+            </a>
+        </nav>
+        <div class="pb-4">
+            <a href="profile.html" class="nav-link-sidebar active">
+                <i class="fas fa-user-circle"></i>Profil
+            </a>
+            <a href="#" id="sidebarLogoutLink" class="nav-link-sidebar">
+                <i class="fas fa-sign-out-alt"></i>Déconnexion
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content-area py-8">
+        <div class="profile-card">
+            <div class="profile-header">
+                <img id="profile-pic" src="https://placehold.co/96x96/E2E8F0/A0AEC0?text=JD" alt="Photo de profil" class="profile-picture">
+                <div>
+                    <h1 id="profile-name" class="profile-name">Jean Dupont</h1>
+                    <p id="profile-role" class="profile-role">Rôle minier : Mineur artisanal</p>
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <h2 class="profile-section-title">Informations personnelles</h2>
+                <div class="profile-info-grid">
+                    <div>
+                        <p class="info-label">E-mail</p>
+                        <p id="profile-email" class="info-value">jean.dupont@exemple.com</p>
+                    </div>
+                    <div>
+                        <p class="info-label">Téléphone</p>
+                        <p id="profile-phone" class="info-value">+1234567890</p>
+                    </div>
+                    <div>
+                        <p class="info-label">Pays</p>
+                        <p id="profile-country" class="info-value">Canada</p>
+                    </div>
+                    <div>
+                        <p class="info-label">Ville</p>
+                        <p id="profile-city" class="info-value">Montréal</p>
+                    </div>
+                    <div>
+                        <p class="info-label">Date de naissance</p>
+                        <p id="profile-dob" class="info-value">01/01/1990</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="company-section" class="mb-8 hidden">
+                <h2 class="profile-section-title">Détails de l'entreprise / organisation</h2>
+                <div class="profile-info-grid">
+                    <div>
+                        <p class="info-label">Nom de l'entreprise</p>
+                        <p id="company-name" class="info-value">GeoMining Corp</p>
+                    </div>
+                    <div>
+                        <p class="info-label">Type</p>
+                        <p id="company-type" class="info-value">Privé</p>
+                    </div>
+                    <div>
+                        <p class="info-label">Pays d'opération</p>
+                        <p id="company-op-country" class="info-value">France</p>
+                    </div>
+                    <div>
+                        <p class="info-label">Nombre d'employés</p>
+                        <p id="company-employees" class="info-value">50</p>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <p class="info-label">Site Web</p>
+                        <a href="#" id="company-website" class="info-value text-blue-600 hover:underline" target="_blank">https://www.geomining.com</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <h2 class="profile-section-title">Détails de l'activité minière</h2>
+                <div class="profile-info-grid">
+                    <div>
+                        <p class="info-label">Minéraux extraits</p>
+                        <p id="minerals-extracted" class="info-value">Or, Cuivre, Lithium</p>
+                    </div>
+                    <div>
+                        <p class="info-label">Emplacement des opérations</p>
+                        <p id="operations-location" class="info-value">Coordonnées GPS ou région</p>
+                    </div>
+                    <div>
+                        <p class="info-label">Production annuelle</p>
+                        <p id="annual-production" class="info-value">500 kg par an</p>
+                    </div>
+                    <div>
+                        <p class="info-label">Équipement utilisé</p>
+                        <p id="equipment-used" class="info-value">Excavateurs, foreuses</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <h2 class="profile-section-title">Expérience & Expertise</h2>
+                <div class="profile-info-grid">
+                    <div>
+                        <p class="info-label">Années dans le secteur</p>
+                        <p id="years-in-sector" class="info-value">5 ans</p>
+                    </div>
+                    <div>
+                        <p class="info-label">Certifications / Licences</p>
+                        <p id="licenses" class="info-value">Certificat de directeur de mine</p>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <p class="info-label">Domaines d'expertise</p>
+                        <p id="expertise" class="info-value">Exploration, Extraction, Logistique</p>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="profile-section-title">Intérêts</h2>
+                <div id="interests-list">
+                    <span class="tag">Achat</span>
+                    <span class="tag">Vente</span>
+                    <span class="tag">Réseautage</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Initialize Supabase client
+            const SUPABASE_URL = 'https://qudbehodnhevjxmdwvta.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1ZGJlaG9kbmhldmp4bWR3dnRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1MjExODksImV4cCI6MjA3MDA5NzE4OX0.YnK8UKd76PBLh3L0zAv5fY0JFK6EWq-UBHLY8jXz55w';
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+            // DOM element references
+            const profilePic = document.getElementById('profile-pic');
+            const profileName = document.getElementById('profile-name');
+            const profileRole = document.getElementById('profile-role');
+            const profileEmail = document.getElementById('profile-email');
+            const profilePhone = document.getElementById('profile-phone');
+            const profileCountry = document.getElementById('profile-country');
+            const profileCity = document.getElementById('profile-city');
+            const profileDob = document.getElementById('profile-dob');
+            const companySection = document.getElementById('company-section');
+            const companyName = document.getElementById('company-name');
+            const companyType = document.getElementById('company-type');
+            const companyOpCountry = document.getElementById('company-op-country');
+            const companyEmployees = document.getElementById('company-employees');
+            const companyWebsite = document.getElementById('company-website');
+            const mineralsExtracted = document.getElementById('minerals-extracted');
+            const operationsLocation = document.getElementById('operations-location');
+            const annualProduction = document.getElementById('annual-production');
+            const equipmentUsed = document.getElementById('equipment-used');
+            const yearsInSector = document.getElementById('years-in-sector');
+            const licenses = document.getElementById('licenses');
+            const expertise = document.getElementById('expertise');
+            const interestsList = document.getElementById('interests-list');
+
+            async function handleLogout() {
+                await supabase.auth.signOut();
+                window.location.href = 'login.html';
+            }
+
+            const sidebarLogoutLink = document.getElementById('sidebarLogoutLink');
+            if (sidebarLogoutLink) sidebarLogoutLink.addEventListener('click', (e) => { e.preventDefault(); handleLogout(); });
+            const mobileLogoutLink = document.getElementById('mobileLogoutLink');
+            if (mobileLogoutLink) mobileLogoutLink.addEventListener('click', (e) => { e.preventDefault(); handleLogout(); });
+
+            const hamburgerBtnMobile = document.getElementById('hamburgerBtnMobile');
+            const sidebar = document.getElementById('sidebar');
+            if (hamburgerBtnMobile) {
+                hamburgerBtnMobile.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.toggle('open'); });
+            }
+            document.addEventListener('click', (e) => {
+                if (sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target) && (!hamburgerBtnMobile || !hamburgerBtnMobile.contains(e.target))) {
+                    sidebar.classList.remove('open');
+                }
+            });
+
+            async function fetchProfileData() {
+                const { data: { user }, error: authError } = await supabase.auth.getUser();
+                if (authError || !user) {
+                    handleLogout();
+                    return;
+                }
+
+                const { data: profile, error } = await supabase.from('profiles').select('*').eq('user_id', user.id).single();
+
+                if (error) {
+                    console.error('Error fetching profile:', error);
+                    // Fallback to placeholder data if a profile doesn't exist
+                    displayProfile({ full_name: 'Utilisateur Inconnu' });
+                    return;
+                }
+                displayProfile(profile);
+            }
+
+            function displayProfile(profile) {
+                // Personal Info
+                profilePic.src = profile.avatar_url || `https://placehold.co/96x96/E2E8F0/A0AEC0?text=${profile.full_name ? profile.full_name.charAt(0) : 'U'}`;
+                profileName.textContent = profile.full_name || 'Utilisateur Xeltis';
+                profileRole.textContent = `Rôle minier : ${profile.mining_role || 'Non spécifié'}`;
+                profileEmail.textContent = profile.email || 'N/A';
+                profilePhone.textContent = profile.phone_number || 'N/A';
+                profileCountry.textContent = profile.country || 'N/A';
+                profileCity.textContent = profile.city || 'N/A';
+                profileDob.textContent = profile.date_of_birth ? new Date(profile.date_of_birth).toLocaleDateString('fr-CA') : 'N/A';
+
+                // Company/Organization Details (show only if a relevant role is selected)
+                const miningRole = profile.mining_role;
+                if (['Compagnie minière industrielle/internationale', 'Compagnie minière locale', 'Fournisseur d\'équipement', 'Fournisseur de logistique / transport'].includes(miningRole)) {
+                    companySection.classList.remove('hidden');
+                    companyName.textContent = profile.company_name || 'N/A';
+                    companyType.textContent = profile.company_type || 'N/A';
+                    companyOpCountry.textContent = profile.country_of_operation || 'N/A';
+                    companyEmployees.textContent = profile.num_employees || 'N/A';
+                    if (profile.company_website) {
+                        companyWebsite.href = profile.company_website;
+                        companyWebsite.textContent = profile.company_website;
+                    } else {
+                        companyWebsite.textContent = 'N/A';
+                    }
+                } else {
+                    companySection.classList.add('hidden');
+                }
+
+                // Mining Activity
+                mineralsExtracted.textContent = profile.minerals_extracted || 'N/A';
+                operationsLocation.textContent = profile.operations_location || 'N/A';
+                annualProduction.textContent = profile.annual_production || 'N/A';
+                equipmentUsed.textContent = profile.equipment_used || 'N/A';
+
+                // Experience & Expertise
+                yearsInSector.textContent = profile.years_in_sector ? `${profile.years_in_sector} ans` : 'N/A';
+                licenses.textContent = profile.licenses || 'N/A';
+                expertise.textContent = profile.expertise || 'N/A';
+
+                // Interests
+                interestsList.innerHTML = '';
+                const interests = profile.interests ? profile.interests.split(',').map(s => s.trim()) : [];
+                interests.forEach(interest => {
+                    const tag = document.createElement('span');
+                    tag.className = 'tag';
+                    tag.textContent = interest;
+                    interestsList.appendChild(tag);
+                });
+            }
+            fetchProfileData();
+        });
+    </script>
+</body>
+</html>

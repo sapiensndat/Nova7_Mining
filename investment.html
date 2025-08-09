@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Dashboard - nova7</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --nova7-gold: #FFD700;
+            --nova7-dark: #121212;
+            --nova7-white: #FFFFFF;
+            --nova7-gray-light: #D1D5DB;
+            --nova7-gray-medium: #4B5563;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--nova7-dark);
+            color: var(--nova7-white);
+            display: flex;
+            min-height: 100vh;
+        }
+        .header-nova7 {
+            background-color: var(--nova7-white);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 0.75rem 1.5rem;
+            height: 60px;
+        }
+        .nova7-logo-header {
+            max-height: 36px;
+            width: auto;
+        }
+        .sidebar-nova7 {
+            background-color: var(--nova7-dark);
+            color: var(--nova7-white);
+            width: 260px;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding-top: 1rem;
+            transition: transform 0.3s ease-in-out;
+            z-index: 40;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-header {
+            padding: 0.75rem 1.5rem 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--nova7-gold);
+            margin-bottom: 0.75rem;
+        }
+        .sidebar-logo-img {
+            max-height: 120px;
+            width: auto;
+        }
+        .sidebar-nova7 .nav-link-sidebar {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            margin: 0.25rem 1rem;
+            font-weight: 500;
+            color: var(--nova7-white);
+            text-decoration: none;
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+        .sidebar-nova7 .nav-link-sidebar:hover {
+            background-color: var(--nova7-gold);
+            color: var(--nova7-dark);
+            transform: translateX(5px);
+        }
+        .sidebar-nova7 .nav-link-sidebar.active {
+            background-color: var(--nova7-gold);
+            color: var(--nova7-dark);
+            font-weight: 600;
+        }
+        .sidebar-nova7 .nav-link-sidebar i {
+            width: 20px;
+            margin-right: 0.75rem;
+            text-align: center;
+        }
+        .main-content-area {
+            margin-left: 260px;
+            padding: 1.5rem;
+            width: calc(100% - 260px);
+            min-height: 100vh;
+            background-color: var(--nova7-dark);
+        }
+        .card-styled {
+            background-color: var(--nova7-white);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--nova7-dark);
+        }
+        .greeting-summary-card {
+            background-color: var(--nova7-white);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            padding: 1.5rem 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--nova7-dark);
+        }
+        .greeting-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--nova7-dark);
+            margin-bottom: 0.5rem;
+        }
+        .ai-summary-text {
+            font-size: 0.95rem;
+            color: var(--nova7-gray-medium);
+            line-height: 1.6;
+        }
+        .ai-summary-text strong {
+            color: var(--nova7-gold);
+            font-weight: 600;
+        }
+        .btn-primary-action {
+            background-color: var(--nova7-gold);
+            color: var(--nova7-dark);
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+        .btn-primary-action:hover {
+            background-color: #E6C200;
+            box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);
+        }
+        .message-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #22C55E;
+            color: var(--nova7-white);
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            text-align: center;
+            min-width: 250px;
+        }
+        .message-box.error {
+            background-color: #EF4444;
+        }
+        .message-box.show {
+            display: block;
+            opacity: 1;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-badge.positive {
+            background-color: #D1FAE5;
+            color: #065F46;
+        }
+        .status-badge.negative {
+            background-color: #FEE2E2;
+            color: #991B1B;
+        }
+        .status-badge.neutral {
+            background-color: #E5E7EB;
+            color: #4B5563;
+        }
+        .grid-3-col {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        .investor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        .graph-container {
+            width: 100%;
+            height: 100px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: var(--nova7-white);
+            color: var(--nova7-dark);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            transform: scale(0.95);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .modal-overlay.show .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--nova7-dark);
+            cursor: pointer;
+        }
+        .form-input, .form-textarea {
+            width: 100%;
+            border: 1px solid var(--nova7-gray-medium);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            color: var(--nova7-dark);
+            background-color: var(--nova7-white);
+        }
+        .chat-container {
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            background-color: #f3f4f6;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .chat-message {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            word-wrap: break-word;
+        }
+        .chat-message.sent {
+            align-self: flex-end;
+            background-color: var(--nova7-gold);
+            color: var(--nova7-dark);
+        }
+        .chat-message.received {
+            align-self: flex-start;
+            background-color: #e5e7eb;
+            color: var(--nova7-dark);
+        }
+        .chat-input-container {
+            display: flex;
+            padding: 1rem;
+            background-color: #fff;
+            border-top: 1px solid #e5e7eb;
+        }
+        .file-upload-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        .file-upload-input {
+            opacity: 0;
+            position: absolute;
+            z-index: -1;
+        }
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--nova7-gray-medium);
+            border-radius: 8px;
+            background-color: var(--nova7-white);
+            color: var(--nova7-dark);
+            cursor: pointer;
+        }
+        .file-upload-label i {
+            margin-right: 0.5rem;
+            color: var(--nova7-gold);
+        }
+
+        .floating-message-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--nova7-gold);
+            color: var(--nova7-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            cursor: pointer;
+            z-index: 50;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+            transform: scale(1);
+            opacity: 1;
+            border: none;
+        }
+        .floating-message-btn:hover {
+            transform: scale(1.05);
+        }
+        .floating-message-btn .notification-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 24px;
+            height: 24px;
+            background-color: #EF4444;
+            color: var(--nova7-white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border: 2px solid var(--nova7-dark);
+            transform: scale(0);
+            transform-origin: center;
+            transition: transform 0.2s ease;
+        }
+        .floating-message-btn .notification-badge.show {
+            transform: scale(1);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-nova7 {
+                transform: translateX(-100%);
+                top: 0;
+                height: 100vh;
+            }
+            .sidebar-nova7.open {
+                transform: translateX(0);
+            }
+            .main-content-area {
+                margin-left: 0;
+                width: 100%;
+                padding-top: calc(60px + 1rem);
+                padding: 1rem;
+            }
+            .desktop-header { display: none; }
+            .mobile-header {
+                display: flex;
+                background-color: var(--nova7-white);
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                padding: 0 1rem;
+                height: 60px;
+                align-items: center;
+                justify-content: space-between;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 50;
+            }
+            .mobile-header .text-gray-700 {
+                color: var(--nova7-dark);
+            }
+            .mobile-header .hover\:text-blue-600:hover {
+                color: var(--nova7-gold);
+            }
+            .greeting-text {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <div id="messageBox" class="message-box"></div>
+
+    <header class="mobile-header md:hidden">
+        <button id="hamburgerBtnMobile" class="p-2 text-gray-700 hover:text-nova7-gold">
+            <i class="fas fa-bars text-2xl"></i>
+        </button>
+        <a href="dashboard.html">
+            <img src="xeltis-logo-CIxL2od-.png" alt="Xeltis Logo" class="nova7-logo-header" onerror="this.src='https://placehold.co/120x60/333333/FFD700?text=Xeltis'; this.onerror=null;">
+        </a>
+        <a href="#" id="mobileLogoutLink" class="p-2 text-gray-700 hover:text-nova7-gold">
+            <i class="fas fa-sign-out-alt text-xl"></i>
+        </a>
+    </header>
+
+    <aside id="sidebar" class="sidebar-nova7">
+        <div class="sidebar-header">
+            <a href="dashboard.html" class="flex items-center">
+                <img src="xeltis-logo-CIxL2od-.png" alt="Xeltis Logo" class="sidebar-logo-img" onerror="this.src='https://placehold.co/120x60/333333/FFD700?text=Xeltis'; this.onerror=null;">
+            </a>
+        </div>
+        <nav class="flex-grow">
+            <a href="dashboard.html" class="nav-link-sidebar">
+                <i class="fas fa-tachometer-alt"></i>Dashboard
+            </a>
+            <a href="map.html" class="nav-link-sidebar">
+                <i class="fas fa-map-marked-alt"></i>Map
+            </a>
+            <a href="resources.html" class="nav-link-sidebar">
+                <i class="fas fa-store"></i>Marketplace
+            </a>
+            <a href="investment.html" class="nav-link-sidebar active">
+                <i class="fas fa-chart-line"></i>Investment
+            </a>
+            <a href="settings.html" class="nav-link-sidebar">
+                <i class="fas fa-cog"></i>Settings
+            </a>
+        </nav>
+        <div class="pb-4">
+            <a href="profile.html" class="nav-link-sidebar">
+                <i class="fas fa-user-circle"></i>Profile
+            </a>
+            <a href="#" id="sidebarLogoutLink" class="nav-link-sidebar">
+                <i class="fas fa-sign-out-alt"></i>Logout
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content-area">
+        <header class="desktop-header hidden md:flex items-center justify-between mb-6">
+            <h1 class="text-3xl font-bold text-nova7-dark">Investment Dashboard</h1>
+            <div class="flex items-center space-x-3">
+                <span id="desktopUserWelcome" class="text-sm text-nova7-dark">Welcome, User!</span>
+            </div>
+        </header>
+
+        <div id="verificationMessage" class="greeting-summary-card hidden">
+            <h1 class="greeting-text">Please Verify Your Email</h1>
+            <p class="ai-summary-text">
+                Your account is not yet verified. Please check your email for the verification link.
+                <button id="resendVerification" class="btn-primary-action mt-4">Resend Verification Email</button>
+            </p>
+        </div>
+
+        <div id="investmentContent" class="hidden">
+            <div class="greeting-summary-card">
+                <h1 id="personalizedGreeting" class="greeting-text">Good morning, User!</h1>
+                <p class="ai-summary-text" id="aiSummaryText">
+                    Manage your mineral investments, track market trends, and connect with potential investors.
+                </p>
+            </div>
+
+            <div class="card-styled">
+                <h2 class="text-xl font-semibold text-nova7-dark mb-4">Mineral Market Overview</h2>
+                <div id="marketOverview" class="grid-3-col">
+                    <p class="text-center text-nova7-gray-medium py-4">Loading market data...</p>
+                </div>
+            </div>
+
+            <div class="card-styled">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-nova7-dark">My Investments</h2>
+                    <a href="resources.html" class="btn-primary-action text-sm"><i class="fas fa-store mr-2"></i>Invest Now</a>
+                </div>
+                <div id="portfolioSummary">
+                    <p class="text-nova7-gray-medium">Loading portfolio data...</p>
+                </div>
+            </div>
+
+            <div class="card-styled">
+                <h2 class="text-xl font-semibold text-nova7-dark mb-4">Connect with Investors</h2>
+                <div class="flex flex-col md:flex-row gap-4 mb-6">
+                    <input type="text" id="investorSearch" class="form-input flex-grow" placeholder="Search investors or companies...">
+                    <button id="searchInvestorsBtn" class="btn-primary-action flex-shrink-0">
+                        <i class="fas fa-search mr-2"></i>Search
+                    </button>
+                </div>
+                <div id="investorList" class="investor-grid">
+                    <p class="text-center text-nova7-gray-medium py-4 col-span-full">Find investors based on your project interests.</p>
+                </div>
+            </div>
+
+            <div class="card-styled">
+                <h2 class="text-xl font-semibold text-nova7-dark mb-4">Investment Insights</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-4 border border-nova7-gray-light rounded-lg">
+                        <h3 class="font-semibold text-lg mb-1">Q3 2025 Market Analysis</h3>
+                        <p class="text-sm text-nova7-gray-medium">A deep dive into the performance of precious metals and gemstones this quarter.</p>
+                        <a href="#" class="text-nova7-gold font-medium text-sm mt-2 block">Read Article <i class="fas fa-arrow-right ml-1"></i></a>
+                    </div>
+                    <div class="p-4 border border-nova7-gray-light rounded-lg">
+                        <h3 class="font-semibold text-lg mb-1">Investing in Amethyst: A Beginner's Guide</h3>
+                        <p class="text-sm text-nova7-gray-medium">Learn the basics of investing in colored gemstones, from purity to market value.</p>
+                        <a href="#" class="text-nova7-gold font-medium text-sm mt-2 block">Read Article <i class="fas fa-arrow-right ml-1"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <button id="floatingMessageBtn" class="floating-message-btn hidden">
+        <i class="fas fa-comment-dots text-2xl"></i>
+        <span id="messageNotificationBadge" class="notification-badge">0</span>
+    </button>
+
+
+    <div id="investorModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button id="closeInvestorModalBtn" class="modal-close-btn"><i class="fas fa-times"></i></button>
+            <div id="investorFormView">
+                <h2 class="text-xl font-semibold text-nova7-dark mb-2">Pitch to <span id="investorNameInModal"></span></h2>
+                <p class="text-sm text-nova7-gray-medium mb-4">
+                    Answer these questions and optionally attach your proposal.
+                </p>
+                <form id="investorMessageForm">
+                    <div class="mb-4">
+                        <label for="mineralMined" class="block text-sm font-medium text-gray-700">Mineral Being Mined</label>
+                        <input type="text" id="mineralMined" class="form-input mt-1" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="projectLocation" class="block text-sm font-medium text-gray-700">Project Location</label>
+                        <input type="text" id="projectLocation" class="form-input mt-1" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="extractionMethod" class="block text-sm font-medium text-gray-700">Extraction Method</label>
+                        <textarea id="extractionMethod" rows="2" class="form-textarea mt-1" required placeholder="e.g., Sustainable open-pit mining, artisanal methods, etc."></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="targetMarket" class="block text-sm font-medium text-gray-700">Target Market & Buyers</label>
+                        <textarea id="targetMarket" rows="2" class="form-textarea mt-1" required placeholder="e.g., Global electronics manufacturers, jewelry artisans, etc."></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="proposalPdf" class="block text-sm font-medium text-gray-700">Upload Proposal (PDF, max 10 pages)</label>
+                        <div class="file-upload-wrapper mt-1">
+                            <input type="file" id="proposalPdf" class="file-upload-input" accept=".pdf">
+                            <label for="proposalPdf" class="file-upload-label">
+                                <span id="fileNameDisplay" class="text-sm text-gray-500">Choose file...</span>
+                                <i class="fas fa-upload text-xl"></i>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <button type="submit" id="sendProposalBtn" class="btn-primary-action">
+                            <i class="fas fa-paper-plane mr-2"></i>Send Proposal
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div id="investorChatView" class="hidden">
+                <h2 class="text-xl font-semibold text-nova7-dark mb-4">Chat with <span id="chatInvestorName"></span></h2>
+                <div class="chat-container">
+                    <div id="chatMessages" class="chat-messages">
+                        </div>
+                    <div class="chat-input-container">
+                        <input type="text" id="chatInput" class="form-input flex-grow mr-2" placeholder="Type your message...">
+                        <button id="sendChatBtn" class="btn-primary-action"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const SUPABASE_URL = 'https://qudbehodnhevjxmdwvta.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1ZGJlaG9kbmhldmp4bWR3dnRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1MjExODksImV4cCI6MjA3MDA5NzE4OX0.YnK8UKd76PBLh3L0zAv5fY0JFK6EWq-UBHLY8jXz55w';
+            const TRANSACTION_FEE_RATE = 0.001;
+            let supabase;
+            try {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log("Supabase client initialized.");
+            } catch (e) {
+                console.error("Error initializing Supabase client:", e.message);
+                showMessage("Failed to initialize investment dashboard. Please try again.", "error");
+                return;
+            }
+
+            const messageBox = document.getElementById('messageBox');
+            const verificationMessage = document.getElementById('verificationMessage');
+            const investmentContent = document.getElementById('investmentContent');
+            const resendButton = document.getElementById('resendVerification');
+            const investorModal = document.getElementById('investorModal');
+            const investorMessageForm = document.getElementById('investorMessageForm');
+            const investorFormView = document.getElementById('investorFormView');
+            const investorChatView = document.getElementById('investorChatView');
+            const floatingMessageBtn = document.getElementById('floatingMessageBtn');
+            const messageNotificationBadge = document.getElementById('messageNotificationBadge');
+            const proposalPdfInput = document.getElementById('proposalPdf');
+            const fileNameDisplay = document.getElementById('fileNameDisplay');
+
+            function showMessage(message, type = 'success', duration = 3000) {
+                messageBox.textContent = message;
+                messageBox.className = 'message-box show';
+                if (type === 'error') {
+                    messageBox.classList.add('error');
+                } else {
+                    messageBox.classList.remove('error');
+                }
+                setTimeout(() => {
+                    messageBox.classList.remove('show');
+                }, duration);
+            }
+
+            async function handleLogout() {
+                try {
+                    await supabase.auth.signOut();
+                    window.location.href = 'login.html';
+                } catch (error) {
+                    console.error("Logout error:", error.message);
+                    showMessage("Logout failed. Please try again.", "error");
+                }
+            }
+
+            const sidebarLogoutLink = document.getElementById('sidebarLogoutLink');
+            if (sidebarLogoutLink) sidebarLogoutLink.addEventListener('click', (e) => { e.preventDefault(); handleLogout(); });
+            const mobileLogoutLink = document.getElementById('mobileLogoutLink');
+            if (mobileLogoutLink) mobileLogoutLink.addEventListener('click', (e) => { e.preventDefault(); handleLogout(); });
+
+            const hamburgerBtnMobile = document.getElementById('hamburgerBtnMobile');
+            const sidebar = document.getElementById('sidebar');
+            if (hamburgerBtnMobile && sidebar) {
+                hamburgerBtnMobile.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.toggle('open'); });
+            }
+            document.addEventListener('click', (e) => {
+                if (sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target) && (!hamburgerBtnMobile || !hamburgerBtnMobile.contains(e.target))) {
+                    sidebar.classList.remove('open');
+                }
+            });
+            
+            const closeInvestorModalBtn = document.getElementById('closeInvestorModalBtn');
+            closeInvestorModalBtn.addEventListener('click', () => {
+                investorModal.classList.remove('show');
+                setTimeout(() => investorModal.classList.add('hidden'), 300);
+            });
+            investorModal.addEventListener('click', (e) => {
+                if (e.target === investorModal) {
+                    investorModal.classList.remove('show');
+                    setTimeout(() => investorModal.classList.add('hidden'), 300);
+                }
+            });
+
+            function showFloatingButton() {
+                floatingMessageBtn.classList.remove('hidden');
+            }
+
+            function incrementNotificationCount() {
+                let count = parseInt(messageNotificationBadge.textContent);
+                count++;
+                messageNotificationBadge.textContent = count;
+                messageNotificationBadge.classList.add('show');
+            }
+
+            floatingMessageBtn.addEventListener('click', () => {
+                // Reset notification badge and open chat view
+                messageNotificationBadge.textContent = '0';
+                messageNotificationBadge.classList.remove('show');
+                openChatModal();
+            });
+
+            function addChatMessage(message, sender) {
+                const chatMessages = document.getElementById('chatMessages');
+                const chatMessage = document.createElement('div');
+                chatMessage.className = `chat-message ${sender}`;
+                chatMessage.innerHTML = message;
+                chatMessages.appendChild(chatMessage);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            function openChatModal() {
+                investorFormView.classList.add('hidden');
+                investorChatView.classList.remove('hidden');
+                investorModal.classList.remove('hidden');
+                setTimeout(() => investorModal.classList.add('show'), 10);
+            }
+
+            async function checkUserSession() {
+                try {
+                    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+                    if (sessionError || !session) {
+                        console.log("No active Supabase session. Redirecting to login.");
+                        window.location.href = 'login.html';
+                        return;
+                    }
+
+                    const user = session.user;
+                    console.log("Supabase User:", user);
+
+                    if (!user.email_confirmed_at && user.email) {
+                        verificationMessage.classList.remove('hidden');
+                        investmentContent.classList.add('hidden');
+                        showMessage(`Your account is not yet verified. Please check your email (${user.email}) for the verification link.`, 'error');
+                        
+                        if (resendButton) {
+                            resendButton.addEventListener('click', async () => {
+                                resendButton.disabled = true;
+                                resendButton.textContent = 'Sending...';
+                                try {
+                                    const { error } = await supabase.auth.resend({
+                                        type: 'signup',
+                                        email: user.email,
+                                        options: { emailRedirectTo: 'http://localhost:3000/verify-email.html' }
+                                    });
+                                    if (error) {
+                                        console.error('Resend error:', error.message);
+                                        showMessage(`Failed to resend verification email: ${error.message}`, 'error');
+                                    } else {
+                                        showMessage(`Verification email resent to ${user.email}`, 'success');
+                                    }
+                                } catch (err) {
+                                    console.error('Unexpected resend error:', err);
+                                    showMessage('Unexpected error. Please try again.', 'error');
+                                } finally {
+                                    resendButton.disabled = false;
+                                    resendButton.textContent = 'Resend Verification Email';
+                                }
+                            });
+                        }
+                        return;
+                    }
+
+                    verificationMessage.classList.add('hidden');
+                    investmentContent.classList.remove('hidden');
+
+                    const { data: profile, error: profileError } = await supabase
+                        .from('profiles')
+                        .select('full_name')
+                        .eq('user_id', user.id)
+                        .maybeSingle();
+
+                    let userName = 'User';
+                    if (!profileError && profile && profile.full_name) {
+                        userName = profile.full_name;
+                    }
+
+                    const greetingElement = document.getElementById('personalizedGreeting');
+                    const desktopUserWelcomeElement = document.getElementById('desktopUserWelcome');
+                    if (greetingElement) {
+                        const currentHour = new Date().getHours();
+                        let timeOfDayGreeting = 'Hello';
+                        if (currentHour < 12) timeOfDayGreeting = 'Good morning';
+                        else if (currentHour < 18) timeOfDayGreeting = 'Good afternoon';
+                        else timeOfDayGreeting = 'Good evening';
+                        greetingElement.textContent = `${timeOfDayGreeting}, ${userName}!`;
+                    }
+                    if (desktopUserWelcomeElement) desktopUserWelcomeElement.textContent = `Welcome, ${userName}!`;
+                    
+                    fetchMarketOverview();
+                    fetchMyInvestments(user.id);
+                    fetchInvestors();
+
+                    // Check local storage for persistent chat button visibility
+                    if (localStorage.getItem('hasSentProposal')) {
+                        showFloatingButton();
+                    }
+
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                    showMessage('Failed to load investment dashboard. Please try again.', 'error');
+                    window.location.href = 'login.html';
+                }
+            }
+
+            function generateMarketData() {
+                const minerals = [
+                    { name: 'Gold', category: 'gold', currentPrice: 1950, change: (Math.random() - 0.5) * 50, history: [1900, 1920, 1915, 1930, 1925, 1940, 1950] },
+                    { name: 'Silver', category: 'silver', currentPrice: 24, change: (Math.random() - 0.5) * 2, history: [22, 23, 22.5, 23.5, 23, 24.5, 24] },
+                    { name: 'Emerald', category: 'emerald', currentPrice: 1500, change: (Math.random() - 0.5) * 200, history: [1400, 1450, 1550, 1500, 1520, 1580, 1500] },
+                    { name: 'Platinum', category: 'platinum', currentPrice: 980, change: (Math.random() - 0.5) * 80, history: [1000, 990, 970, 985, 960, 975, 980] }
+                ];
+                return minerals;
+            }
+
+            function fetchMarketOverview() {
+                const marketOverviewDiv = document.getElementById('marketOverview');
+                marketOverviewDiv.innerHTML = '';
+                const minerals = generateMarketData();
+
+                minerals.forEach(mineral => {
+                    const isPositive = mineral.change >= 0;
+                    const changeIcon = isPositive ? 'fa-arrow-up' : 'fa-arrow-down';
+                    const changeColor = isPositive ? 'text-green-600' : 'text-red-600';
+                    const changeBadge = isPositive ? 'positive' : 'negative';
+
+                    const card = document.createElement('div');
+                    card.className = 'card-styled flex-1';
+                    card.innerHTML = `
+                        <h3 class="text-xl font-bold">${mineral.name}</h3>
+                        <p class="text-sm text-nova7-gray-medium mb-2">Price per gram</p>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-3xl font-extrabold text-nova7-gold">$${mineral.currentPrice.toFixed(2)}</span>
+                            <span class="status-badge ${changeBadge} ml-2">
+                                <i class="fas ${changeIcon} mr-1"></i>
+                                ${mineral.change.toFixed(2)}%
+                            </span>
+                        </div>
+                        <div class="graph-container">
+                            <canvas id="chart-${mineral.category}"></canvas>
+                        </div>
+                    `;
+                    marketOverviewDiv.appendChild(card);
+
+                    const ctx = document.getElementById(`chart-${mineral.category}`).getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                            datasets: [{
+                                label: 'Price',
+                                data: mineral.history,
+                                borderColor: isPositive ? '#10B981' : '#EF4444',
+                                backgroundColor: isPositive ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return `${context.dataset.label}: $${context.parsed.y.toFixed(2)}`;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: { display: false },
+                                y: { display: false }
+                            }
+                        }
+                    });
+                });
+            }
+
+            async function fetchMyInvestments(userId) {
+                const portfolioSummaryDiv = document.getElementById('portfolioSummary');
+                portfolioSummaryDiv.innerHTML = '';
+
+                try {
+                    const { data: boughtProducts, error: buyError } = await supabase
+                        .from('products')
+                        .select('id, name, price, mineral_weight, mineral_purity')
+                        .eq('buyer_id', userId);
+
+                    if (buyError) {
+                        console.error('Error fetching investments:', buyError.message);
+                        portfolioSummaryDiv.innerHTML = `<p class="text-red-500">Failed to load your investments.</p>`;
+                        return;
+                    }
+
+                    if (!boughtProducts || boughtProducts.length === 0) {
+                        portfolioSummaryDiv.innerHTML = `
+                            <p class="text-nova7-gray-medium mb-4">You have not made any mineral investments yet.</p>
+                            <a href="resources.html" class="btn-primary-action"><i class="fas fa-store mr-2"></i>Start Investing Today</a>
+                        `;
+                        return;
+                    }
+
+                    const investments = {};
+                    boughtProducts.forEach(product => {
+                        if (!investments[product.name]) {
+                            investments[product.name] = {
+                                quantity: 0,
+                                totalCost: 0,
+                                mineral_weight: 0,
+                                currentPrice: 0,
+                                mineral_purity: product.mineral_purity
+                            };
+                        }
+                        investments[product.name].quantity += 1;
+                        investments[product.name].totalCost += product.price * (1 + TRANSACTION_FEE_RATE);
+                        investments[product.name].mineral_weight += product.mineral_weight;
+                        investments[product.name].currentPrice = product.price; // For simplicity, using last known price
+                    });
+
+                    let totalPortfolioValue = 0;
+                    let totalInvestment = 0;
+                    const tableHtml = `
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mineral</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Weight (g)</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Value</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg. Cost</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">P/L</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    ${Object.keys(investments).map(name => {
+                                        const mineral = investments[name];
+                                        const avgCost = mineral.totalCost / mineral.quantity;
+                                        const currentValue = mineral.currentPrice * mineral.quantity;
+                                        const profitLoss = currentValue - mineral.totalCost;
+                                        const profitLossClass = profitLoss >= 0 ? 'text-green-600' : 'text-red-600';
+                                        
+                                        totalPortfolioValue += currentValue;
+                                        totalInvestment += mineral.totalCost;
+
+                                        return `
+                                            <tr>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${name}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${mineral.quantity}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${mineral.mineral_weight.toFixed(2)}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$${currentValue.toFixed(2)}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$${avgCost.toFixed(2)}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm ${profitLossClass}">$${profitLoss.toFixed(2)}</td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+
+                    portfolioSummaryDiv.innerHTML = `
+                        <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="p-4 bg-gray-50 rounded-lg shadow-sm">
+                                <p class="text-sm font-medium text-nova7-gray-medium">Total Investment</p>
+                                <p class="text-2xl font-bold text-nova7-dark">$${totalInvestment.toFixed(2)}</p>
+                            </div>
+                            <div class="p-4 bg-gray-50 rounded-lg shadow-sm">
+                                <p class="text-sm font-medium text-nova7-gray-medium">Current Value</p>
+                                <p class="text-2xl font-bold text-nova7-gold">$${totalPortfolioValue.toFixed(2)}</p>
+                            </div>
+                            <div class="p-4 bg-gray-50 rounded-lg shadow-sm">
+                                <p class="text-sm font-medium text-nova7-gray-medium">Total P/L</p>
+                                <p class="text-2xl font-bold ${totalPortfolioValue - totalInvestment >= 0 ? 'text-green-600' : 'text-red-600'}">$${(totalPortfolioValue - totalInvestment).toFixed(2)}</p>
+                            </div>
+                        </div>
+                        ${tableHtml}
+                    `;
+                } catch (error) {
+                    console.error('Unexpected error fetching investments:', error);
+                    portfolioSummaryDiv.innerHTML = `<p class="text-red-500">An unexpected error occurred while loading your portfolio.</p>`;
+                }
+            }
+
+            function fetchInvestors(query = '') {
+                const investorListDiv = document.getElementById('investorList');
+                investorListDiv.innerHTML = '';
+                
+                // Simulate a list of investors
+                const allInvestors = [
+                    { name: 'Global Mining Ventures', interests: 'Precious Metals, Rare Earths' },
+                    { name: 'Gemstone Capital Partners', interests: 'Gemstones, Jewelry Manufacturing' },
+                    { name: 'Earthstone Investments', interests: 'Industrial Minerals, Quarrying' },
+                    { name: 'Mineral Tech Fund', interests: 'Technology Minerals, Sustainability' },
+                    { name: 'Aurora Ventures', interests: 'Gold, Silver, Platinum' }
+                ];
+                
+                const filteredInvestors = allInvestors.filter(investor => 
+                    investor.name.toLowerCase().includes(query.toLowerCase()) || 
+                    investor.interests.toLowerCase().includes(query.toLowerCase())
+                );
+
+                if (filteredInvestors.length === 0) {
+                    investorListDiv.innerHTML = `<p class="text-center text-nova7-gray-medium py-4 col-span-full">No investors found matching your search.</p>`;
+                    return;
+                }
+
+                filteredInvestors.forEach(investor => {
+                    const investorCard = document.createElement('div');
+                    investorCard.className = 'card-styled flex flex-col items-center text-center';
+                    investorCard.innerHTML = `
+                        <div class="w-16 h-16 rounded-full bg-nova7-gold flex items-center justify-center text-nova7-dark font-bold text-xl mb-4">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold">${investor.name}</h3>
+                        <p class="text-sm text-nova7-gray-medium mb-4">${investor.interests}</p>
+                        <button class="btn-primary-action connect-investor-btn" data-investor-name="${investor.name}">
+                            <i class="fas fa-comment-dots mr-2"></i>Connect
+                        </button>
+                    `;
+                    investorListDiv.appendChild(investorCard);
+                });
+
+                document.querySelectorAll('.connect-investor-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const investorName = e.currentTarget.dataset.investorName;
+                        document.getElementById('investorNameInModal').textContent = investorName;
+                        document.getElementById('chatInvestorName').textContent = investorName;
+                        
+                        // Reset form and show the form view
+                        document.getElementById('investorMessageForm').reset();
+                        fileNameDisplay.textContent = 'Choose file...';
+                        investorFormView.classList.remove('hidden');
+                        investorChatView.classList.add('hidden');
+                        document.getElementById('chatMessages').innerHTML = ''; // Clear chat messages
+
+                        investorModal.classList.remove('hidden');
+                        setTimeout(() => investorModal.classList.add('show'), 10);
+                    });
+                });
+            }
+            
+            document.getElementById('searchInvestorsBtn').addEventListener('click', () => {
+                const query = document.getElementById('investorSearch').value;
+                fetchInvestors(query);
+            });
+            
+            // Listen for file input changes to update the file name display
+            proposalPdfInput.addEventListener('change', () => {
+                if (proposalPdfInput.files.length > 0) {
+                    fileNameDisplay.textContent = proposalPdfInput.files[0].name;
+                } else {
+                    fileNameDisplay.textContent = 'Choose file...';
+                }
+            });
+
+            investorMessageForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const mineralMined = document.getElementById('mineralMined').value;
+                const projectLocation = document.getElementById('projectLocation').value;
+                const extractionMethod = document.getElementById('extractionMethod').value;
+                const targetMarket = document.getElementById('targetMarket').value;
+                const proposalFile = proposalPdfInput.files[0];
+
+                // Simulate sending the proposal
+                document.getElementById('sendProposalBtn').disabled = true;
+                document.getElementById('sendProposalBtn').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Sending...';
+                
+                setTimeout(() => {
+                    document.getElementById('sendProposalBtn').disabled = false;
+                    document.getElementById('sendProposalBtn').innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Send Proposal';
+                    
+                    // Set flag in local storage to remember that a proposal has been sent
+                    localStorage.setItem('hasSentProposal', 'true');
+                    showFloatingButton();
+                    
+                    // Hide form and show chat view
+                    openChatModal();
+                    
+                    // Add user's message to chat
+                    let proposalMessage = `
+                        <strong>Mineral Mined:</strong> ${mineralMined}<br>
+                        <strong>Project Location:</strong> ${projectLocation}<br>
+                        <strong>Extraction Method:</strong> ${extractionMethod}<br>
+                        <strong>Target Market:</strong> ${targetMarket}
+                    `;
+
+                    if (proposalFile) {
+                        proposalMessage += `<br><br><strong>Attached Proposal:</strong> <a href="#" class="text-blue-600 hover:underline"><i class="fas fa-file-pdf mr-1"></i>${proposalFile.name}</a>`;
+                    }
+
+                    addChatMessage(proposalMessage, 'sent');
+                    
+                    // Simulate an investor response after a delay
+                    setTimeout(() => {
+                        addChatMessage('Thank you for the detailed proposal. I am reviewing the information and will get back to you with some follow-up questions.', 'received');
+                        incrementNotificationCount();
+                    }, 3000);
+
+                }, 1500);
+            });
+
+            document.getElementById('sendChatBtn').addEventListener('click', () => {
+                const chatInput = document.getElementById('chatInput');
+                const message = chatInput.value.trim();
+                if (message) {
+                    addChatMessage(message, 'sent');
+                    chatInput.value = '';
+                    
+                    // Simulate a response from the investor
+                    setTimeout(() => {
+                        addChatMessage('Thanks for the follow-up. I will get back to you soon.', 'received');
+                        incrementNotificationCount();
+                    }, 2000);
+                }
+            });
+
+
+            checkUserSession();
+        });
+    </script>
+</body>
+</html>

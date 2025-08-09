@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geological World Map - XELTIS LTD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet-geosearch@3.8.0/dist/geosearch.umd.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.8.0/dist/geosearch.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --xeltis-dark: #000000;
+            --xeltis-gold: #FFD700;
+            --xeltis-white: #FFFFFF;
+            --xeltis-gray-light: #F3F2EF;
+            --xeltis-gray-medium: #CED0D4;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--xeltis-dark);
+            color: var(--xeltis-dark);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .sidebar-xeltis {
+            background-color: var(--xeltis-dark);
+            color: var(--xeltis-white);
+            width: 260px;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding-top: 1.5rem;
+            transition: transform 0.3s ease-in-out;
+            z-index: 40;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-header {
+            padding: 0.75rem 1.5rem 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--xeltis-gold);
+            margin-bottom: 0.75rem;
+        }
+        .sidebar-logo-img {
+            max-height: 120px;
+            width: auto;
+            filter: brightness(0) invert(1);
+        }
+        .sidebar-xeltis .nav-link-sidebar {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            margin: 0.25rem 1rem;
+            font-weight: 500;
+            color: var(--xeltis-white);
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .sidebar-xeltis .nav-link-sidebar:hover {
+            background-color: var(--xeltis-gold);
+            color: var(--xeltis-dark);
+        }
+        .sidebar-xeltis .nav-link-sidebar.active {
+            background-color: var(--xeltis-gold);
+            color: var(--xeltis-dark);
+            font-weight: 600;
+        }
+        .sidebar-xeltis .nav-link-sidebar i {
+            width: 20px;
+            margin-right: 0.75rem;
+            text-align: center;
+        }
+        .main-content-area {
+            margin-left: 260px;
+            width: calc(100% - 260px);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--xeltis-gray-light);
+        }
+        .mobile-header {
+            display: none;
+            background-color: var(--xeltis-white);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 0 1rem;
+            height: 60px;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+        }
+        .map-container {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 60px);
+            background-color: var(--xeltis-white);
+            border-radius: 0;
+            box-shadow: 0 0 0 rgba(0,0,0,0);
+            padding: 24px;
+            flex-grow: 1;
+        }
+        #geological-map {
+            width: 100%;
+            height: calc(100% - 100px);
+            border-radius: 8px;
+        }
+        .map-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--xeltis-gold);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+        .map-header h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--xeltis-gold);
+        }
+        .map-header img {
+            height: 40px;
+        }
+        .mineral-count {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--xeltis-gold);
+            color: var(--xeltis-dark);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 1000;
+        }
+        .search-filter-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 16px;
+        }
+        .search-container {
+            flex: 1;
+            max-width: 400px;
+        }
+        .search-container input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--xeltis-gray-medium);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+        }
+        .filter-container {
+            flex: 0 0 auto;
+        }
+        .filter-container select {
+            padding: 8px 12px;
+            border: 1px solid var(--xeltis-gray-medium);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            background-color: var(--xeltis-white);
+            cursor: pointer;
+        }
+        .fab {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            background-color: var(--xeltis-gold);
+            color: var(--xeltis-dark);
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: background-color 0.2s;
+            z-index: 1000;
+        }
+        .fab:hover {
+            background-color: #E6C200;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: var(--xeltis-white);
+            padding: 24px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .modal-content h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--xeltis-gold);
+            margin-bottom: 16px;
+        }
+        .modal-content form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .modal-content input, .modal-content select {
+            padding: 8px 12px;
+            border: 1px solid var(--xeltis-gray-medium);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+        }
+        .modal-content input[readonly] {
+            background-color: var(--xeltis-gray-light);
+        }
+        .modal-content button {
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .modal-content .submit-btn {
+            background-color: var(--xeltis-gold);
+            color: var(--xeltis-dark);
+        }
+        .modal-content .submit-btn:hover {
+            background-color: #E6C200;
+        }
+        .modal-content .cancel-btn {
+            background-color: var(--xeltis-gray-medium);
+            color: var(--xeltis-dark);
+        }
+        .modal-content .cancel-btn:hover {
+            background-color: #B0B3B8;
+        }
+        .verification-message {
+            background-color: var(--xeltis-white);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            padding: 1.5rem 2rem;
+            margin: 1.5rem auto;
+            max-width: 600px;
+            text-align: center;
+        }
+        .verification-message h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--xeltis-dark);
+            margin-bottom: 0.5rem;
+        }
+        .verification-message p {
+            font-size: 0.95rem;
+            color: #4A5568;
+            line-height: 1.6;
+        }
+        .btn-resend {
+            background-color: var(--xeltis-gold);
+            color: var(--xeltis-dark);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+            border: none;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+        .btn-resend:hover {
+            background-color: #E6C200;
+        }
+        .btn-resend:disabled {
+            background-color: #A0AEC0;
+            cursor: not-allowed;
+        }
+        @media (max-width: 850px) {
+            .map-container {
+                width: 100%;
+                height: calc(100vh - 60px);
+                padding: 1rem;
+            }
+            .search-filter-container {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .search-container {
+                max-width: 100%;
+            }
+        }
+        @media (max-width: 768px) {
+            .sidebar-xeltis {
+                transform: translateX(-100%);
+                height: 100vh;
+            }
+            .sidebar-xeltis.open {
+                transform: translateX(0);
+            }
+            .main-content-area {
+                margin-left: 0;
+                width: 100%;
+                padding-top: 60px;
+            }
+            .mobile-header {
+                display: flex;
+            }
+        }
+        @media print {
+            body {
+                background-color: var(--xeltis-white);
+            }
+            body > *:not(.map-container) {
+                display: none !important;
+                visibility: hidden !important;
+            }
+            .map-container {
+                visibility: visible !important;
+                display: flex !important;
+                flex-direction: column;
+                position: absolute;
+                left: 0;
+                top: 0;
+                margin: 0;
+                width: 100%;
+                height: auto;
+                box-shadow: none;
+                border-radius: 0;
+                padding: 10mm;
+                box-sizing: border-box;
+                border: 1px solid #ccc;
+            }
+            .map-header {
+                width: 100%;
+                font-size: 18px;
+                padding-bottom: 6mm;
+                margin-bottom: 8mm;
+            }
+            .map-header h2 {
+                font-size: 18px;
+            }
+            .map-header img {
+                height: 30px;
+            }
+            #geological-map {
+                height: 500px;
+            }
+            .search-filter-container, .fab, .modal, .verification-message, .mineral-count {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <header class="mobile-header md:hidden">
+        <button id="hamburgerBtnMobile" class="p-2 text-gray-700 hover:text-xeltis-gold">
+            <i class="fas fa-bars text-2xl"></i>
+        </button>
+        <a href="dashboard.html">
+            <img src="xeltis-logo-CIxL2od-.png" alt="Xeltis Logo" class="sidebar-logo-img" style="filter: brightness(0) invert(1);" onerror="this.onerror=null; this.src='https://placehold.co/120x60/333333/FFD700?text=Xeltis';">
+        </a>
+        <a href="#" id="mobileLogoutLink" class="p-2 text-gray-700 hover:text-xeltis-gold">
+            <i class="fas fa-sign-out-alt text-xl"></i>
+        </a>
+    </header>
+    <aside id="sidebar" class="sidebar-xeltis">
+        <div class="sidebar-header">
+            <a href="dashboard.html" class="flex items-center">
+                <img src="xeltis-logo-CIxL2od-.png" alt="Xeltis Logo" class="sidebar-logo-img" style="filter: brightness(0) invert(1);" onerror="this.onerror=null; this.src='https://placehold.co/120x60/333333/FFD700?text=Xeltis';">
+            </a>
+        </div>
+        <nav class="flex-grow">
+            <a href="dashboard.html" class="nav-link-sidebar">
+                <i class="fas fa-tachometer-alt"></i>Tableau de bord
+            </a>
+            <a href="map.html" class="nav-link-sidebar active">
+                <i class="fas fa-map"></i>Carte
+            </a>
+            <a href="resources.html" class="nav-link-sidebar">
+                <i class="fas fa-shopping-cart"></i>Marketplace
+            </a>
+            <a href="settings.html" class="nav-link-sidebar">
+                <i class="fas fa-cog"></i>Paramètres
+            </a>
+            <a href="wallet.html" class="nav-link-sidebar">
+                <i class="fas fa-wallet"></i>Investment
+            </a>
+        </nav>
+        <div class="pb-4">
+            <a href="profile.html" class="nav-link-sidebar">
+                <i class="fas fa-user-circle"></i>Profil
+            </a>
+            <a href="#" id="sidebarLogoutLink" class="nav-link-sidebar">
+                <i class="fas fa-sign-out-alt"></i>Déconnexion
+            </a>
+        </div>
+    </aside>
+    <main class="main-content-area">
+        <div id="messageBox" class="modal">
+            <div class="modal-content">
+                <h3 id="messageTitle"></h3>
+                <p id="messageText"></p>
+                <div class="flex justify-end mt-4">
+                    <button id="closeMessageBtn" class="cancel-btn">Close</button>
+                </div>
+            </div>
+        </div>
+        <div id="verificationMessage" class="verification-message hidden">
+            <h1>Please Verify Your Email</h1>
+            <p id="verificationText"></p>
+            <button id="resendVerification" class="btn-resend">Resend Verification Email</button>
+        </div>
+        <div id="mapContent" class="map-container">
+            <div class="map-header">
+                <h2>GEOLOGICAL WORLD MAP</h2>
+                <img src="xeltis-logo-CIxL2od-.png" alt="Xeltis Logo" style="filter: brightness(0) invert(1);" onerror="this.onerror=null; this.src='https://placehold.co/120x60/333333/FFD700?text=Xeltis';">
+            </div>
+            <div id="mineral-count" class="mineral-count">Mineral Count: 0</div>
+            <div class="search-filter-container">
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="Search for a location...">
+                </div>
+                <div class="filter-container">
+                    <select id="mineral-filter">
+                        <option value="all">All Minerals</option>
+                        <option value="Detected">Detected</option>
+                        <option value="Gold">Gold</option>
+                        <option value="Copper">Copper</option>
+                        <option value="Iron">Iron</option>
+                        <option value="Aluminum">Aluminum</option>
+                        <option value="Silver">Silver</option>
+                        <option value="Nickel">Nickel</option>
+                        <option value="Zinc">Zinc</option>
+                        <option value="Lead">Lead</option>
+                        <option value="Tin">Tin</option>
+                        <option value="Titanium">Titanium</option>
+                        <option value="Platinum">Platinum</option>
+                        <option value="Cobalt">Cobalt</option>
+                        <option value="Lithium">Lithium</option>
+                        <option value="Manganese">Manganese</option>
+                        <option value="Chromium">Chromium</option>
+                        <option value="Molybdenum">Molybdenum</option>
+                        <option value="Tungsten">Tungsten</option>
+                        <option value="Palladium">Palladium</option>
+                        <option value="Vanadium">Vanadium</option>
+                        <option value="Uranium">Uranium</option>
+                    </select>
+                </div>
+            </div>
+            <div id="geological-map"></div>
+            <button id="add-data-btn" class="fab" title="Add Mineral Data">
+                <i class="fas fa-plus text-xl"></i>
+            </button>
+        </div>
+        <div id="add-data-modal" class="modal">
+            <div class="modal-content">
+                <h3>Add New Mineral Data</h3>
+                <form id="add-data-form">
+                    <input type="text" id="mineral-name" placeholder="Mineral Name" required>
+                    <select id="mineral-type" required>
+                        <option value="" disabled selected>Select Mineral Type</option>
+                        <option value="Detected">Detected</option>
+                        <option value="Gold">Gold</option>
+                        <option value="Copper">Copper</option>
+                        <option value="Iron">Iron</option>
+                        <option value="Aluminum">Aluminum</option>
+                        <option value="Silver">Silver</option>
+                        <option value="Nickel">Nickel</option>
+                        <option value="Zinc">Zinc</option>
+                        <option value="Lead">Lead</option>
+                        <option value="Tin">Tin</option>
+                        <option value="Titanium">Titanium</option>
+                        <option value="Platinum">Platinum</option>
+                        <option value="Cobalt">Cobalt</option>
+                        <option value="Lithium">Lithium</option>
+                        <option value="Manganese">Manganese</option>
+                        <option value="Chromium">Chromium</option>
+                        <option value="Molybdenum">Molybdenum</option>
+                        <option value="Tungsten">Tungsten</option>
+                        <option value="Palladium">Palladium</option>
+                        <option value="Vanadium">Vanadium</option>
+                        <option value="Uranium">Uranium</option>
+                    </select>
+                    <input type="number" id="mineral-quantity" placeholder="Quantity Identified (e.g., tonnes)" min="0" step="0.01" required>
+                    <input type="text" id="mineral-lat" placeholder="Latitude" readonly required>
+                    <input type="text" id="mineral-lng" placeholder="Longitude" readonly required>
+                    <div style="display: flex; gap: 12px;">
+                        <button type="submit" class="submit-btn">Submit</button>
+                        <button type="button" id="cancel-btn" class="cancel-btn">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const SUPABASE_URL = 'https://qudbehodnhevjxmdwvta.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1ZGJlaG9kbmhldmp4bWR3dnRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1MjExODksImV4cCI6MjA3MDA5NzE4OX0.YnK8UKd76PBLh3L0zAv5fY0JFK6EWq-UBHLY8jXz55w';
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log("Supabase client initialized.");
+
+            const mapContent = document.getElementById('mapContent');
+            const verificationMessage = document.getElementById('verificationMessage');
+            const resendButton = document.getElementById('resendVerification');
+            const mineralCountElement = document.getElementById('mineral-count');
+
+            const showMessageBox = (title, message) => {
+                const modal = document.getElementById('messageBox');
+                document.getElementById('messageTitle').textContent = title;
+                document.getElementById('messageText').textContent = message;
+                modal.style.display = 'flex';
+            };
+
+            document.getElementById('closeMessageBtn').addEventListener('click', () => {
+                document.getElementById('messageBox').style.display = 'none';
+            });
+
+            async function handleLogout() {
+                try {
+                    await supabase.auth.signOut();
+                    console.log("Logged out successfully.");
+                    window.location.href = 'login.html';
+                } catch (error) {
+                    console.error("Error signing out:", error);
+                    showMessageBox('Logout Error', 'Failed to log out. Please try again.');
+                }
+            }
+
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            if (sessionError || !session) {
+                console.log("No active Supabase session. Redirecting to login.");
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const user = session.user;
+            console.log("Supabase user:", user);
+
+            if (user && !user.email_confirmed_at && user.email) {
+                verificationMessage.classList.remove('hidden');
+                mapContent.classList.add('hidden');
+                document.getElementById('verificationText').textContent = `Your account is not yet verified. Please check your email (${user.email}) for the verification link.`;
+                
+                if (resendButton) {
+                    resendButton.addEventListener('click', async () => {
+                        resendButton.disabled = true;
+                        resendButton.textContent = 'Sending...';
+                        try {
+                            const { error } = await supabase.auth.resend({
+                                type: 'signup',
+                                email: user.email,
+                                options: { emailRedirectTo: 'http://www.lifeline-wdc.com/email-verification.html' }
+                            });
+                            if (error) {
+                                console.error('Resend error:', error.message);
+                                showMessageBox('Resend Error', `Failed to resend verification email: ${error.message}`);
+                            } else {
+                                showMessageBox('Success', `Verification email resent to ${user.email}`);
+                            }
+                        } catch (err) {
+                            console.error('Unexpected resend error:', err);
+                            showMessageBox('Resend Error', 'Unexpected error. Please try again.');
+                        } finally {
+                            resendButton.disabled = false;
+                            resendButton.textContent = 'Resend Verification Email';
+                        }
+                    });
+                }
+                return;
+            }
+
+            verificationMessage.classList.add('hidden');
+            mapContent.classList.remove('hidden');
+
+            const map = L.map('geological-map').setView([0, 0], 2);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            const provider = new GeoSearch.OpenStreetMapProvider();
+            const searchControl = new GeoSearch.GeoSearchControl({
+                provider: provider,
+                style: 'bar',
+                showMarker: true,
+                marker: {
+                    icon: new L.Icon.Default(),
+                    draggable: false,
+                },
+                autoComplete: true,
+                autoCompleteDelay: 250,
+            });
+            map.addControl(searchControl);
+
+            const searchInput = document.getElementById('search-input');
+            searchControl.getContainer().style.display = 'none';
+            searchInput.addEventListener('input', function(e) {
+                provider.search({ query: e.target.value }).then(results => {
+                    if (results && results.length > 0) {
+                        const { x, y } = results[0];
+                        map.setView([y, x], 10);
+                        L.marker([y, x]).addTo(map).bindPopup(results[0].label).openPopup();
+                    }
+                });
+            });
+
+            let mineralLayer = L.layerGroup().addTo(map);
+
+            // Define mineral-specific icons (mini points)
+            const mineralIcons = {
+                'Detected': L.icon({
+                    iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-color-markers/marker-icon-gold.png',
+                    iconSize: [15, 25],
+                    iconAnchor: [7, 25],
+                    popupAnchor: [0, -20],
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    shadowSize: [25, 25]
+                }),
+                'Gold': L.icon({
+                    iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-color-markers/marker-icon-yellow.png',
+                    iconSize: [15, 25],
+                    iconAnchor: [7, 25],
+                    popupAnchor: [0, -20],
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    shadowSize: [25, 25]
+                }),
+                'Copper': L.icon({
+                    iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-color-markers/marker-icon-green.png',
+                    iconSize: [15, 25],
+                    iconAnchor: [7, 25],
+                    popupAnchor: [0, -20],
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    shadowSize: [25, 25]
+                }),
+                'Iron': L.icon({
+                    iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-color-markers/marker-icon-red.png',
+                    iconSize: [15, 25],
+                    iconAnchor: [7, 25],
+                    popupAnchor: [0, -20],
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    shadowSize: [25, 25]
+                }),
+                'Aluminum': L.icon({
+                    iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-color-markers/marker-icon-gray.png',
+                    iconSize: [15, 25],
+                    iconAnchor: [7, 25],
+                    popupAnchor: [0, -20],
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    shadowSize: [25, 25]
+                }),
+                'Silver': L.icon({
+                    iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-color-markers/marker-icon-silver.png',
+                    iconSize: [15, 25],
+                    iconAnchor: [7, 25],
+                    popupAnchor: [0, -20],
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    shadowSize: [25, 25]
+                }),
+                'Nickel': L.icon({
+                    iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-color-markers/marker-icon-orange.png',
+                    iconSize: [15, 25],
+                    iconAnchor: [7, 25],
+                    popupAnchor: [0, -20],
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    shadowSize: [25, 25]
+                }),
+                'Zinc': L.icon({
+                    iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-color-markers/marker-icon-blue.png',
+                    iconSize: [15, 25],
+                    iconAnchor: [7, 25],
+                    popupAnchor: [0, -20],
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    shadowSize: [25, 25]
+                }),
+                'Lead': L.icon({
+                    iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-color-markers/marker-icon-purple.png',
+                    iconSize: [15, 25],
+                    iconAnchor: [7, 25],
+                    popupAnchor: [0, -20],
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    shadowSize: [25, 25]
+                }),
+                'Tin': L.icon({
+                    iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-color-markers/marker-icon-brown.png',
+                    iconSize: [15, 25],
+                    iconAnchor: [7, 25],
+                    popupAnchor: [0, -20],
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    shadowSize: [25, 25]
+                }),
+                'Titanium': L.icon({
+                    iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-color-markers/marker-icon-darkgreen.png',
+                    iconSize: [15, 25],
+                    iconAnchor: [7, 25],
+                    popupAnchor: [0, -20],
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    shadowSize: [25, 25]
+                }),
+                'Platinum': L.icon({
+                    iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-color-markers/marker-icon-lightgray.png',
+                    iconSize: [15, 25],
+                    iconAnchor: [7, 25],
+                    popupAnchor: [0, -20],
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    shadowSize: [25, 25]
+                }),
+                'Cobalt': L.icon({
+                    iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-color-markers/marker-icon-cyan.png',
+                    iconSize: [15, 25],
+                    iconAnchor: [7, 25],
+                    popupAnchor: [0, -20],
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    shadowSize: [25, 25]
+                }),
+                'Lithium': L.icon({
+                    iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-color-markers/marker-icon-pink.png',
+                    iconSize: [15, 25],
+                    iconAnchor: [7, 25],
+                    popupAnchor: [0, -20],
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    shadowSize: [25, 25]
+                }),
+                'Manganese': L.icon({
+                    iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-color-markers/marker-icon-darkred.png',
+                    iconSize: [15, 25],
+                    iconAnchor: [7, 25],
+                    popupAnchor: [0, -20],
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    shadowSize: [25, 25]
+                }),
+                'Chromium': L.icon({
+                    iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-color-markers/marker-icon-teal.png',
+                    iconSize: [15, 25],
+                    iconAnchor: [7, 25],
+                    popupAnchor: [0, -20],
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    shadowSize: [25, 25]
+                }),
+                'Molybdenum': L.icon({
+                    iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-color-markers/marker-icon-magenta.png',
+                    iconSize: [15, 25],
+                    iconAnchor: [7, 25],
+                    popupAnchor: [0, -20],
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    shadowSize: [25, 25]
+                }),
+                'Tungsten': L.icon({
+                    iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-color-markers/marker-icon-darkblue.png',
+                    iconSize: [15, 25],
+                    iconAnchor: [7, 25],
+                    popupAnchor: [0, -20],
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    shadowSize: [25, 25]
+                }),
+                'Palladium': L.icon({
+                    iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-color-markers/marker-icon-lightblue.png',
+                    iconSize: [15, 25],
+                    iconAnchor: [7, 25],
+                    popupAnchor: [0, -20],
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    shadowSize: [25, 25]
+                }),
+                'Vanadium': L.icon({
+                    iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-color-markers/marker-icon-olive.png',
+                    iconSize: [15, 25],
+                    iconAnchor: [7, 25],
+                    popupAnchor: [0, -20],
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    shadowSize: [25, 25]
+                }),
+                'Uranium': L.icon({
+                    iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-color-markers/marker-icon-black.png',
+                    iconSize: [15, 25],
+                    iconAnchor: [7, 25],
+                    popupAnchor: [0, -20],
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    shadowSize: [25, 25]
+                })
+            };
+
+            async function loadData() {
+                mineralLayer.clearLayers();
+                try {
+                    const response = await fetch('mineral_points_DRC_20250808_182217.geojson');
+                    if (!response.ok) throw new Error('Failed to fetch GeoJSON');
+                    const geojson = await response.json();
+                    L.geoJSON(geojson, {
+                        pointToLayer: function(feature, latlng) {
+                            const mineralType = feature.properties.mineral_type;
+                            const icon = mineralIcons[mineralType] || mineralIcons['Detected'];
+                            return L.marker(latlng, { icon: icon });
+                        },
+                        onEachFeature: function(feature, layer) {
+                            const mineralType = feature.properties.mineral_type;
+                            const ironRatio = feature.properties.iron_ratio || 'N/A';
+                            const clayRatio = feature.properties.clay_ratio || 'N/A';
+                            layer.bindPopup(`<b>Detected Mineral Anomaly</b><br>Type: ${mineralType}<br>Iron Ratio: ${ironRatio}<br>Clay Ratio: ${clayRatio}`);
+                            layer.mineralType = mineralType;
+                        }
+                    }).addTo(mineralLayer);
+                    mineralCountElement.textContent = `Mineral Count: ${geojson.features.length}`;
+                    console.log('GeoJSON data loaded successfully.');
+                } catch (err) {
+                    console.error('Error loading GeoJSON:', err.message);
+                    showMessageBox('Data Error', 'Failed to load mineral data. Please ensure the GeoJSON file is accessible.');
+                }
+            }
+
+            const overlayLayers = { "Mineral Data": mineralLayer };
+            L.control.layers(null, overlayLayers).addTo(map);
+
+            const mineralFilter = document.getElementById('mineral-filter');
+            mineralFilter.addEventListener('change', function(e) {
+                const selectedMineral = e.target.value;
+                mineralLayer.eachLayer(layer => {
+                    const type = layer.mineralType;
+                    const isVisible = (selectedMineral === 'all' || type === selectedMineral);
+                    if (isVisible) {
+                        layer.addTo(map);
+                    } else {
+                        map.removeLayer(layer);
+                    }
+                });
+            });
+
+            const addDataBtn = document.getElementById('add-data-btn');
+            const addDataModal = document.getElementById('add-data-modal');
+            const addDataForm = document.getElementById('add-data-form');
+            const cancelBtn = document.getElementById('cancel-btn');
+            const latInput = document.getElementById('mineral-lat');
+            const lngInput = document.getElementById('mineral-lng');
+            let tempMarker = null;
+
+            addDataBtn.addEventListener('click', function() {
+                if (!user) {
+                    showMessageBox('Authentication Required', 'Please log in to add mineral data.');
+                    return;
+                }
+                addDataModal.style.display = 'flex';
+                map.on('click', onMapClick);
+            });
+
+            function onMapClick(e) {
+                const { lat, lng } = e.latlng;
+                latInput.value = lat.toFixed(6);
+                lngInput.value = lng.toFixed(6);
+                if (tempMarker) map.removeLayer(tempMarker);
+                tempMarker = L.marker([lat, lng]).addTo(map);
+            }
+
+            cancelBtn.addEventListener('click', function() {
+                addDataModal.style.display = 'none';
+                map.off('click', onMapClick);
+                if (tempMarker) {
+                    map.removeLayer(tempMarker);
+                    tempMarker = null;
+                }
+                addDataForm.reset();
+            });
+
+            addDataForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                if (!user) {
+                    showMessageBox('Authentication Error', 'Cannot submit data. Please log in.');
+                    return;
+                }
+                showMessageBox('Submission Not Supported', 'Adding new data is not supported in this version. Please update the GeoJSON file manually.');
+                addDataModal.style.display = 'none';
+                map.off('click', onMapClick);
+                if (tempMarker) {
+                    map.removeLayer(tempMarker);
+                    tempMarker = null;
+                }
+                addDataForm.reset();
+            });
+
+            document.getElementById('sidebarLogoutLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                handleLogout();
+            });
+            document.getElementById('mobileLogoutLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                handleLogout();
+            });
+
+            const hamburgerBtnMobile = document.getElementById('hamburgerBtnMobile');
+            const sidebar = document.getElementById('sidebar');
+            if (hamburgerBtnMobile && sidebar) {
+                hamburgerBtnMobile.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebar.classList.toggle('open');
+                });
+            }
+            document.addEventListener('click', (e) => {
+                if (sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target) && (!hamburgerBtnMobile || !hamburgerBtnMobile.contains(e.target))) {
+                    sidebar.classList.remove('open');
+                }
+            });
+
+            await loadData();
+        });
+    </script>
+</body>
+</html>
