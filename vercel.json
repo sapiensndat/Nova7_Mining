@@ -3,34 +3,6 @@
     {
       "source": "/",
       "destination": "/login"
-    },
-    {
-      "source": "/login",
-      "destination": "/login.html"
-    },
-    {
-      "source": "/en/login",
-      "destination": "/login.html?lang=en"
-    },
-    {
-      "source": "/fr/login",
-      "destination": "/login.html?lang=fr"
-    },
-    {
-      "source": "/dashboard",
-      "destination": "/dashboard.html"
-    },
-    {
-      "source": "/en/dashboard",
-      "destination": "/dashboard.html?lang=en"
-    },
-    {
-      "source": "/fr/dashboard",
-      "destination": "/dashboard.html?lang=fr"
-    },
-    {
-      "source": "/:path",
-      "destination": "/:path.html"
     }
   ],
   "headers": [
