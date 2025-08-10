@@ -7,6 +7,13 @@
     { "src": "*.png", "use": "@vercel/static" }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "/$1" }
+    {
+      "src": "/([^/.]+)$",
+      "dest": "/$1.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
   ]
 }
