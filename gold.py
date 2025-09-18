@@ -7,25 +7,34 @@ import sys
 import os
 import json
 import time
+import base64
+import logging
+
+# Configure logging for better visibility in Heroku logs
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # -------------------------------
 # EARTH ENGINE INIT
 # -------------------------------
-import ee, os, json, sys
+try:
+    ee_credentials_b64 = os.getenv('EE_CREDENTIALS_BASE64')
+    if not ee_credentials_b64:
+        raise ValueError("❌ EE_CREDENTIALS_BASE64 environment variable not set.")
+    
+    ee_credentials_json_string = base64.b64decode(ee_credentials_b64).decode('utf-8')
+    ee_credentials_json = json.loads(ee_credentials_json_string)
 
-ee_credentials_b64 = os.getenv('EE_CREDENTIALS_BASE64')
-if not ee_credentials_b64:
-    print("❌ EE_CREDENTIALS_BASE64 not set"); sys.exit(1)
+    creds = ee.ServiceAccountCredentials(
+        email=ee_credentials_json["client_email"],
+        key_data=ee_credentials_json["private_key"]
+    )
+    ee.Initialize(creds, project=ee_credentials_json["project_id"])
+    logging.info("✅ Earth Engine initialized successfully")
 
-ee_credentials_json = json.loads(
-    os.popen(f'echo "{ee_credentials_b64}" | base64 --decode').read()
-)
-creds = ee.ServiceAccountCredentials(
-    email=ee_credentials_json["client_email"],
-    key_data=ee_credentials_json["private_key"]
-)
-ee.Initialize(creds, project=ee_credentials_json["project_id"])
-print("✅ Earth Engine initialized successfully")
+except Exception as e:
+    logging.critical(f"❌ Failed to initialize Earth Engine: {e}")
+    # Exit with an error code, so Heroku knows to restart
+    sys.exit(1)
 
 app = Flask(__name__)
 CORS(app)
@@ -59,7 +68,7 @@ def compute_gold_proxies(aoi):
               .sort('CLOUDY_PIXEL_PERCENTAGE')
               .first())
         if not s2:
-            print("❌ No Sentinel-2 image found for the given AOI.")
+            logging.warning("❌ No Sentinel-2 image found for the given AOI.")
             return {}
         s2 = s2.clip(aoi)
         b2, b3, b4, b8, b11, b12 = [s2.select(b) for b in ["B2", "B3", "B4", "B8", "B11", "B12"]]
@@ -79,16 +88,17 @@ def compute_gold_proxies(aoi):
         max_attempts = 3
         for attempt in range(max_attempts):
             try:
+                # The .getInfo() call is where the network request and potential failure occurs.
                 return stats.getInfo()
             except Exception as e:
-                print(f"❌ Attempt {attempt + 1}/{max_attempts} failed: {e}")
+                logging.warning(f"❌ Attempt {attempt + 1}/{max_attempts} failed: {e}")
                 if attempt < max_attempts - 1:
                     time.sleep(2)  # Wait before retrying
                 else:
-                    print("❌ Max retries reached. Returning empty stats.")
+                    logging.error("❌ Max retries reached. Returning empty stats.")
                     return {}
     except Exception as e:
-        print(f"❌ Earth Engine API call failed: {e}")
+        logging.error(f"❌ Earth Engine API call failed unexpectedly: {e}")
         return {}
 
 def estimate_depth_quantity_grade_au(stats):
@@ -279,7 +289,7 @@ def render_page(page_name):
     try:
         return render_template(f'{page_name}.html')
     except Exception as e:
-        print(f"Error rendering page {page_name}.html: {e}")
+        logging.error(f"Error rendering page {page_name}.html: {e}")
         return "<h1>404 Not Found</h1><p>The requested URL was not found on the server.</p>", 404
 
 @app.route('/map')
@@ -337,8 +347,8 @@ def analyze_gold():
 
         return jsonify(response)
     except Exception as e:
-        print(f"❌ API error: {e}")
-        return jsonify({"error": str(e)}), 500
+        logging.error(f"❌ API error: {e}")
+        return jsonify({"error": "Internal Server Error"}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=os.environ.get('PORT', 8080))
