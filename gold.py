@@ -11,8 +11,15 @@ import json
 # EARTH ENGINE INIT
 # -------------------------------
 try:
-    ee.Authenticate()  # Use user-based authentication
-    ee.Initialize(project='jovial-style-470913-i9')  # Set your project ID
+    # Option A: running on Fly.io with secret EE_CREDENTIALS (JSON as string)
+    ee_credentials = os.getenv('EE_CREDENTIALS')
+    if ee_credentials:
+        # Parse JSON string directly from the secret
+        key_data = json.loads(ee_credentials)
+        creds = ee.ServiceAccountCredentials(key_data["client_email"], "jovial-style-470913-i9-2fa18b2326a2.json")
+        ee.Initialize(creds, project=key_data["project_id"])
+    else:
+        raise Exception("EE_CREDENTIALS environment variable not set. Cannot initialize Earth Engine in online deployment.")
     print("✅ Earth Engine initialized successfully.")
 except Exception as e:
     print(f"❌ Failed to initialize Earth Engine: {e}")
@@ -240,6 +247,7 @@ def find_nearby_with_geojson(lat, lng, step_km=10, max_distance_km=100, threshol
 # -------------------------------
 # WEB PAGES ROUTES
 # -------------------------------
+
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -314,6 +322,5 @@ def analyze_gold():
         return jsonify(response)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
