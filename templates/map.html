@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carte - Xeltis</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
     <!-- Inter Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome for Icons -->
@@ -20,7 +18,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.14/jspdf.plugin.autotable.min.js"></script>
     <!-- Chart.js for charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Supabase CDN for auth and data -->
+    <!-- Supabase CDN for auth -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
@@ -215,8 +213,6 @@
         .accordion-content.open {
             display: block;
         }
-
-        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -416,20 +412,15 @@
     <script>
         const SUPABASE_URL = 'https://qudbehodnhevjxmdwvta.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1ZGJlaG9kbmhldmp4bWR3dnRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1MjExODksImV4cCI6MjA3MDA5NzE4OX0.YnK8UKd76PBLh3L0zAv5fY0JFK6EWq-UBHLY8jXz55w';
-
-        let supabaseClient, user, db;
+        let supabaseClient, user;
         let allResults = [];
         let map, markers = [], heatLayer;
         let isAnalyzing = false;
         let heatmapVisible = true;
-        const COLLECTION_NAME = 'geological_analysis';
 
-        // Custom modal implementation to replace alert()
         function showCustomAlert(message) {
             const modal = document.getElementById('subscriptionModal');
             const content = document.getElementById('product-buttons-container');
-            
-            // Temporarily replace content with alert message
             content.innerHTML = `
                 <span class="close-btn" onclick="toggleSubscriptionModal()">&times;</span>
                 <p class="text-xl font-bold mb-4">Alert</p>
@@ -441,7 +432,6 @@
         async function initSupabase() {
             try {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                db = supabaseClient; // Use supabaseClient directly for database access
                 const { data: { user: currentUser }, error } = await supabaseClient.auth.getUser();
                 if (error || !currentUser) {
                     console.warn('User not authenticated, redirecting to login.html');
@@ -523,25 +513,8 @@
             markers = [];
             if (heatLayer) map.removeLayer(heatLayer);
 
-            const fetchedResults = await fetchResultsFromSupabase(lines);
-            const remainingCoords = lines.filter(line => !fetchedResults.find(r => `${r.lat},${r.lng}` === line));
-
-            // Simulate API call for new coordinates
-            const newResults = remainingCoords.map(line => {
-                const [lat, lng] = line.split(',').map(Number);
-                return {
-                    lat,
-                    lng,
-                    data: generateSimulatedData(lat, lng)
-                };
-            });
-
-            allResults = [...fetchedResults, ...newResults];
-
-            // Save new results to Supabase
-            if (newResults.length > 0) {
-                await saveResultsToSupabase(newResults);
-            }
+            const fetchedResults = await fetchFromFlaskAPI(lines);
+            allResults = fetchedResults;
 
             if (allResults.length === 0) {
                 showError('No valid data retrieved. Please check coordinates or try again.');
@@ -558,110 +531,20 @@
             analyzeSpinner.classList.add('hidden');
         }
 
-        function generateSimulatedData(lat, lng) {
-            const random = Math.random();
-            const goldPotential = random > 0.8 ? 'High Potential' : random > 0.5 ? 'Moderate Potential' : 'Low Potential';
-            const confidence = Math.floor(Math.random() * 40) + 60; // 60-100%
-            const depth = Math.floor(Math.random() * 500) + 100;
-            const tonnes = Math.floor(Math.random() * 1000000) + 500000;
-            const grade = (Math.random() * 5 + 1).toFixed(2);
-            const containedAu = (tonnes * grade / 31.1035).toFixed(2);
-            const recoveryValue = (containedAu * (Math.random() * 1000 + 1500)).toFixed(2);
-
-            const topAnomaly = Math.random() > 0.7 ? {
-                lat: lat + (Math.random() - 0.5) / 100,
-                lng: lng + (Math.random() - 0.5) / 100,
-                distance_km: (Math.random() * 5).toFixed(2),
-                composite_score: (Math.random() * 100000000 + 1000000).toFixed(0),
-                ranking_explanation: 'This is a simulated explanation for a high-value anomaly based on nearby geological indicators.',
-                result: {
-                    Gold_Potential: 'Top Anomaly',
-                    Confidence: Math.floor(Math.random() * 10) + 90,
-                    Depth_Estimate: { Depth_m: depth - 50, Estimated_Tonnes: tonnes * 1.5, Grade_g_t: (parseFloat(grade) * 2).toFixed(2), Uncertainty: 5 },
-                    Proximity_to_Known_Deposits: { deposit: 'Simulated Deposit A', distance_km: (Math.random() * 10).toFixed(2) },
-                    Indicators: { Hydroxyl_Alteration: Math.random() * 10, Iron_Oxides: Math.random() * 10, Silica_Alteration: Math.random() * 10, Slope: Math.random() * 10 }
-                }
-            } : null;
-
-            return {
-                location: { lat, lng },
-                gold_analysis: {
-                    Gold_Potential: goldPotential,
-                    Gold_Potential_Flag: goldPotential,
-                    Confidence,
-                    Depth_Estimate: {
-                        Depth_m: depth,
-                        Estimated_Tonnes: tonnes,
-                        Grade_g_t: parseFloat(grade),
-                        Uncertainty: Math.floor(Math.random() * 20) + 5
-                    },
-                    Indicators: {
-                        Hydroxyl_Alteration: Math.random() * 10,
-                        Iron_Oxides: Math.random() * 10,
-                        Silica_Alteration: Math.random() * 10,
-                        Slope: Math.random() * 10
-                    }
-                },
-                Contained_Au_oz: parseFloat(containedAu),
-                Recovery_Adjusted_Value_USD: parseFloat(recoveryValue),
-                exploration_report: {
-                    'Geological Formation': 'Simulated Formation',
-                    'Mineralization Type': 'Simulated Type',
-                    'Rock Type': 'Simulated Rock',
-                    'Access': 'Simulated Access'
-                },
-                top_economic_anomaly: topAnomaly,
-                nearby_anomalies: Math.random() > 0.5 ? Array.from({ length: 2 }, () => ({
-                    lat: lat + (Math.random() - 0.5) / 50,
-                    lng: lng + (Math.random() - 0.5) / 50,
-                    distance_km: (Math.random() * 10).toFixed(2),
-                    composite_score: (Math.random() * 5000000 + 100000).toFixed(0),
-                    result: {
-                        Gold_Potential: Math.random() > 0.5 ? 'Moderate Potential' : 'Low Potential',
-                        Confidence: Math.floor(Math.random() * 30) + 50,
-                        Depth_Estimate: { Depth_m: depth + 50, Estimated_Tonnes: tonnes * 0.8, Grade_g_t: (parseFloat(grade) * 0.5).toFixed(2), Uncertainty: 15 },
-                        Proximity_to_Known_Deposits: { deposit: 'Simulated Deposit B', distance_km: (Math.random() * 20).toFixed(2) },
-                        Indicators: { Hydroxyl_Alteration: Math.random() * 10, Iron_Oxides: Math.random() * 10, Silica_Alteration: Math.random() * 10, Slope: Math.random() * 10 }
-                    }
-                })) : []
-            };
-        }
-
-        async function fetchResultsFromSupabase(coordsArray) {
-            if (!db || !user) return [];
+        async function fetchFromFlaskAPI(coordsArray) {
             try {
-                const { data, error } = await db.from(COLLECTION_NAME).select('*').in('coords', coordsArray);
-                if (error) throw error;
-                return data.map(item => ({
-                    lat: item.lat,
-                    lng: item.lng,
-                    data: JSON.parse(item.data_json)
+                const response = await Promise.all(coordsArray.map(async line => {
+                    const [lat, lng] = line.split(',').map(Number);
+                    const res = await fetch(`/api/analyze_gold?lat=${lat}&lng=${lng}`);
+                    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                    const data = await res.json();
+                    return { lat, lng, data };
                 }));
+                return response;
             } catch (err) {
-                console.error('Error fetching data from Supabase:', err);
-                showError('Error retrieving data from database.');
+                console.error('Error fetching data from Flask API:', err);
+                showError('Error retrieving data from server.');
                 return [];
-            }
-        }
-
-        async function saveResultsToSupabase(results) {
-            if (!db || !user) return;
-            const updates = results.map(r => ({
-                user_id: user.id,
-                lat: r.lat,
-                lng: r.lng,
-                coords: `${r.lat},${r.lng}`,
-                data_json: JSON.stringify(r.data),
-                created_at: new Date().toISOString()
-            }));
-
-            try {
-                const { error } = await db.from(COLLECTION_NAME).upsert(updates, { onConflict: 'coords, user_id' });
-                if (error) throw error;
-                console.log('Results saved to Supabase.');
-            } catch (err) {
-                console.error('Error saving data to Supabase:', err);
-                showError('Error saving data to database.');
             }
         }
 
@@ -697,7 +580,7 @@
                                 <p><strong>Contained Au:</strong> ${r.data.Contained_Au_oz ? r.data.Contained_Au_oz.toLocaleString() + ' oz' : 'N/A'}</p>
                                 <p><strong>Recovery Value:</strong> ${r.data.Recovery_Adjusted_Value_USD ? '$' + r.data.Recovery_Adjusted_Value_USD.toLocaleString() : 'N/A'}</p>
                                 <p><strong>Gold Potential:</strong> ${r.data.gold_analysis.Gold_Potential}</p>
-                                <p><strong>Confidence:</strong> ${r.data.gold_analysis.Confidence}%</p>
+                                <p><strong>Confidence:</strong> ${r.data.gold_analysis.confidence}%</p>
                                 <p><strong>Depth:</strong> ${d.Depth_m} m</p>
                                 <p><strong>Tonnes:</strong> ${d.Estimated_Tonnes.toLocaleString()}</p>
                                 <p><strong>Grade:</strong> ${d.Grade_g_t.toFixed(2)} g/t</p>
@@ -725,7 +608,7 @@
                                 <p><strong>Economic Score:</strong> $${parseInt(topAnomaly.composite_score).toLocaleString()}</p>
                                 <p><strong>Explanation:</strong> ${topAnomaly.ranking_explanation}</p>
                                 <p><strong>Gold Potential:</strong> ${topAnomaly.result.Gold_Potential}</p>
-                                <p><strong>Confidence:</strong> ${topAnomaly.result.Confidence}%</p>
+                                <p><strong>Confidence:</strong> ${topAnomaly.result.confidence}%</p>
                                 <p><strong>Depth:</strong> ${topAnomaly.result.Depth_Estimate.Depth_m} m</p>
                                 <p><strong>Tonnes:</strong> ${topAnomaly.result.Depth_Estimate.Estimated_Tonnes.toLocaleString()}</p>
                                 <p><strong>Grade:</strong> ${topAnomaly.result.Depth_Estimate.Grade_g_t.toFixed(2)} g/t</p>
@@ -765,7 +648,7 @@
                                                     <td>${anomaly.lng.toFixed(4)}</td>
                                                     <td>${anomaly.distance_km}</td>
                                                     <td>${anomaly.result.Gold_Potential}</td>
-                                                    <td>${anomaly.result.Confidence}</td>
+                                                    <td>${anomaly.result.confidence}</td>
                                                     <td>${anomaly.result.Depth_Estimate.Estimated_Tonnes.toLocaleString()}</td>
                                                     <td>${anomaly.result.Depth_Estimate.Grade_g_t.toFixed(2)}</td>
                                                     <td>$${parseInt(anomaly.composite_score).toLocaleString()}</td>
@@ -818,14 +701,10 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: {
-                            beginAtZero: true
-                        }
+                        y: { beginAtZero: true }
                     },
                     plugins: {
-                        legend: {
-                            display: false
-                        }
+                        legend: { display: false }
                     }
                 }
             });
@@ -872,17 +751,10 @@
                 const potential = data.gold_analysis.Gold_Potential_Flag;
                 let color;
                 switch (potential) {
-                    case 'High Potential':
-                        color = 'red';
-                        break;
-                    case 'Moderate Potential':
-                        color = 'orange';
-                        break;
-                    case 'Low Potential':
-                        color = 'green';
-                        break;
-                    default:
-                        color = 'gray';
+                    case 'High': color = 'red'; break;
+                    case 'Moderate': color = 'orange'; break;
+                    case 'Low': color = 'green'; break;
+                    default: color = 'gray';
                 }
 
                 const marker = L.circleMarker(latlng, {
@@ -897,7 +769,7 @@
                 const popupContent = `
                     <b>Coordinates:</b> ${r.lat.toFixed(4)}, ${r.lng.toFixed(4)}<br>
                     <b>Potential:</b> ${data.gold_analysis.Gold_Potential}<br>
-                    <b>Confidence:</b> ${data.gold_analysis.Confidence}%<br>
+                    <b>Confidence:</b> ${data.gold_analysis.confidence}%<br>
                     <b>Value:</b> $${parseInt(data.Recovery_Adjusted_Value_USD).toLocaleString()}<br>
                     <b>Tonnes:</b> ${data.gold_analysis.Depth_Estimate.Estimated_Tonnes.toLocaleString()}<br>
                 `;
@@ -972,7 +844,7 @@
                         <td>${r.data.gold_analysis.Gold_Potential}</td>
                         <td>${r.data.Contained_Au_oz.toLocaleString()}</td>
                         <td>$${parseInt(r.data.Recovery_Adjusted_Value_USD).toLocaleString()}</td>
-                        <td>${r.data.gold_analysis.Confidence}</td>
+                        <td>${r.data.gold_analysis.confidence}</td>
                         <td>${d.Estimated_Tonnes.toLocaleString()}</td>
                         <td>${d.Grade_g_t.toFixed(2)}</td>
                     `;
@@ -1015,12 +887,12 @@
                 doc.setFontSize(14);
                 doc.text(`Coordinate ${i + 1}: ${r.lat}, ${r.lng}`, 14, y); y += 6;
                 doc.setFontSize(12);
-                doc.text(`Potential: ${r.data.Gold_Potential_Flag}`, 14, y); y += 6;
+                doc.text(`Potential: ${r.data.gold_analysis.Gold_Potential_Flag}`, 14, y); y += 6;
                 doc.text(`Location: Lat: ${r.data.location.lat}, Lng: ${r.data.location.lng}`, 14, y); y += 6;
                 doc.text(`Contained Au: ${r.data.Contained_Au_oz ? r.data.Contained_Au_oz.toLocaleString() + ' oz' : 'N/A'}`, 14, y); y += 6;
                 doc.text(`Recovery Value: ${r.data.Recovery_Adjusted_Value_USD ? '$' + parseInt(r.data.Recovery_Adjusted_Value_USD).toLocaleString() : 'N/A'}`, 14, y); y += 6;
                 doc.text(`Gold Potential: ${r.data.gold_analysis.Gold_Potential}`, 14, y); y += 6;
-                doc.text(`Confidence: ${r.data.gold_analysis.Confidence}%`, 14, y); y += 6;
+                doc.text(`Confidence: ${r.data.gold_analysis.confidence}%`, 14, y); y += 6;
                 doc.text(`Depth: ${d.Depth_m} m | Tonnes: ${d.Estimated_Tonnes.toLocaleString()} | Grade: ${d.Grade_g_t.toFixed(2)} g/t | Uncertainty: ${d.Uncertainty}%`, 14, y); y += 6;
                 doc.text(`Indicators: Hydroxyl ${g.Hydroxyl_Alteration.toFixed(2)}, Iron Oxides ${g.Iron_Oxides.toFixed(2)}, Silica ${g.Silica_Alteration.toFixed(2)}, Slope ${g.Slope.toFixed(2)}`, 14, y); y += 6;
 
@@ -1045,7 +917,7 @@
                     doc.text(`Economic Score: $${parseInt(topAnomaly.composite_score).toLocaleString()}`, 14, y); y += 6;
                     doc.text(`Explanation: ${topAnomaly.ranking_explanation}`, 14, y); y += 6;
                     doc.text(`Gold Potential: ${topAnomaly.result.Gold_Potential}`, 14, y); y += 6;
-                    doc.text(`Confidence: ${topAnomaly.result.Confidence}%`, 14, y); y += 6;
+                    doc.text(`Confidence: ${topAnomaly.result.confidence}%`, 14, y); y += 6;
                     doc.text(`Depth: ${topAnomaly.result.Depth_Estimate.Depth_m} m`, 14, y); y += 6;
                     doc.text(`Tonnes: ${topAnomaly.result.Depth_Estimate.Estimated_Tonnes.toLocaleString()}`, 14, y); y += 6;
                     doc.text(`Grade: ${topAnomaly.result.Depth_Estimate.Grade_g_t.toFixed(2)} g/t`, 14, y); y += 6;
@@ -1063,7 +935,7 @@
                         a.lng.toFixed(4),
                         a.distance_km,
                         a.result.Gold_Potential,
-                        a.result.Confidence,
+                        a.result.confidence,
                         a.result.Depth_Estimate.Estimated_Tonnes.toLocaleString(),
                         a.result.Depth_Estimate.Grade_g_t.toFixed(2),
                         `$${parseInt(a.composite_score).toLocaleString()}`,
