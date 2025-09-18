@@ -11,14 +11,19 @@ import json
 # EARTH ENGINE INIT
 # -------------------------------
 try:
-    # Option A: running on Fly.io with secret EE_CREDENTIALS (JSON as string)
-    ee_credentials = os.getenv('EE_CREDENTIALS')
-    if ee_credentials:
-        # Parse JSON string directly from the secret
-        key_data = json.loads(ee_credentials)
-        creds = ee.ServiceAccountCredentials(key_data["client_email"], "jovial-style-470913-i9-2fa18b2326a2.json")
+    ee_credentials_json = os.getenv('EE_CREDENTIALS')
+    if ee_credentials_json:
+        # Parse JSON string from the environment variable
+        key_data = json.loads(ee_credentials_json)
+        # Use key_data directly for ServiceAccountCredentials
+        creds = ee.ServiceAccountCredentials(
+            key_data["client_email"],
+            None, # Pass None for the private_key_file since we're using key_data
+            key_data["private_key"]
+        )
         ee.Initialize(creds, project=key_data["project_id"])
     else:
+        # This is the error from the logs.
         raise Exception("EE_CREDENTIALS environment variable not set. Cannot initialize Earth Engine in online deployment.")
     print("✅ Earth Engine initialized successfully.")
 except Exception as e:
@@ -46,28 +51,39 @@ def get_aoi(lat, lng, size_km=2.5):
     return point.buffer(size_km * 500).bounds()
 
 def compute_gold_proxies(aoi):
-    s2 = (ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
-          .filterBounds(aoi)
-          .filterDate('2022-01-01', '2025-01-01')
-          .sort('CLOUDY_PIXEL_PERCENTAGE')
-          .first())
-    if not s2:
+    """
+    Computes gold proxies from Sentinel-2 data within a given area of interest.
+    Includes robust error handling for API calls.
+    """
+    try:
+        s2 = (ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
+              .filterBounds(aoi)
+              .filterDate('2022-01-01', '2025-01-01')
+              .sort('CLOUDY_PIXEL_PERCENTAGE')
+              .first())
+        if not s2:
+            return {}
+        s2 = s2.clip(aoi)
+        b2, b3, b4, b8, b11, b12 = [s2.select(b) for b in ["B2","B3","B4","B8","B11","B12"]]
+        iron_oxide = b4.divide(b2).add(b4.divide(b3)).rename("Iron_Oxide_Index")
+        hydroxyl = b11.divide(b8).add(b12.divide(b8)).rename("Hydroxyl_Index")
+        silica = b8.divide(b11).rename("Silica_Index")
+        dem = ee.Image("USGS/SRTMGL1_003").clip(aoi)
+        slope = ee.Terrain.slope(dem).rename("Slope")
+        combined = iron_oxide.addBands([hydroxyl, silica, slope])
+        stats = combined.reduceRegion(
+            reducer=ee.Reducer.mean(),
+            geometry=aoi,
+            scale=30,
+            maxPixels=1e9
+        )
+        return stats.getInfo()
+    except Exception as e:
+        # Log the error to help with debugging
+        print(f"❌ Earth Engine API call failed for AOI: {aoi.getInfo()}")
+        print(f"Error details: {e}")
+        # Return an empty dict so the application can handle it gracefully
         return {}
-    s2 = s2.clip(aoi)
-    b2, b3, b4, b8, b11, b12 = [s2.select(b) for b in ["B2","B3","B4","B8","B11","B12"]]
-    iron_oxide = b4.divide(b2).add(b4.divide(b3)).rename("Iron_Oxide_Index")
-    hydroxyl = b11.divide(b8).add(b12.divide(b8)).rename("Hydroxyl_Index")
-    silica = b8.divide(b11).rename("Silica_Index")
-    dem = ee.Image("USGS/SRTMGL1_003").clip(aoi)
-    slope = ee.Terrain.slope(dem).rename("Slope")
-    combined = iron_oxide.addBands([hydroxyl, silica, slope])
-    stats = combined.reduceRegion(
-        reducer=ee.Reducer.mean(),
-        geometry=aoi,
-        scale=30,
-        maxPixels=1e9
-    )
-    return stats.getInfo()
 
 def estimate_depth_quantity_grade_au(stats):
     """Estimate depth, tonnes, grade (g/t), contained Au ounces, uncertainty index"""
