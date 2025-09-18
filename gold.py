@@ -252,6 +252,19 @@ def find_nearby_with_geojson(lat, lng, step_km=10, max_distance_km=100, threshol
 def home():
     return render_template('index.html')
 
+# This dynamic route handles all HTML files in the templates folder.
+@app.route('/<page_name>')
+@app.route('/<page_name>.html')
+def render_page(page_name):
+    try:
+        # Flask looks in the `templates` folder by default, so we just pass the file name.
+        return render_template(f'{page_name}.html')
+    except Exception as e:
+        print(f"Error rendering page {page_name}.html: {e}")
+        # Return a standard 404 Not Found page with a message
+        return "<h1>404 Not Found</h1><p>The requested URL was not found on the server.</p>", 404
+
+# The following specific routes are optional, but kept for clarity or if they have special logic.
 @app.route('/map')
 def show_map():
     return render_template('map.html')
@@ -264,10 +277,7 @@ def login():
 def register():
     return render_template('register.html')
 
-@app.route('/dashboard')
-def dashboard():
-    return render_template('dashboard.html')
-
+# This is still needed for static assets like images, CSS, and JavaScript.
 @app.route('/static/<path:filename>')
 def serve_static(filename):
     return send_from_directory('static', filename)
