@@ -77,7 +77,7 @@ def compute_gold_proxies(aoi):
             scale=30,
             maxPixels=1e9
         )
-        return stats.getInfo()
+        return ee.data.computeValue(stats)
     except Exception as e:
         # Log the error to help with debugging
         print(f"❌ Earth Engine API call failed for AOI: {aoi.getInfo()}")
