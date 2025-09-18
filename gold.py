@@ -80,7 +80,7 @@ def compute_gold_proxies(aoi):
         return ee.data.computeValue(stats)
     except Exception as e:
         # Log the error to help with debugging
-        print(f"❌ Earth Engine API call failed for AOI: {aoi.getInfo()}")
+        print("❌ Earth Engine API call failed for AOI")
         print(f"Error details: {e}")
         # Return an empty dict so the application can handle it gracefully
         return {}
