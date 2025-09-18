@@ -77,7 +77,13 @@ def compute_gold_proxies(aoi):
             scale=30,
             maxPixels=1e9
         )
-        return ee.data.computeValue(stats)
+        task = ee.batch.Export.table.toDrive(
+            collection=ee.FeatureCollection([ee.Feature(None, stats)]),
+            description="gold_stats_export",
+            fileFormat="GeoJSON"
+            )
+        task.start()
+        return {"status": "processing", "message": "Task started. Check Drive for results."}
     except Exception as e:
         # Log the error to help with debugging
         print(f"❌ Earth Engine API call failed: {e}")
