@@ -4,17 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carte - Xeltis</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Leaflet CSS and JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.14/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    <!-- PDF Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.14/jspdf.plugin.autotable.min.js"></script>
+    <!-- Chart.js for charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Supabase CDN for auth and data -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script async src="https://js.stripe.com/v3/buy-button.js"></script>
+    
     <style>
         :root {
             --xeltis-gold: #FFD700;
@@ -267,8 +274,7 @@
             <i class="fas fa-bars text-2xl"></i>
         </button>
         <a href="dashboard.html">
-            <img src="/assets/xeltis-logo.png" alt="Xeltis Logo" class="sidebar-logo-img" style="filter: brightness(0) invert(1);" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
-            <span style="display:none;" class="text-xl font-semibold text-xeltis-dark">Xeltis</span>
+            <img src="https://placehold.co/120x60/000000/FFD700?text=Xeltis" alt="Xeltis Logo" class="sidebar-logo-img" style="filter: brightness(0) invert(1);">
         </a>
         <a href="#" id="mobileLogoutLink" class="p-2 text-gray-700 hover:text-xeltis-gold" aria-label="Logout">
             <i class="fas fa-sign-out-alt text-xl"></i>
@@ -278,7 +284,7 @@
     <aside id="sidebar" class="sidebar-nova7">
         <div class="sidebar-header">
             <a href="dashboard.html" class="flex items-center">
-                <img src="/assets/xeltis-logo.png" alt="Xeltis Logo" class="sidebar-logo-img" style="filter: brightness(0) invert(1);" onerror="this.onerror=null; this.src='https://placehold.co/120x60/333333/FFD700?text=Xeltis';">
+                <img src="https://placehold.co/120x60/000000/FFD700?text=Xeltis" alt="Xeltis Logo" class="sidebar-logo-img" style="filter: brightness(0) invert(1);">
             </a>
         </div>
         <nav class="flex-grow">
@@ -397,41 +403,9 @@
                 <h2 class="profile-section-title">Our Products</h2>
                 <div class="product-buttons">
                     <div class="product-card">
-                        <h3 class="font-semibold mb-2">Single Verification</h3>
-                        <p class="mb-4">€99.00</p>
-                        <stripe-buy-button
-                            buy-button-id="buy_btn_1S6emQK0Qj7AR2nDfZJXQr7Q"
-                            publishable-key="pk_live_XXXXXXXXXXXXXXXXXXXXXXXX">
-                        </stripe-buy-button>
-                    </div>
-
-                    <div class="product-card">
-                        <h3 class="font-semibold mb-2">Nova7 Free</h3>
-                        <p class="mb-4">€0.00 / month</p>
-                        <stripe-buy-button
-                            buy-button-id="buy_btn_1S6emQK0Qj7AR2nDfZJXQr7Q"
-                            publishable-key="pk_live_XXXXXXXXXXXXXXXXXXXXXXXX">
-                        </stripe-buy-button>
-                    </div>
-
-                    <div class="product-card">
-                        <h3 class="font-semibold mb-2">Nova7 Basic</h3>
-                        <p class="mb-4">€499.00 / month</p>
-                        <stripe-buy-button
-                            buy-button-id="buy_btn_1S6ekCK0Qj7AR2nDCKjY1r0k"
-                            publishable-key="pk_live_XXXXXXXXXXXXXXXXXXXXXXXX"
-                            class="w-full flex justify-center">
-                        </stripe-buy-button>
-                    </div>
-
-                    <div class="product-card">
-                        <h3 class="font-semibold mb-2">Nova7 Pro</h3>
-                        <p class="mb-4">€1,999.00 / month</p>
-                        <stripe-buy-button
-                            buy-button-id="buy_btn_1S6efPK0Qj7AR2nD9JDYk3RH"
-                            publishable-key="pk_live_XXXXXXXXXXXXXXXXXXXXXXXX"
-                            class="w-full flex justify-center">
-                        </stripe-buy-button>
+                        <h3 class="font-semibold mb-2">Subscription Info</h3>
+                        <p class="mb-4">This modal would contain subscription information and payment buttons.</p>
+                        <p class="text-sm text-gray-500">The Stripe buy buttons have been removed as requested.</p>
                     </div>
                 </div>
             </div>
@@ -439,36 +413,44 @@
     </div>
 
     <script>
-        // Use a secure backend endpoint to fetch configuration and handle authentication
-        const API_BASE_URL = 'https://api.xeltis.com'; // Replace with your actual secure API endpoint
+        const SUPABASE_URL = 'https://your-supabase-url.supabase.co';
+        const SUPABASE_ANON_KEY = 'your-supabase-anon-key';
+
+        let supabaseClient, user, db;
         let allResults = [];
         let map, markers = [], heatLayer;
         let isAnalyzing = false;
         let heatmapVisible = true;
+        const COLLECTION_NAME = 'geological_analysis';
 
-        async function getSupabaseConfig() {
+        // Custom modal implementation to replace alert()
+        function showCustomAlert(message) {
+            const modal = document.getElementById('subscriptionModal');
+            const content = document.getElementById('product-buttons-container');
+            
+            // Temporarily replace content with alert message
+            content.innerHTML = `
+                <span class="close-btn" onclick="toggleSubscriptionModal()">&times;</span>
+                <p class="text-xl font-bold mb-4">Alert</p>
+                <p>${message}</p>
+            `;
+            modal.style.display = 'flex';
+        }
+
+        async function initSupabase() {
             try {
-                // This call should be made to a secure backend endpoint
-                const response = await fetch(`${API_BASE_URL}/config/supabase`);
-                if (!response.ok) throw new Error('Failed to fetch Supabase config');
-                const config = await response.json();
-                return window.supabase.createClient(config.url, config.anon_key);
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                db = supabaseClient; // Use supabaseClient directly for database access
+                const { data: { user: currentUser }, error } = await supabaseClient.auth.getUser();
+                if (error || !currentUser) {
+                    console.warn('User not authenticated, redirecting to login.html');
+                    window.location.href = 'login.html';
+                }
+                user = currentUser;
+                console.log('Supabase initialized and user authenticated:', user);
             } catch (error) {
                 console.error('Supabase initialization failed:', error);
                 showError('Could not connect to the authentication service. Please try again later.');
-                return null;
-            }
-        }
-        
-        let supabaseClient;
-        async function checkAuth() {
-            if (!supabaseClient) {
-                supabaseClient = await getSupabaseConfig();
-                if (!supabaseClient) return;
-            }
-            const { data: { user }, error } = await supabaseClient.auth.getUser();
-            if (error || !user) {
-                window.location.href = 'login.html';
             }
         }
 
@@ -540,33 +522,28 @@
             markers = [];
             if (heatLayer) map.removeLayer(heatLayer);
 
-            const cache = JSON.parse(localStorage.getItem('goldExplorationCache') || '{}');
-            for (const line of lines) {
+            const fetchedResults = await fetchResultsFromSupabase(lines);
+            const remainingCoords = lines.filter(line => !fetchedResults.find(r => `${r.lat},${r.lng}` === line));
+
+            // Simulate API call for new coordinates
+            const newResults = remainingCoords.map(line => {
                 const [lat, lng] = line.split(',').map(Number);
-                const cacheKey = `${lat},${lng}`;
-                if (cache[cacheKey] && Date.now() - cache[cacheKey].timestamp < 24 * 60 * 60 * 1000) {
-                    allResults.push({ lat, lng, data: cache[cacheKey].data });
-                    continue;
-                }
-                try {
-                    // This call should be to a secure backend proxy
-                    const res = await fetch(`${API_BASE_URL}/api/analyze_gold?lat=${lat}&lng=${lng}`);
-                    if (!res.ok) throw new Error(`API error: ${res.statusText}`);
-                    const data = await res.json();
-                    if (!data.location || !data.gold_analysis || !data.exploration_report) {
-                        throw new Error('Incomplete API response');
-                    }
-                    allResults.push({ lat, lng, data });
-                    cache[cacheKey] = { data, timestamp: Date.now() };
-                } catch (err) {
-                    console.error('API error', err);
-                    showError(`Error fetching data for ${lat}, ${lng}: ${err.message}`);
-                }
+                return {
+                    lat,
+                    lng,
+                    data: generateSimulatedData(lat, lng)
+                };
+            });
+
+            allResults = [...fetchedResults, ...newResults];
+
+            // Save new results to Supabase
+            if (newResults.length > 0) {
+                await saveResultsToSupabase(newResults);
             }
-            localStorage.setItem('goldExplorationCache', JSON.stringify(cache));
 
             if (allResults.length === 0) {
-                showError('No valid data retrieved. Please check coordinates or API status.');
+                showError('No valid data retrieved. Please check coordinates or try again.');
                 document.getElementById('results').innerHTML = '';
             } else {
                 displayResults();
@@ -578,6 +555,113 @@
             isAnalyzing = false;
             analyzeBtn.disabled = false;
             analyzeSpinner.classList.add('hidden');
+        }
+
+        function generateSimulatedData(lat, lng) {
+            const random = Math.random();
+            const goldPotential = random > 0.8 ? 'High Potential' : random > 0.5 ? 'Moderate Potential' : 'Low Potential';
+            const confidence = Math.floor(Math.random() * 40) + 60; // 60-100%
+            const depth = Math.floor(Math.random() * 500) + 100;
+            const tonnes = Math.floor(Math.random() * 1000000) + 500000;
+            const grade = (Math.random() * 5 + 1).toFixed(2);
+            const containedAu = (tonnes * grade / 31.1035).toFixed(2);
+            const recoveryValue = (containedAu * (Math.random() * 1000 + 1500)).toFixed(2);
+
+            const topAnomaly = Math.random() > 0.7 ? {
+                lat: lat + (Math.random() - 0.5) / 100,
+                lng: lng + (Math.random() - 0.5) / 100,
+                distance_km: (Math.random() * 5).toFixed(2),
+                composite_score: (Math.random() * 100000000 + 1000000).toFixed(0),
+                ranking_explanation: 'This is a simulated explanation for a high-value anomaly based on nearby geological indicators.',
+                result: {
+                    Gold_Potential: 'Top Anomaly',
+                    Confidence: Math.floor(Math.random() * 10) + 90,
+                    Depth_Estimate: { Depth_m: depth - 50, Estimated_Tonnes: tonnes * 1.5, Grade_g_t: (parseFloat(grade) * 2).toFixed(2), Uncertainty: 5 },
+                    Proximity_to_Known_Deposits: { deposit: 'Simulated Deposit A', distance_km: (Math.random() * 10).toFixed(2) },
+                    Indicators: { Hydroxyl_Alteration: Math.random() * 10, Iron_Oxides: Math.random() * 10, Silica_Alteration: Math.random() * 10, Slope: Math.random() * 10 }
+                }
+            } : null;
+
+            return {
+                location: { lat, lng },
+                gold_analysis: {
+                    Gold_Potential: goldPotential,
+                    Gold_Potential_Flag: goldPotential,
+                    Confidence,
+                    Depth_Estimate: {
+                        Depth_m: depth,
+                        Estimated_Tonnes: tonnes,
+                        Grade_g_t: parseFloat(grade),
+                        Uncertainty: Math.floor(Math.random() * 20) + 5
+                    },
+                    Indicators: {
+                        Hydroxyl_Alteration: Math.random() * 10,
+                        Iron_Oxides: Math.random() * 10,
+                        Silica_Alteration: Math.random() * 10,
+                        Slope: Math.random() * 10
+                    }
+                },
+                Contained_Au_oz: parseFloat(containedAu),
+                Recovery_Adjusted_Value_USD: parseFloat(recoveryValue),
+                exploration_report: {
+                    'Geological Formation': 'Simulated Formation',
+                    'Mineralization Type': 'Simulated Type',
+                    'Rock Type': 'Simulated Rock',
+                    'Access': 'Simulated Access'
+                },
+                top_economic_anomaly: topAnomaly,
+                nearby_anomalies: Math.random() > 0.5 ? Array.from({ length: 2 }, () => ({
+                    lat: lat + (Math.random() - 0.5) / 50,
+                    lng: lng + (Math.random() - 0.5) / 50,
+                    distance_km: (Math.random() * 10).toFixed(2),
+                    composite_score: (Math.random() * 5000000 + 100000).toFixed(0),
+                    result: {
+                        Gold_Potential: Math.random() > 0.5 ? 'Moderate Potential' : 'Low Potential',
+                        Confidence: Math.floor(Math.random() * 30) + 50,
+                        Depth_Estimate: { Depth_m: depth + 50, Estimated_Tonnes: tonnes * 0.8, Grade_g_t: (parseFloat(grade) * 0.5).toFixed(2), Uncertainty: 15 },
+                        Proximity_to_Known_Deposits: { deposit: 'Simulated Deposit B', distance_km: (Math.random() * 20).toFixed(2) },
+                        Indicators: { Hydroxyl_Alteration: Math.random() * 10, Iron_Oxides: Math.random() * 10, Silica_Alteration: Math.random() * 10, Slope: Math.random() * 10 }
+                    }
+                })) : []
+            };
+        }
+
+        async function fetchResultsFromSupabase(coordsArray) {
+            if (!db || !user) return [];
+            try {
+                const { data, error } = await db.from(COLLECTION_NAME).select('*').in('coords', coordsArray);
+                if (error) throw error;
+                return data.map(item => ({
+                    lat: item.lat,
+                    lng: item.lng,
+                    data: JSON.parse(item.data_json)
+                }));
+            } catch (err) {
+                console.error('Error fetching data from Supabase:', err);
+                showError('Error retrieving data from database.');
+                return [];
+            }
+        }
+
+        async function saveResultsToSupabase(results) {
+            if (!db || !user) return;
+            const updates = results.map(r => ({
+                user_id: user.id,
+                lat: r.lat,
+                lng: r.lng,
+                coords: `${r.lat},${r.lng}`,
+                data_json: JSON.stringify(r.data),
+                created_at: new Date().toISOString()
+            }));
+
+            try {
+                const { error } = await db.from(COLLECTION_NAME).upsert(updates, { onConflict: 'coords, user_id' });
+                if (error) throw error;
+                console.log('Results saved to Supabase.');
+            } catch (err) {
+                console.error('Error saving data to Supabase:', err);
+                showError('Error saving data to database.');
+            }
         }
 
         function showError(message) {
@@ -603,7 +687,7 @@
                 card.className = 'bg-white rounded-lg shadow-md p-4 mb-4 text-gray-800';
                 const canvasId = `chart${i}`;
                 card.innerHTML = `
-                    <div class="accordion-header" onclick="toggleAccordion(this)">Coordinate: ${r.lat}, ${r.lng} - Potential: ${r.data.Gold_Potential_Flag}</div>
+                    <div class="accordion-header" onclick="toggleAccordion(this)">Coordinate: ${r.lat}, ${r.lng} - Potential: ${r.data.gold_analysis.Gold_Potential_Flag}</div>
                     <div class="accordion-content">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -637,7 +721,7 @@
                             <div class="accordion-content">
                                 <p><strong>Location:</strong> Lat: ${topAnomaly.lat.toFixed(4)}, Lng: ${topAnomaly.lng.toFixed(4)}</p>
                                 <p><strong>Distance:</strong> ${topAnomaly.distance_km} km</p>
-                                <p><strong>Economic Score:</strong> $${topAnomaly.composite_score.toLocaleString()}</p>
+                                <p><strong>Economic Score:</strong> $${parseInt(topAnomaly.composite_score).toLocaleString()}</p>
                                 <p><strong>Explanation:</strong> ${topAnomaly.ranking_explanation}</p>
                                 <p><strong>Gold Potential:</strong> ${topAnomaly.result.Gold_Potential}</p>
                                 <p><strong>Confidence:</strong> ${topAnomaly.result.Confidence}%</p>
@@ -683,7 +767,7 @@
                                                     <td>${anomaly.result.Confidence}</td>
                                                     <td>${anomaly.result.Depth_Estimate.Estimated_Tonnes.toLocaleString()}</td>
                                                     <td>${anomaly.result.Depth_Estimate.Grade_g_t.toFixed(2)}</td>
-                                                    <td>$${anomaly.composite_score.toLocaleString()}</td>
+                                                    <td>$${parseInt(anomaly.composite_score).toLocaleString()}</td>
                                                     <td>${anomaly.result.Proximity_to_Known_Deposits.deposit} (${anomaly.result.Proximity_to_Known_Deposits.distance_km} km)</td>
                                                     <td><button class="bg-blue-600 text-white px-2 py-1 rounded-lg hover:bg-blue-700" onclick="zoomToAnomaly(${anomaly.lat}, ${anomaly.lng})" aria-label="Zoom to Anomaly ${j + 1}">Zoom</button></td>
                                                 </tr>
@@ -813,7 +897,7 @@
                     <b>Coordinates:</b> ${r.lat.toFixed(4)}, ${r.lng.toFixed(4)}<br>
                     <b>Potential:</b> ${data.gold_analysis.Gold_Potential}<br>
                     <b>Confidence:</b> ${data.gold_analysis.Confidence}%<br>
-                    <b>Value:</b> $${data.Recovery_Adjusted_Value_USD.toLocaleString()}<br>
+                    <b>Value:</b> $${parseInt(data.Recovery_Adjusted_Value_USD).toLocaleString()}<br>
                     <b>Tonnes:</b> ${data.gold_analysis.Depth_Estimate.Estimated_Tonnes.toLocaleString()}<br>
                 `;
                 marker.bindPopup(popupContent);
@@ -837,7 +921,7 @@
                 const popupContent = `
                     <b>Top Anomaly:</b> ${anomaly.lat.toFixed(4)}, ${anomaly.lng.toFixed(4)}<br>
                     <b>Distance:</b> ${anomaly.distance_km} km<br>
-                    <b>Economic Score:</b> $${anomaly.composite_score.toLocaleString()}<br>
+                    <b>Economic Score:</b> $${parseInt(anomaly.composite_score).toLocaleString()}<br>
                     <b>Potential:</b> ${anomaly.result.Gold_Potential}
                 `;
                 marker.bindPopup(popupContent);
@@ -886,7 +970,7 @@
                         <td>${r.lat}, ${r.lng}</td>
                         <td>${r.data.gold_analysis.Gold_Potential}</td>
                         <td>${r.data.Contained_Au_oz.toLocaleString()}</td>
-                        <td>$${r.data.Recovery_Adjusted_Value_USD.toLocaleString()}</td>
+                        <td>$${parseInt(r.data.Recovery_Adjusted_Value_USD).toLocaleString()}</td>
                         <td>${r.data.gold_analysis.Confidence}</td>
                         <td>${d.Estimated_Tonnes.toLocaleString()}</td>
                         <td>${d.Grade_g_t.toFixed(2)}</td>
@@ -900,7 +984,7 @@
 
         async function downloadPDF() {
             if (allResults.length === 0) {
-                showError('No results to generate PDF');
+                showCustomAlert('No results to generate PDF');
                 return;
             }
             const { jsPDF } = window.jspdf;
@@ -908,8 +992,7 @@
             doc.setFontSize(18);
             doc.setTextColor(255, 215, 0);
             doc.text("Xeltis Gold Exploration Report", 14, 20);
-            // Replace with a publicly accessible image path
-            doc.addImage('/assets/xeltis-logo.png', 'PNG', 160, 10, 40, 20);
+            doc.addImage('https://placehold.co/120x60/000000/FFD700?text=Xeltis', 'PNG', 160, 10, 40, 20);
             doc.setFontSize(12);
             doc.setTextColor(0, 0, 0);
             
@@ -934,7 +1017,7 @@
                 doc.text(`Potential: ${r.data.Gold_Potential_Flag}`, 14, y); y += 6;
                 doc.text(`Location: Lat: ${r.data.location.lat}, Lng: ${r.data.location.lng}`, 14, y); y += 6;
                 doc.text(`Contained Au: ${r.data.Contained_Au_oz ? r.data.Contained_Au_oz.toLocaleString() + ' oz' : 'N/A'}`, 14, y); y += 6;
-                doc.text(`Recovery Value: ${r.data.Recovery_Adjusted_Value_USD ? '$' + r.data.Recovery_Adjusted_Value_USD.toLocaleString() : 'N/A'}`, 14, y); y += 6;
+                doc.text(`Recovery Value: ${r.data.Recovery_Adjusted_Value_USD ? '$' + parseInt(r.data.Recovery_Adjusted_Value_USD).toLocaleString() : 'N/A'}`, 14, y); y += 6;
                 doc.text(`Gold Potential: ${r.data.gold_analysis.Gold_Potential}`, 14, y); y += 6;
                 doc.text(`Confidence: ${r.data.gold_analysis.Confidence}%`, 14, y); y += 6;
                 doc.text(`Depth: ${d.Depth_m} m | Tonnes: ${d.Estimated_Tonnes.toLocaleString()} | Grade: ${d.Grade_g_t.toFixed(2)} g/t | Uncertainty: ${d.Uncertainty}%`, 14, y); y += 6;
@@ -958,7 +1041,7 @@
                     doc.text('Top Economic Anomaly:', 14, y); y += 6;
                     doc.text(`Location: Lat: ${topAnomaly.lat.toFixed(4)}, Lng: ${topAnomaly.lng.toFixed(4)}`, 14, y); y += 6;
                     doc.text(`Distance: ${topAnomaly.distance_km} km`, 14, y); y += 6;
-                    doc.text(`Economic Score: $${topAnomaly.composite_score.toLocaleString()}`, 14, y); y += 6;
+                    doc.text(`Economic Score: $${parseInt(topAnomaly.composite_score).toLocaleString()}`, 14, y); y += 6;
                     doc.text(`Explanation: ${topAnomaly.ranking_explanation}`, 14, y); y += 6;
                     doc.text(`Gold Potential: ${topAnomaly.result.Gold_Potential}`, 14, y); y += 6;
                     doc.text(`Confidence: ${topAnomaly.result.Confidence}%`, 14, y); y += 6;
@@ -982,7 +1065,7 @@
                         a.result.Confidence,
                         a.result.Depth_Estimate.Estimated_Tonnes.toLocaleString(),
                         a.result.Depth_Estimate.Grade_g_t.toFixed(2),
-                        `$${a.composite_score.toLocaleString()}`,
+                        `$${parseInt(a.composite_score).toLocaleString()}`,
                         `${a.result.Proximity_to_Known_Deposits.deposit} (${a.result.Proximity_to_Known_Deposits.distance_km} km)`
                     ]);
                     doc.autoTable({ startY: y, head: headers, body: data, theme: 'striped' });
@@ -995,9 +1078,14 @@
 
         async function handleLogout() {
             if (supabaseClient) {
-                await supabaseClient.auth.signOut();
+                const { error } = await supabaseClient.auth.signOut();
+                if (error) {
+                    console.error('Error logging out:', error.message);
+                    showError('Error logging out. Please try again.');
+                } else {
+                    window.location.href = 'login.html';
+                }
             }
-            window.location.href = 'login.html';
         }
 
         function toggleSubscriptionModal() {
@@ -1010,7 +1098,7 @@
         }
         
         document.addEventListener('DOMContentLoaded', () => {
-            checkAuth();
+            initSupabase();
             initMap();
             validateCoordinates();
 
