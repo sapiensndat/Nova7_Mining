@@ -1,33 +1,46 @@
+from celery import Celery
+import os
 import ee
-from flask import Flask, request, jsonify, render_template, send_from_directory
 from geopy.distance import geodesic
-from flask_cors import CORS
 import datetime
 import sys
-import os
 import json
 import time
-import base64
 import logging
+from math import cos, radians
 
-# Import the Celery app from the new worker.py file
-from worker import celery_app
-
-# Configure logging for better visibility in Heroku logs
+# Configure logging for better visibility
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Create and configure the Celery application
+# Heroku uses the REDIS_URL environment variable to provide the Redis connection string.
+celery_app = Celery(
+    __name__,
+    broker=os.environ.get("REDIS_URL", "redis://localhost:6379/0"),
+    backend=os.environ.get("REDIS_URL", "redis://localhost:6379/0"),
+)
+
+# Optional: Set a timezone and other configurations
+celery_app.conf.update(
+    task_serializer='json',
+    accept_content=['json'],
+    result_serializer='json',
+    timezone='UTC',
+    enable_utc=True,
+)
 
 # -------------------------------
 # EARTH ENGINE INIT
 # -------------------------------
 try:
+    # Decode the base64-encoded credentials from the environment variable
+    # This is a robust way to handle multi-line secrets on services like Heroku or Fly.io
     ee_credentials_json_string = os.getenv('EE_CREDENTIALS')
-    
+
     if not ee_credentials_json_string:
         raise ValueError("❌ EE_CREDENTIALS environment variable not set.")
-    
-    # Strip any leading/trailing whitespace or quotes that might be added by the shell
-    clean_json_string = ee_credentials_json_string.strip().strip('"')
 
+    clean_json_string = ee_credentials_json_string.strip().strip('"')
     ee_credentials_json = json.loads(clean_json_string)
 
     creds = ee.ServiceAccountCredentials(
@@ -35,23 +48,13 @@ try:
         key_data=ee_credentials_json["private_key"]
     )
     ee.Initialize(creds, project=ee_credentials_json["project_id"])
-    logging.info("✅ Earth Engine initialized successfully")
-
-except json.JSONDecodeError as e:
-    logging.critical(f"❌ Failed to decode EE_CREDENTIALS JSON: {e}")
-    # Print the first 50 characters of the string for debugging, if it exists
-    log_value = ee_credentials_json_string[:50] + '...' if 'ee_credentials_json_string' in locals() else 'None'
-    logging.critical(f"❌ The value of EE_CREDENTIALS was: '{log_value}'")
-    sys.exit(1)
+    logging.info("✅ Earth Engine initialized successfully in worker")
 except Exception as e:
-    logging.critical(f"❌ Failed to initialize Earth Engine for an unknown reason: {e}")
+    logging.critical(f"❌ Failed to initialize Earth Engine in worker: {e}")
     sys.exit(1)
-
-app = Flask(__name__)
-CORS(app)
 
 # -------------------------------
-# GLOBAL CONSTANTS / ENHANCEMENTS
+# GLOBAL CONSTANTS / UTILITY FUNCTIONS
 # -------------------------------
 GOLD_PRICE_PER_G_T = 64
 RECOVERY_FACTOR = 0.85
@@ -60,36 +63,15 @@ KNOWN_DEPOSITS = [
     {"name": "Tanzania_Gold_Belt", "lat": -5.0, "lng": 37.0}
 ]
 
-# -------------------------------
-# CELERY TASK
-# -------------------------------
-@celery_app.task(name='tasks.analyze_gold_in_background')
-def analyze_gold_in_background(lat, lng):
-    """A background task to perform the gold analysis."""
-    try:
-        logging.info(f"Starting background analysis for lat: {lat}, lng: {lng}")
-        # Placeholder for a long-running task.
-        # This function should contain the core logic that you want to offload.
-        stats = compute_gold_proxies(get_aoi(lat, lng))
-        interp = assess_gold_potential(stats)
-        # In a real app, you would save this result to a database or a file.
-        logging.info(f"Background analysis complete for lat: {lat}, lng: {lng}")
-        return interp
-    except Exception as e:
-        logging.error(f"Background analysis failed: {e}")
-        return {"error": str(e)}
-
-# -------------------------------
-# ALL UTILITY FUNCTIONS
-# -------------------------------
 def get_aoi(lat, lng, size_km=2.5):
+    """Generates an Area of Interest (AOI) as a buffered EE Geometry."""
     point = ee.Geometry.Point([lng, lat])
     return point.buffer(size_km * 500).bounds()
 
 def compute_gold_proxies(aoi):
     """
-    Computes gold proxies from Sentinel-2 data within a given area of interest.
-    Includes robust error handling for API calls.
+    Computes remote sensing indices from a Sentinel-2 image.
+    This function handles common EE API failures with retries.
     """
     try:
         s2 = (ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
@@ -97,33 +79,42 @@ def compute_gold_proxies(aoi):
               .filterDate('2022-01-01', '2025-01-01')
               .sort('CLOUDY_PIXEL_PERCENTAGE')
               .first())
+
         if not s2:
-            logging.warning("❌ No Sentinel-2 image found for the given AOI.")
             return {}
+
         s2 = s2.clip(aoi)
+
+        # Select relevant bands
         b2, b3, b4, b8, b11, b12 = [s2.select(b) for b in ["B2", "B3", "B4", "B8", "B11", "B12"]]
+
+        # Compute geological indices
         iron_oxide = b4.divide(b2).add(b4.divide(b3)).rename("Iron_Oxide_Index")
         hydroxyl = b11.divide(b8).add(b12.divide(b8)).rename("Hydroxyl_Index")
         silica = b8.divide(b11).rename("Silica_Index")
+
+        # Get DEM and compute slope
         dem = ee.Image("USGS/SRTMGL1_003").clip(aoi)
         slope = ee.Terrain.slope(dem).rename("Slope")
+
         combined = iron_oxide.addBands([hydroxyl, silica, slope])
+
         stats = combined.reduceRegion(
             reducer=ee.Reducer.mean(),
             geometry=aoi,
             scale=30,
             maxPixels=1e9
         )
-        # Retry mechanism for getInfo() to handle transient errors
+
+        # Handle potential API timeouts with retries
         max_attempts = 3
         for attempt in range(max_attempts):
             try:
-                # The .getInfo() call is where the network request and potential failure occurs.
                 return stats.getInfo()
             except Exception as e:
                 logging.warning(f"❌ Attempt {attempt + 1}/{max_attempts} failed: {e}")
                 if attempt < max_attempts - 1:
-                    time.sleep(2)  # Wait before retrying
+                    time.sleep(2)
                 else:
                     logging.error("❌ Max retries reached. Returning empty stats.")
                     return {}
@@ -131,8 +122,9 @@ def compute_gold_proxies(aoi):
         logging.error(f"❌ Earth Engine API call failed unexpectedly: {e}")
         return {}
 
+
 def estimate_depth_quantity_grade_au(stats):
-    """Estimate depth, tonnes, grade (g/t), contained Au ounces, uncertainty index"""
+    """Estimates depth, quantity, grade, and contained gold from the computed indices."""
     if not stats:
         return {"Depth_m": None, "Estimated_Tonnes": None, "Grade_g_t": None, "Contained_Au_oz": None, "Uncertainty": None}
 
@@ -141,6 +133,7 @@ def estimate_depth_quantity_grade_au(stats):
     silica = stats.get("Silica_Index", 0)
     slope = stats.get("Slope", 0)
 
+    # Simple heuristic-based estimation
     depth = max(10, 100 - int(10 * slope + 5 * hydrox + 5 * iron))
     alteration_factor = (iron + hydrox + silica) / 3
     estimated_tonnes = max(1000, int(depth * alteration_factor * 1000))
@@ -157,10 +150,9 @@ def estimate_depth_quantity_grade_au(stats):
     }
 
 def estimate_depth_quantity_grade(stats):
-    """Estimate depth, tonnes, grade (g/t), uncertainty index"""
+    """A lighter version of the estimation function."""
     if not stats:
         return {"Depth_m": None, "Estimated_Tonnes": None, "Grade_g_t": None, "Uncertainty": None}
-
     iron = stats.get("Iron_Oxide_Index", 0)
     hydrox = stats.get("Hydroxyl_Index", 0)
     silica = stats.get("Silica_Index", 0)
@@ -175,19 +167,27 @@ def estimate_depth_quantity_grade(stats):
     return {"Depth_m": depth, "Estimated_Tonnes": estimated_tonnes, "Grade_g_t": grade, "Uncertainty": uncertainty}
 
 def assess_gold_potential(stats):
+    """
+    Assesses the gold potential based on computed indices.
+    Returns a flag and a confidence score.
+    """
     if not stats:
         return {"Gold_Potential": "No Data", "Confidence": 0, "Indicators": {}, "Depth_Estimate": None}
     iron = stats.get("Iron_Oxide_Index", 0)
     hydrox = stats.get("Hydroxyl_Index", 0)
     silica = stats.get("Silica_Index", 0)
     slope = stats.get("Slope", 0)
+
+    # Scoring based on heuristic thresholds
     score = 0
     if iron and iron > 1.5: score += 25
     if hydrox and hydrox > 1.2: score += 25
     if silica and silica > 0.8: score += 20
     if slope and slope > 8: score += 15
+
     confidence = min(100, score)
     depth_quantity = estimate_depth_quantity_grade_au(stats)
+
     return {
         "Gold_Potential": "High" if confidence >= 85 else "Moderate" if confidence >= 30 else "Low",
         "Confidence": confidence,
@@ -196,6 +196,7 @@ def assess_gold_potential(stats):
     }
 
 def build_geology_report(interp):
+    """Builds a human-readable geological report from the analysis results."""
     depth = interp.get("Depth_Estimate", {})
     depth_str = f"Estimated depth: {depth.get('Depth_m', 'Unknown')} m; Approx. ore: {depth.get('Estimated_Tonnes', 'Unknown')} tonnes"
     contained_au = depth.get("Contained_Au_oz", None)
@@ -230,57 +231,36 @@ def build_geology_report(interp):
         "Ground_Truthing": "Field survey and core drilling needed."
     }
 
-def compute_composite_score(anomaly):
-    depth = anomaly["result"].get("Depth_Estimate", {})
-    tonnes = depth.get("Estimated_Tonnes", 0) or 0
-    grade = depth.get("Grade_g_t", 0) or 0
-    confidence = anomaly["result"].get("Confidence", 0)
-    return tonnes * grade * GOLD_PRICE_PER_G_T * RECOVERY_FACTOR * (confidence / 100)
-
 def compute_composite_score_au(anomaly):
+    """Calculates a composite economic score for an anomaly."""
     depth = anomaly["result"].get("Depth_Estimate", {})
     tonnes = depth.get("Estimated_Tonnes", 0) or 0
     grade = depth.get("Grade_g_t", 0) or 0
     confidence = anomaly["result"].get("Confidence", 0)
     return tonnes * grade * GOLD_PRICE_PER_G_T * RECOVERY_FACTOR * (confidence / 100)
-
-def multi_mineral_mode(stats, metals=["Au", "Cu", "Co", "Ni", "Li"]):
-    results = {}
-    base = estimate_depth_quantity_grade_au(stats)
-    for metal in metals:
-        factor = 1.0
-        results[metal] = {
-            "Estimated_Tonnes": base["Estimated_Tonnes"] * factor,
-            "Grade_g_t": base["Grade_g_t"] * factor,
-            "Contained_oz": round(base["Estimated_Tonnes"] * base["Grade_g_t"] * factor / 31.103, 2)
-        }
-    return results
-
-def temporal_persistence_filter(lat, lng, years=[2020, 2021, 2022, 2023, 2024]):
-    stable_count = 0
-    for year in years:
-        aoi = get_aoi(lat, lng)
-        stats = compute_gold_proxies(aoi)
-        interp = assess_gold_potential(stats)
-        if interp.get("Confidence", 0) >= 85:
-            stable_count += 1
-    persistence_score = stable_count / len(years) * 100
-    return persistence_score
 
 def find_nearby_with_geojson(lat, lng, step_km=10, max_distance_km=100, threshold=85):
+    """
+    Performs a breadth-first search for nearby gold anomalies.
+    Returns a list of anomalies as GeoJSON Feature objects.
+    """
     visited = set()
     results = []
     to_check = [(lat, lng, 0)]
+
     while to_check:
         curr_lat, curr_lng, dist = to_check.pop(0)
         key = (round(curr_lat, 4), round(curr_lng, 4))
+        
         if key in visited or dist > max_distance_km:
             continue
+            
         visited.add(key)
+        
         aoi = get_aoi(curr_lat, curr_lng)
         stats = compute_gold_proxies(aoi)
         interp = assess_gold_potential(stats)
-
+        
         interp["Depth_Estimate"] = estimate_depth_quantity_grade(stats)
         interp["Geophysical_Anomalies"] = {}
         interp["Geochemical_Assays"] = {}
@@ -290,74 +270,66 @@ def find_nearby_with_geojson(lat, lng, step_km=10, max_distance_km=100, threshol
             "deposit": nearest["name"],
             "distance_km": round(geodesic((curr_lat, curr_lng), (nearest["lat"], nearest["lng"])).km, 2)
         }
+
+        # Create a GeoJSON point for the result
         interp["GeoJSON"] = {"type": "Point", "coordinates": [curr_lng, curr_lat]}
 
         results.append({"lat": curr_lat, "lng": curr_lng, "distance_km": round(dist, 2), "result": interp})
-
+        
+        # Stop searching if a high-confidence anomaly is found
         if interp["Confidence"] >= threshold:
             break
-
+            
+        # Explore neighboring grid cells
         offsets = [(step_km / 111, 0), (0, step_km / 111), (0, -step_km / 111), (-step_km / 111, 0),
                   (step_km / 111, step_km / 111), (step_km / 111, -step_km / 111),
                   (-step_km / 111, step_km / 111), (-step_km / 111, -step_km / 111)]
+        
         for dlat, dlng in offsets:
-            new_lat, new_lng = curr_lat + dlat, curr_lng + dlng
+            new_lat = curr_lat + dlat
+            new_lng = curr_lng + dlng / cos(radians(curr_lat)) # Account for longitude compression
             new_dist = geodesic((lat, lng), (new_lat, new_lng)).km
-            to_check.append((new_lat, new_lng, new_dist))
+            if (round(new_lat, 4), round(new_lng, 4)) not in visited:
+                to_check.append((new_lat, new_lng, new_dist))
+
     return results
 
-# -------------------------------
-# WEB PAGES ROUTES
-# -------------------------------
-@app.route('/')
-def home():
-    return render_template('index.html')
-
-@app.route('/<page_name>')
-@app.route('/<page_name>.html')
-def render_page(page_name):
+@celery_app.task(bind=True)
+def analyze_gold_in_background(self, lat, lng):
+    """
+    Celery task to perform the full gold analysis workflow.
+    It takes a lat/lng, computes remote sensing data, assesses potential,
+    and returns a structured payload.
+    """
+    logging.info(f"🚀 Starting gold analysis for Lat: {lat}, Lng: {lng}...")
     try:
-        return render_template(f'{page_name}.html')
-    except Exception as e:
-        logging.error(f"Error rendering page {page_name}.html: {e}")
-        return "<h1>404 Not Found</h1><p>The requested URL was not found on the server.</p>", 404
+        # 1. Get the Area of Interest
+        aoi = get_aoi(lat, lng)
 
-@app.route('/map')
-def show_map():
-    return render_template('map.html')
+        # 2. Compute the geological proxies from satellite data
+        stats = compute_gold_proxies(aoi)
 
-@app.route('/login')
-def login():
-    return render_template('login.html')
-
-@app.route('/register')
-def register():
-    return render_template('register.html')
-
-@app.route('/static/<path:filename>')
-def serve_static(filename):
-    return send_from_directory('static', filename)
-
-# -------------------------------
-# API ENDPOINT
-# -------------------------------
-@app.route('/api/analyze_gold', methods=['GET'])
-def analyze_gold():
-    try:
-        lat = float(request.args.get("lat"))
-        lng = float(request.args.get("lng"))
+        # 3. Assess the gold potential based on the proxies
+        interpretation = assess_gold_potential(stats)
         
-        # Dispatch the long-running analysis to the background worker
-        task = analyze_gold_in_background.delay(lat, lng)
+        # 4. Find nearby anomalies (in the real world, this would be a more complex service)
+        nearby_results = find_nearby_with_geojson(lat, lng)
+        
+        # 5. Build a detailed geological report
+        report = build_geology_report(interpretation)
+        
+        result_payload = {
+            "input_location": {"lat": lat, "lng": lng},
+            "analysis_result": interpretation,
+            "nearby_anomalies": nearby_results,
+            "geology_report": report
+        }
+        
+        logging.info("✅ Analysis completed successfully.")
+        return result_payload
 
-        return jsonify({
-            "status": "Analysis started",
-            "task_id": task.id,
-            "message": "Your request is being processed in the background. You can check the task status later."
-        })
     except Exception as e:
-        logging.error(f"❌ API error: {e}")
-        return jsonify({"error": "Internal Server Error"}), 500
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=os.environ.get('PORT', 8080))
+        # Update Celery task state to FAILURE if an error occurs
+        self.update_state(state='FAILURE', meta={'exc_type': type(e).__name__, 'exc_message': str(e)})
+        logging.error(f"❌ Gold analysis failed: {e}")
+        return {"error": str(e)}
