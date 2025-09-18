@@ -9,6 +9,7 @@ import json
 import time
 import base64
 import logging
+from celery.result import AsyncResult # New import for checking task status
 
 # Import the Celery app from the new worker.py file
 from worker import celery_app
@@ -358,6 +359,25 @@ def analyze_gold():
     except Exception as e:
         logging.error(f"❌ API error: {e}")
         return jsonify({"error": "Internal Server Error"}), 500
+
+# New endpoint to check task status
+@app.route('/api/tasks/<task_id>', methods=['GET'])
+def get_task_status(task_id):
+    try:
+        task = AsyncResult(task_id, app=celery_app)
+        if task.ready():
+            return jsonify({
+                "status": "completed",
+                "result": task.get()
+            })
+        else:
+            return jsonify({
+                "status": "pending",
+                "message": "Analysis is still in progress."
+            })
+    except Exception as e:
+        logging.error(f"❌ Error checking task status for ID {task_id}: {e}")
+        return jsonify({"error": "Invalid task ID or internal error."}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=os.environ.get('PORT', 8080))
