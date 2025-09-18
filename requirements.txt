@@ -9,3 +9,4 @@ earthengine-api==0.1.341
 celery
 redis
 geopy==2.3.0
+Flask-CORS==3.0.10
