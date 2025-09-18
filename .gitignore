@@ -1,0 +1,26 @@
+# Ignore GeoJSON and log files
+*.geojson
+*.log
+
+# Ignore mineral detection/points results
+mineral_detection_results*
+mineral_points*
+
+# Ignore videos
+public/videos/*.mp4
+
+# Ignore PDFs in public/data
+public/data/*.pdf
+
+# Ignore placeholder images / large images for deployment
+public/images/video*.jpg
+images/video*.jpg
+images/hero-fallback.jpg
+
+# Ignore OS / editor files
+.DS_Store
+*.swp
+*.swo
+*.idea/
+.vscode/
+.vercel

@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carte - Xeltis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script async src="https://js.stripe.com/v3/buy-button.js"></script>
+    <style>
+        :root {
+            --xeltis-gold: #FFD700;
+            --xeltis-dark: #000000;
+            --xeltis-white: #FFFFFF;
+            --xeltis-gray-light: #F3F2EF;
+            --xeltis-gray-medium: #CED0D4;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--xeltis-dark);
+            color: var(--xeltis-white);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .high-contrast {
+            --xeltis-gray-light: #FFFFFF;
+            --xeltis-dark: #1F2937;
+        }
+        .sidebar-nova7 {
+            background-color: var(--xeltis-dark);
+            color: var(--xeltis-white);
+            width: 260px;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding-top: 1rem;
+            transition: transform 0.3s ease-in-out;
+            z-index: 40;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-header {
+            padding: 0.75rem 1.5rem 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--xeltis-gold);
+            margin-bottom: 0.75rem;
+        }
+        .sidebar-logo-img {
+            max-height: 120px;
+            width: auto;
+        }
+        .sidebar-nova7 .nav-link-sidebar {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            margin: 0.25rem 1rem;
+            font-weight: 500;
+            color: var(--xeltis-white);
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .sidebar-nova7 .nav-link-sidebar:hover {
+            background-color: var(--xeltis-gold);
+            color: var(--xeltis-dark);
+        }
+        .sidebar-nova7 .nav-link-sidebar.active {
+            background-color: var(--xeltis-gold);
+            color: var(--xeltis-dark);
+            font-weight: 600;
+        }
+        .sidebar-nova7 .nav-link-sidebar i {
+            width: 20px;
+            margin-right: 0.75rem;
+            text-align: center;
+        }
+        .main-content-area {
+            margin-left: 260px;
+            padding: 1.5rem;
+            width: calc(100% - 260px);
+            min-height: 100vh;
+            background-color: var(--xeltis-gray-light);
+            color: var(--xeltis-dark);
+        }
+        .mobile-header {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .sidebar-nova7 {
+                transform: translateX(-100%);
+                top: 0;
+                height: 100vh;
+            }
+            .sidebar-nova7.open {
+                transform: translateX(0);
+            }
+            .main-content-area {
+                margin-left: 0;
+                width: 100%;
+                padding-top: calc(60px + 1rem);
+            }
+            .mobile-header {
+                display: flex;
+                background-color: var(--xeltis-white);
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                padding: 0 1rem;
+                height: 60px;
+                align-items: center;
+                justify-content: space-between;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 50;
+            }
+        }
+        .profile-card {
+            background-color: var(--xeltis-white);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            padding: 2rem;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .profile-section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--xeltis-dark);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--xeltis-gold);
+            padding-bottom: 0.5rem;
+        }
+        #map {
+            height: 500px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-top: 1.5rem;
+        }
+        canvas {
+            max-width: 100%;
+            height: 300px;
+        }
+        .table-auto th, .table-auto td {
+            border: 1px solid var(--xeltis-gray-medium);
+            padding: 0.5rem;
+        }
+        .error-message {
+            color: #dc2626;
+            font-weight: 500;
+            margin-top: 1rem;
+            animation: fadeIn 0.5s;
+        }
+        .toast {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            background-color: #dc2626;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            animation: slideIn 0.5s, fadeOut 3s 2s forwards;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; display: none; } }
+        .summary-card {
+            background: linear-gradient(to right, var(--xeltis-white), #F9FAFB);
+            border: 1px solid var(--xeltis-gold);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+        .legend {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 8px;
+            z-index: 1000;
+        }
+        .accordion-header {
+            cursor: pointer;
+            background: var(--xeltis-gold);
+            color: var(--xeltis-dark);
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+        }
+        .accordion-content {
+            display: none;
+        }
+        .accordion-content.open {
+            display: block;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+            position: relative;
+            width: 90%;
+            max-width: 600px;
+            animation-name: animatetop;
+            animation-duration: 0.4s;
+            color: var(--xeltis-dark);
+        }
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close-btn:hover,
+        .close-btn:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        @keyframes animatetop {
+            from { top: -300px; opacity: 0; }
+            to { top: 0; opacity: 1; }
+        }
+        .product-buttons-container .product-card {
+            border: 1px solid var(--xeltis-gold);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <header class="mobile-header md:hidden">
+        <button id="hamburgerBtnMobile" class="p-2 text-gray-700 hover:text-xeltis-gold" aria-label="Toggle Sidebar">
+            <i class="fas fa-bars text-2xl"></i>
+        </button>
+        <a href="dashboard.html">
+            <img src="/Users/sapiensndatabaye/Library/Mobile Documents/com~apple~CloudDocs/Desktop/APPS/xeltis-vite/Nova7_Mining/xeltis-logo-CIxL2od-.png" alt="Xeltis Logo" class="sidebar-logo-img" style="filter: brightness(0) invert(1);" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+            <span style="display:none;" class="text-xl font-semibold text-xeltis-dark">Xeltis</span>
+        </a>
+        <a href="#" id="mobileLogoutLink" class="p-2 text-gray-700 hover:text-xeltis-gold" aria-label="Logout">
+            <i class="fas fa-sign-out-alt text-xl"></i>
+        </a>
+    </header>
+
+    <aside id="sidebar" class="sidebar-nova7">
+        <div class="sidebar-header">
+            <a href="dashboard.html" class="flex items-center">
+                <img src="/Users/sapiensndatabaye/Library/Mobile Documents/com~apple~CloudDocs/Desktop/APPS/xeltis-vite/Nova7_Mining/xeltis-logo-CIxL2od-.png" alt="Xeltis Logo" class="sidebar-logo-img" style="filter: brightness(0) invert(1);" onerror="this.onerror=null; this.src='https://placehold.co/120x60/333333/FFD700?text=Xeltis';">
+            </a>
+        </div>
+        <nav class="flex-grow">
+            <a href="dashboard.html" class="nav-link-sidebar">
+                <i class="fas fa-tachometer-alt"></i>Tableau de bord
+            </a>
+            <a href="map.html" class="nav-link-sidebar active">
+                <i class="fas fa-map-marked-alt"></i>Carte
+            </a>
+            <a href="resources.html" class="nav-link-sidebar">
+                <i class="fas fa-store"></i>Marketplace
+            </a>
+            <a href="investment.html" class="nav-link-sidebar">
+                <i class="fas fa-chart-line"></i>Investment
+            </a>
+            <a href="settings.html" class="nav-link-sidebar">
+                <i class="fas fa-cog"></i>Paramètres
+            </a>
+        </nav>
+        <div class="pb-4">
+            <a href="profile.html" class="nav-link-sidebar">
+                <i class="fas fa-user-circle"></i>Profil
+            </a>
+            <button class="nav-link-sidebar" onclick="toggleSubscriptionModal()">
+                <i class="fas fa-euro-sign"></i>Upgrade
+            </button>
+            <a href="#" id="sidebarLogoutLink" class="nav-link-sidebar" aria-label="Logout">
+                <i class="fas fa-sign-out-alt"></i>Déconnexion
+            </a>
+            <button id="contrastToggle" class="nav-link-sidebar" aria-label="Toggle High Contrast Mode">
+                <i class="fas fa-adjust"></i>High Contrast
+            </button>
+        </div>
+    </aside>
+
+    <main class="main-content-area py-8">
+        <div class="profile-card">
+            <h1 class="profile-section-title"></h1>
+
+            <div id="summary" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="summary-card">
+                    <i class="fas fa-map-marker-alt text-xeltis-gold text-2xl mb-2"></i>
+                    <p><strong>Total Coordinates</strong></p>
+                    <p id="totalCoords">0</p>
+                </div>
+                <div class="summary-card">
+                    <i class="fas fa-ruler-vertical text-xeltis-gold text-2xl mb-2"></i>
+                    <p><strong>Average Depth (m)</strong></p>
+                    <p id="avgDepth">0</p>
+                </div>
+                <div class="summary-card">
+                    <i class="fas fa-coins text-xeltis-gold text-2xl mb-2"></i>
+                    <p><strong>Total Contained Gold (oz)</strong></p>
+                    <p id="totalGold">0</p>
+                </div>
+                <div class="summary-card">
+                    <i class="fas fa-dollar-sign text-xeltis-gold text-2xl mb-2"></i>
+                    <p><strong>Total Recovery Value ($)</strong></p>
+                    <p id="totalValue">0</p>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="coordsInput" class="block text-sm font-medium text-gray-700 mb-2">Enter Coordinates (lat,lng per line):</label>
+                <textarea class="w-full p-2 border rounded-lg focus:ring-xeltis-gold focus:border-xeltis-gold" id="coordsInput" rows="5" placeholder="28.8833,-2.325&#10;-2.325,28.8833" aria-describedby="coordsHelp"></textarea>
+                <p id="coordsHelp" class="text-sm text-gray-500 mt-1">Format: latitude,longitude (e.g., 28.8833,-2.325). Latitude: -90 to 90, Longitude: -180 to 180.</p>
+            </div>
+            <div class="flex space-x-4">
+                <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 flex items-center" id="analyzeBtn" onclick="analyzeCoordinates()" aria-label="Analyze Coordinates">
+                    <i class="fas fa-spinner fa-spin hidden mr-2" id="analyzeSpinner"></i>Analyze
+                </button>
+                <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:bg-gray-400" id="downloadBtn" onclick="downloadPDF()" disabled aria-label="Download PDF Report">Download PDF Report</button>
+                <button class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700" onclick="toggleHeatmap()" aria-label="Toggle Heatmap">Toggle Heatmap</button>
+            </div>
+
+            <div id="error" class="error-message hidden"></div>
+
+            <div id="comparison" class="mt-6 hidden">
+                <h2 class="profile-section-title">Coordinate Comparison</h2>
+                <div class="overflow-x-auto">
+                    <table class="table-auto w-full">
+                        <thead>
+                            <tr class="bg-gray-200">
+                                <th>Coordinates</th>
+                                <th>Gold Potential</th>
+                                <th>Contained Au (oz)</th>
+                                <th>Recovery Value ($)</th>
+                                <th>Confidence (%)</th>
+                                <th>Tonnes</th>
+                                <th>Grade (g/t)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparisonTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="map" class="relative">
+                <div class="legend">
+                    <p><strong>Legend</strong></p>
+                    <p><span class="inline-block w-3 h-3 bg-red-500 rounded-full mr-2"></span>High Potential</p>
+                    <p><span class="inline-block w-3 h-3 bg-orange-500 rounded-full mr-2"></span>Moderate Potential</p>
+                    <p><span class="inline-block w-3 h-3 bg-green-500 rounded-full mr-2"></span>Low Potential</p>
+                    <p><span class="inline-block w-3 h-3 bg-purple-500 rounded-full mr-2"></span>Top Economic Anomaly</p>
+                </div>
+            </div>
+
+            <div id="results" class="mt-6"></div>
+        </div>
+    </main>
+
+    <div id="subscriptionModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="toggleSubscriptionModal()">&times;</span>
+            <div id="product-buttons-container">
+                <h2 class="profile-section-title">Our Products</h2>
+                <div class="product-buttons">
+                    <div class="product-card">
+                        <h3 class="font-semibold mb-2">Single Verification</h3>
+                        <p class="mb-4">€99.00</p>
+                        <stripe-buy-button
+                            buy-button-id="buy_btn_1S6emQK0Qj7AR2nDfZJXQr7Q"
+                            publishable-key="pk_live_51S6RtqK0Qj7AR2nD1iXKiYZ2QAonC6I5JpDkO1DTQnwjKdGPjCSmsv3EOV6wR1DdzSTq0Fkp29hMW36s7uEtxjbr00ZK8XfXGn">
+                        </stripe-buy-button>
+                    </div>
+
+                    <div class="product-card">
+                        <h3 class="font-semibold mb-2">Nova7 Free</h3>
+                        <p class="mb-4">€0.00 / month</p>
+                        <stripe-buy-button
+                            buy-button-id="buy_btn_1S6emQK0Qj7AR2nDfZJXQr7Q"
+                            publishable-key="pk_live_51S6RtqK0Qj7AR2nD1iXKiYZ2QAonC6I5JpDkO1DTQnwjKdGPjCSmsv3EOV6wR1DdzSTq0Fkp29hMW36s7uEtxjbr00ZK8XfXGn">
+                        </stripe-buy-button>
+                    </div>
+
+                    <div class="product-card">
+                        <h3 class="font-semibold mb-2">Nova7 Basic</h3>
+                        <p class="mb-4">€499.00 / month</p>
+                        <stripe-buy-button
+                            buy-button-id="buy_btn_1S6ekCK0Qj7AR2nDCKjY1r0k"
+                            publishable-key="pk_live_51S6RtqK0Qj7AR2nD1iXKiYZ2QAonC6I5JpDkO1DTQnwjKdGPjCSmsv3EOV6wR1DdzSTq0Fkp29hMW36s7uEtxjbr00ZK8XfXGn"
+                            class="w-full flex justify-center">
+                        </stripe-buy-button>
+                    </div>
+
+                    <div class="product-card">
+                        <h3 class="font-semibold mb-2">Nova7 Pro</h3>
+                        <p class="mb-4">€1,999.00 / month</p>
+                        <stripe-buy-button
+                            buy-button-id="buy_btn_1S6efPK0Qj7AR2nD9JDYk3RH"
+                            publishable-key="pk_live_51S6RtqK0Qj7AR2nD1iXKiYZ2QAonC6I5JpDkO1DTQnwjKdGPjCSmsv3EOV6wR1DdzSTq0Fkp29hMW36s7uEtxjbr00ZK8XfXGn"
+                            class="w-full flex justify-center">
+                        </stripe-buy-button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const backendUrl = 'https://new-backend-url.com';
+        const SUPABASE_URL = 'https://qudbehodnhevjxmdwvta.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1ZGJlaG9kbmhldmp4bWR3dnRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1MjExODksImV4cCI6MjA3MDA5NzE4OX0.YnK8UKd76PBLh3L0zAv5fY0JFK6EWq-UBHLY8jXz55w';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let allResults = [];
+        let map, markers = [], heatLayer;
+        let isAnalyzing = false;
+        let heatmapVisible = true;
+
+        async function checkAuth() {
+            const { data: { user }, error } = await supabase.auth.getUser();
+            if (error || !user) {
+                window.location.href = 'login.html';
+            }
+        }
+
+        function initMap(lat = 28.8833, lng = -2.325) {
+            map = L.map('map', { zoomControl: true }).setView([lat, lng], 10);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://carto.com/attributions">CartoDB</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                maxZoom: 19
+            }).addTo(map);
+            L.control.scale().addTo(map);
+            map.on('click', (e) => {
+                const coords = `${e.latlng.lat.toFixed(4)},${e.latlng.lng.toFixed(4)}`;
+                const textarea = document.getElementById('coordsInput');
+                textarea.value = textarea.value ? `${textarea.value}\n${coords}` : coords;
+                validateCoordinates();
+            });
+        }
+
+        function validateCoordinates() {
+            const textarea = document.getElementById('coordsInput');
+            const lines = textarea.value.trim().split('\n');
+            let isValid = true;
+            for (const line of lines) {
+                if (!line.match(/^-?\d*\.?\d+,-?\d*\.?\d+$/)) {
+                    isValid = false;
+                    break;
+                }
+                const [lat, lng] = line.split(',').map(Number);
+                if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+                    isValid = false;
+                    break;
+                }
+            }
+            textarea.classList.toggle('border-green-500', isValid);
+            textarea.classList.toggle('border-red-500', !isValid);
+            return isValid;
+        }
+
+        async function analyzeCoordinates() {
+            if (isAnalyzing) return;
+            isAnalyzing = true;
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const analyzeSpinner = document.getElementById('analyzeSpinner');
+            analyzeBtn.disabled = true;
+            analyzeSpinner.classList.remove('hidden');
+            const errorDiv = document.getElementById('error');
+            errorDiv.classList.add('hidden');
+            document.getElementById('results').innerHTML = '<p>Loading...</p>';
+
+            const input = document.getElementById('coordsInput').value.trim();
+            if (!input) {
+                showError('Please enter coordinates');
+                isAnalyzing = false;
+                analyzeBtn.disabled = false;
+                analyzeSpinner.classList.add('hidden');
+                return;
+            }
+            if (!validateCoordinates()) {
+                showError('Invalid coordinates: Use format lat,lng (e.g., 28.8833,-2.325). Lat: -90 to 90, Lng: -180 to 180.');
+                isAnalyzing = false;
+                analyzeBtn.disabled = false;
+                analyzeSpinner.classList.add('hidden');
+                return;
+            }
+
+            const lines = input.split('\n');
+            allResults = [];
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+            if (heatLayer) map.removeLayer(heatLayer);
+
+            const cache = JSON.parse(localStorage.getItem('goldExplorationCache') || '{}');
+            for (const line of lines) {
+                const [lat, lng] = line.split(',').map(Number);
+                const cacheKey = `${lat},${lng}`;
+                if (cache[cacheKey] && Date.now() - cache[cacheKey].timestamp < 24 * 60 * 60 * 1000) {
+                    allResults.push({ lat, lng, data: cache[cacheKey].data });
+                    continue;
+                }
+                try {
+                    // This is the corrected line
+                    const res = await fetch(`${backendUrl}/api/analyze_gold?lat=${lat}&lng=${lng}`);
+                    if (!res.ok) throw new Error(`API error: ${res.statusText}`);
+                    const data = await res.json();
+                    if (!data.location || !data.gold_analysis || !data.exploration_report) {
+                        throw new Error('Incomplete API response');
+                    }
+                    allResults.push({ lat, lng, data });
+                    cache[cacheKey] = { data, timestamp: Date.now() };
+                } catch (err) {
+                    console.error('API error', err);
+                    showError(`Error fetching data for ${lat}, ${lng}: ${err.message}`);
+                }
+            }
+            localStorage.setItem('goldExplorationCache', JSON.stringify(cache));
+
+            if (allResults.length === 0) {
+                showError('No valid data retrieved. Please check coordinates or API status.');
+                document.getElementById('results').innerHTML = '';
+            } else {
+                displayResults();
+                updateMap();
+                updateSummary();
+                updateComparison();
+                document.getElementById('downloadBtn').disabled = false;
+            }
+            isAnalyzing = false;
+            analyzeBtn.disabled = false;
+            analyzeSpinner.classList.add('hidden');
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'toast';
+            errorDiv.textContent = message;
+            document.body.appendChild(errorDiv);
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+
+        function displayResults() {
+            const container = document.getElementById('results');
+            container.innerHTML = '';
+
+            allResults.forEach((r, i) => {
+                const d = r.data.gold_analysis.Depth_Estimate;
+                const g = r.data.gold_analysis.Indicators;
+                const report = r.data.exploration_report;
+                const topAnomaly = r.data.top_economic_anomaly;
+                const nearbyAnomalies = r.data.nearby_anomalies || [];
+
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-lg shadow-md p-4 mb-4';
+                const canvasId = `chart${i}`;
+                card.innerHTML = `
+                    <div class="accordion-header" onclick="toggleAccordion(this)">Coordinate: ${r.lat}, ${r.lng} - Potential: ${r.data.Gold_Potential_Flag} <span class="text-xl">${report.Gold_Potential_Flag.split(' ')[0]}</span></div>
+                    <div class="accordion-content">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <h3 class="font-semibold text-md mb-2">Geological Analysis</h3>
+                                <p><strong>Location:</strong> Lat: ${r.data.location.lat}, Lng: ${r.data.location.lng}</p>
+                                <p><strong>Contained Au:</strong> ${r.data.Contained_Au_oz ? r.data.Contained_Au_oz.toLocaleString() + ' oz' : 'N/A'}</p>
+                                <p><strong>Recovery Value:</strong> ${r.data.Recovery_Adjusted_Value_USD ? '$' + r.data.Recovery_Adjusted_Value_USD.toLocaleString() : 'N/A'}</p>
+                                <p><strong>Gold Potential:</strong> ${r.data.gold_analysis.Gold_Potential}</p>
+                                <p><strong>Confidence:</strong> ${r.data.gold_analysis.Confidence}%</p>
+                                <p><strong>Depth:</strong> ${d.Depth_m} m</p>
+                                <p><strong>Tonnes:</strong> ${d.Estimated_Tonnes.toLocaleString()}</p>
+                                <p><strong>Grade:</strong> ${d.Grade_g_t.toFixed(2)} g/t</p>
+                                <p><strong>Uncertainty:</strong> ${d.Uncertainty}%</p>
+                                <h3 class="font-semibold text-md mt-4 mb-2">Indicators</h3>
+                                <p>Hydroxyl Alteration: ${g.Hydroxyl_Alteration.toFixed(2)}</p>
+                                <p>Iron Oxides: ${g.Iron_Oxides.toFixed(2)}</p>
+                                <p>Silica Alteration: ${g.Silica_Alteration.toFixed(2)}</p>
+                                <p>Slope: ${g.Slope.toFixed(2)}</p>
+                                <canvas id="${canvasId}" class="mt-4" aria-label="Geological Indicators Chart"></canvas>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-md mb-2">Exploration Report</h3>
+                                ${Object.entries(report)
+                                    .filter(([key]) => key !== 'Gold_Potential_Flag')
+                                    .map(([key, value]) => `<p><strong>${key.replace(/_/g, ' ')}:</strong> ${value}</p>`)
+                                    .join('')}
+                            </div>
+                        </div>
+                        ${topAnomaly ? `
+                            <div class="accordion-header mt-4" onclick="toggleAccordion(this)">Top Economic Anomaly</div>
+                            <div class="accordion-content">
+                                <p><strong>Location:</strong> Lat: ${topAnomaly.lat.toFixed(4)}, Lng: ${topAnomaly.lng.toFixed(4)}</p>
+                                <p><strong>Distance:</strong> ${topAnomaly.distance_km} km</p>
+                                <p><strong>Economic Score:</strong> $${topAnomaly.composite_score.toLocaleString()}</p>
+                                <p><strong>Explanation:</strong> ${topAnomaly.ranking_explanation}</p>
+                                <p><strong>Gold Potential:</strong> ${topAnomaly.result.Gold_Potential}</p>
+                                <p><strong>Confidence:</strong> ${topAnomaly.result.Confidence}%</p>
+                                <p><strong>Depth:</strong> ${topAnomaly.result.Depth_Estimate.Depth_m} m</p>
+                                <p><strong>Tonnes:</strong> ${topAnomaly.result.Depth_Estimate.Estimated_Tonnes.toLocaleString()}</p>
+                                <p><strong>Grade:</strong> ${topAnomaly.result.Depth_Estimate.Grade_g_t.toFixed(2)} g/t</p>
+                                <p><strong>Uncertainty:</strong> ${topAnomaly.result.Depth_Estimate.Uncertainty}%</p>
+                                <p><strong>Proximity:</strong> ${topAnomaly.result.Proximity_to_Known_Deposits.deposit} (${topAnomaly.result.Proximity_to_Known_Deposits.distance_km} km)</p>
+                                <h4 class="font-semibold text-sm mt-2 mb-1">Indicators</h4>
+                                <p>Hydroxyl Alteration: ${topAnomaly.result.Indicators.Hydroxyl_Alteration.toFixed(2)}</p>
+                                <p>Iron Oxides: ${topAnomaly.result.Indicators.Iron_Oxides.toFixed(2)}</p>
+                                <p>Silica Alteration: ${topAnomaly.result.Indicators.Silica_Alteration.toFixed(2)}</p>
+                                <p>Slope: ${topAnomaly.result.Indicators.Slope.toFixed(2)}</p>
+                                <button class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 mt-2" onclick="zoomToAnomaly(${topAnomaly.lat}, ${topAnomaly.lng})" aria-label="Zoom to Top Anomaly">Zoom to Anomaly</button>
+                            </div>
+                        ` : '<p class="mt-4">No top economic anomaly found.</p>'}
+                        <div class="accordion-header mt-4" onclick="toggleAccordion(this)">Nearby Anomalies</div>
+                        <div class="accordion-content">
+                            <div class="overflow-x-auto">
+                                <table class="table-auto w-full">
+                                    <thead>
+                                        <tr class="bg-gray-200">
+                                            <th>Lat</th>
+                                            <th>Lng</th>
+                                            <th>Distance (km)</th>
+                                            <th>Potential</th>
+                                            <th>Confidence (%)</th>
+                                            <th>Tonnes</th>
+                                            <th>Grade (g/t)</th>
+                                            <th>Score (USD)</th>
+                                            <th>Proximity</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${nearbyAnomalies.map((anomaly, j) => `
+                                            <tr>
+                                                <td>${anomaly.lat.toFixed(4)}</td>
+                                                <td>${anomaly.lng.toFixed(4)}</td>
+                                                <td>${anomaly.distance_km}</td>
+                                                <td>${anomaly.result.Gold_Potential}</td>
+                                                <td>${anomaly.result.Confidence}</td>
+                                                <td>${anomaly.result.Depth_Estimate.Estimated_Tonnes.toLocaleString()}</td>
+                                                <td>${anomaly.result.Depth_Estimate.Grade_g_t.toFixed(2)}</td>
+                                                <td>$${anomaly.composite_score.toLocaleString()}</td>
+                                                <td>${anomaly.result.Proximity_to_Known_Deposits.deposit} (${anomaly.result.Proximity_to_Known_Deposits.distance_km} km)</td>
+                                                <td><button class="bg-blue-600 text-white px-2 py-1 rounded-lg hover:bg-blue-700" onclick="zoomToAnomaly(${anomaly.lat}, ${anomaly.lng})" aria-label="Zoom to Anomaly ${j + 1}">Zoom</button></td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+
+                const ctx = document.getElementById(canvasId).getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Hydroxyl', 'Iron Oxides', 'Silica', 'Slope'],
+                        datasets: [{
+                            label: 'Geological Indicators',
+                            data: [g.Hydroxyl_Alteration, g.Iron_Oxides, g.Silica_Alteration, g.Slope],
+                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
+                        }]
+                    },
+                    options: { responsive: true, plugins: { title: { display: true, text: 'Geological Indicators' } }, scales: { y: { beginAtZero: true } } }
+                });
+            });
+
+            document.querySelectorAll('.accordion-header').forEach(header => {
+                header.click();
+            });
+        }
+
+        function toggleAccordion(header) {
+            const content = header.nextElementSibling;
+            content.classList.toggle('open');
+        }
+
+        function zoomToAnomaly(lat, lng) {
+            map.setView([lat, lng], 12);
+        }
+
+        function toggleHeatmap() {
+            heatmapVisible = !heatmapVisible;
+            if (heatmapVisible && heatLayer) {
+                heatLayer.addTo(map);
+            } else if (heatLayer) {
+                map.removeLayer(heatLayer);
+            }
+        }
+
+        function updateMap() {
+            let heatData = [];
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+
+            if (allResults.length > 0) {
+                const { lat, lng } = allResults[0];
+                map.setView([lat, lng], 10);
+            }
+
+            allResults.forEach(r => {
+                const color = r.data.Gold_Potential_Flag === "High" ? "red" :
+                              r.data.Gold_Potential_Flag === "Moderate" ? "orange" : "green";
+                const marker = L.circleMarker([r.lat, r.lng], { color, radius: 8 }).addTo(map)
+                    .bindPopup(`<b>Queried Coordinate</b><br>Lat: ${r.lat}, Lng: ${r.lng}<br>Potential: ${r.data.Gold_Potential_Flag}<br>Contained Au: ${r.data.Contained_Au_oz.toLocaleString()} oz<br>Recovery Value: $${r.data.Recovery_Adjusted_Value_USD.toLocaleString()}`);
+                markers.push(marker);
+
+                const intensity = r.data.Gold_Potential_Flag === "High" ? 1 :
+                                 r.data.Gold_Potential_Flag === "Moderate" ? 0.6 : 0.3;
+                heatData.push([r.lat, r.lng, intensity]);
+
+                (r.data.nearby_anomalies || []).forEach(anomaly => {
+                    const anomalyColor = anomaly.result.Gold_Potential === "High" ? "red" :
+                                        anomaly.result.Gold_Potential === "Moderate" ? "orange" : "green";
+                    const anomalyMarker = L.circleMarker([anomaly.lat, anomaly.lng], { color: anomalyColor, radius: 6, opacity: 0.5 }).addTo(map)
+                    .bindPopup(`<b>Nearby Anomaly</b><br>Lat: ${anomaly.lat.toFixed(4)}, Lng: ${anomaly.lng.toFixed(4)}<br>Potential: ${anomaly.result.Gold_Potential}<br>Score: $${anomaly.composite_score.toLocaleString()}<br>Tonnes: ${anomaly.result.Depth_Estimate.Estimated_Tonnes.toLocaleString()}<br>Grade: ${anomaly.result.Depth_Estimate.Grade_g_t.toFixed(2)} g/t`);
+                    markers.push(anomalyMarker);
+                    const anomalyIntensity = anomaly.result.Gold_Potential === "High" ? 0.8 :
+                                            anomaly.result.Gold_Potential === "Moderate" ? 0.5 : 0.2;
+                    heatData.push([anomaly.lat, anomaly.lng, anomalyIntensity]);
+                });
+
+                if (r.data.top_economic_anomaly) {
+                    const top = r.data.top_economic_anomaly;
+                    const topMarker = L.circleMarker([top.lat, top.lng], { color: 'purple', radius: 10 }).addTo(map)
+                        .bindPopup(`<b>Top Economic Anomaly</b><br>Lat: ${top.lat.toFixed(4)}, Lng: ${top.lng.toFixed(4)}<br>Score: $${top.composite_score.toLocaleString()}<br>${top.ranking_explanation}<br>Tonnes: ${top.result.Depth_Estimate.Estimated_Tonnes.toLocaleString()}<br>Grade: ${top.result.Depth_Estimate.Grade_g_t.toFixed(2)} g/t`);
+                    markers.push(topMarker);
+                    heatData.push([top.lat, top.lng, 1]);
+                }
+            });
+
+            if (heatData.length && heatmapVisible) {
+                heatLayer = L.heatLayer(heatData, { radius: 25, blur: 15, maxZoom: 10 }).addTo(map);
+            }
+            if (markers.length) {
+                const group = new L.featureGroup(markers);
+                map.fitBounds(group.getBounds().pad(0.2));
+            }
+        }
+
+        function updateSummary() {
+            let totalCoords = allResults.length;
+            let avgDepth = 0, totalGold = 0, totalValue = 0;
+
+            allResults.forEach(r => {
+                const d = r.data.gold_analysis.Depth_Estimate;
+                avgDepth += d.Depth_m || 0;
+                totalGold += r.data.Contained_Au_oz || 0;
+                totalValue += r.data.Recovery_Adjusted_Value_USD || 0;
+            });
+
+            avgDepth = totalCoords ? (avgDepth / totalCoords).toFixed(2) : 0;
+            totalGold = totalGold.toFixed(2);
+            totalValue = totalValue.toLocaleString();
+
+            document.getElementById('totalCoords').innerText = totalCoords;
+            document.getElementById('avgDepth').innerText = avgDepth;
+            document.getElementById('totalGold').innerText = totalGold;
+            document.getElementById('totalValue').innerText = totalValue;
+        }
+
+        function updateComparison() {
+            const table = document.getElementById('comparisonTable');
+            table.innerHTML = '';
+            if (allResults.length > 1) {
+                document.getElementById('comparison').classList.remove('hidden');
+                allResults.forEach(r => {
+                    const d = r.data.gold_analysis.Depth_Estimate;
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${r.lat}, ${r.lng}</td>
+                        <td>${r.data.gold_analysis.Gold_Potential}</td>
+                        <td>${r.data.Contained_Au_oz.toLocaleString()}</td>
+                        <td>$${r.data.Recovery_Adjusted_Value_USD.toLocaleString()}</td>
+                        <td>${r.data.gold_analysis.Confidence}</td>
+                        <td>${d.Estimated_Tonnes.toLocaleString()}</td>
+                        <td>${d.Grade_g_t.toFixed(2)}</td>
+                    `;
+                    table.appendChild(row);
+                });
+            } else {
+                document.getElementById('comparison').classList.add('hidden');
+            }
+        }
+
+        async function downloadPDF() {
+            if (allResults.length === 0) {
+                showError('No results to generate PDF');
+                return;
+            }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFontSize(18);
+            doc.setTextColor(255, 215, 0);
+            doc.text("Xeltis Gold Exploration Report", 14, 20);
+            doc.addImage('/Users/sapiensndatabaye/Library/Mobile Documents/com~apple~CloudDocs/Desktop/APPS/xeltis-vite/Nova7_Mining/xeltis-logo-CIxL2od-.png', 'PNG', 160, 10, 40, 20);
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            let y = 40;
+
+            allResults.forEach((r, i) => {
+                const d = r.data.gold_analysis.Depth_Estimate;
+                const g = r.data.gold_analysis.Indicators;
+                const report = r.data.exploration_report;
+                const topAnomaly = r.data.top_economic_anomaly;
+                const nearbyAnomalies = r.data.nearby_anomalies || [];
+
+                doc.setFontSize(14);
+                doc.text(`Coordinate ${i + 1}: ${r.lat}, ${r.lng}`, 14, y); y += 6;
+                doc.setFontSize(12);
+                doc.text(`Potential: ${r.data.Gold_Potential_Flag}`, 14, y); y += 6;
+                doc.text(`Location: Lat: ${r.data.location.lat}, Lng: ${r.data.location.lng}`, 14, y); y += 6;
+                doc.text(`Contained Au: ${r.data.Contained_Au_oz ? r.data.Contained_Au_oz.toLocaleString() + ' oz' : 'N/A'}`, 14, y); y += 6;
+                doc.text(`Recovery Value: ${r.data.Recovery_Adjusted_Value_USD ? '$' + r.data.Recovery_Adjusted_Value_USD.toLocaleString() : 'N/A'}`, 14, y); y += 6;
+                doc.text(`Gold Potential: ${r.data.gold_analysis.Gold_Potential}`, 14, y); y += 6;
+                doc.text(`Confidence: ${r.data.gold_analysis.Confidence}%`, 14, y); y += 6;
+                doc.text(`Depth: ${d.Depth_m} m | Tonnes: ${d.Estimated_Tonnes.toLocaleString()} | Grade: ${d.Grade_g_t.toFixed(2)} g/t | Uncertainty: ${d.Uncertainty}%`, 14, y); y += 6;
+                doc.text(`Indicators: Hydroxyl ${g.Hydroxyl_Alteration.toFixed(2)}, Iron Oxides ${g.Iron_Oxides.toFixed(2)}, Silica ${g.Silica_Alteration.toFixed(2)}, Slope ${g.Slope.toFixed(2)}`, 14, y); y += 6;
+
+                const canvas = document.querySelectorAll('canvas')[i];
+                if (canvas) {
+                    const imgData = canvas.toDataURL('image/png');
+                    doc.addImage(imgData, 'PNG', 14, y, 180, 60);
+                    y += 70;
+                }
+
+                doc.text('Exploration Report:', 14, y); y += 6;
+                Object.entries(report)
+                    .filter(([key]) => key !== 'Gold_Potential_Flag')
+                    .forEach(([key, value]) => {
+                        doc.text(`${key.replace(/_/g, ' ')}: ${value}`, 14, y); y += 6;
+                    });
+
+                if (topAnomaly) {
+                    doc.text('Top Economic Anomaly:', 14, y); y += 6;
+                    doc.text(`Location: Lat: ${topAnomaly.lat.toFixed(4)}, Lng: ${topAnomaly.lng.toFixed(4)}`, 14, y); y += 6;
+                    doc.text(`Distance: ${topAnomaly.distance_km} km`, 14, y); y += 6;
+                    doc.text(`Economic Score: $${topAnomaly.composite_score.toLocaleString()}`, 14, y); y += 6;
+                    doc.text(`Explanation: ${topAnomaly.ranking_explanation}`, 14, y); y += 6;
+                    doc.text(`Gold Potential: ${topAnomaly.result.Gold_Potential}`, 14, y); y += 6;
+                    doc.text(`Confidence: ${topAnomaly.result.Confidence}%`, 14, y); y += 6;
+                    doc.text(`Depth: ${topAnomaly.result.Depth_Estimate.Depth_m} m`, 14, y); y += 6;
+                    doc.text(`Tonnes: ${topAnomaly.result.Depth_Estimate.Estimated_Tonnes.toLocaleString()}`, 14, y); y += 6;
+                    doc.text(`Grade: ${topAnomaly.result.Depth_Estimate.Grade_g_t.toFixed(2)} g/t`, 14, y); y += 6;
+                    doc.text(`Uncertainty: ${topAnomaly.result.Depth_Estimate.Uncertainty}%`, 14, y); y += 6;
+                    doc.text(`Proximity: ${topAnomaly.result.Proximity_to_Known_Deposits.deposit} (${topAnomaly.result.Proximity_to_Known_Deposits.distance_km} km)`, 14, y); y += 6;
+                    doc.text(`Indicators: Hydroxyl ${topAnomaly.result.Indicators.Hydroxyl_Alteration.toFixed(2)}, Iron Oxides ${topAnomaly.result.Indicators.Iron_Oxides.toFixed(2)}, Silica ${topAnomaly.result.Indicators.Silica_Alteration.toFixed(2)}, Slope ${topAnomaly.result.Indicators.Slope.toFixed(2)}`, 14, y); y += 6;
+                }
+
+                if (nearbyAnomalies.length) {
+                    doc.text('Nearby Anomalies:', 14, y); y += 6;
+                    const headers = ['Lat', 'Lng', 'Distance (km)', 'Potential', 'Confidence (%)', 'Tonnes', 'Grade (g/t)', 'Score (USD)', 'Proximity'];
+                    const data = nearbyAnomalies.map(a => [
+                        a.lat.toFixed(4),
+                        a.lng.toFixed(4),
+                        a.distance_km,
+                        a.result.Gold_Potential,
+                        a.result.Confidence,
+                        a.result.Depth_Estimate.Estimated_Tonnes.toLocaleString(),
+                        a.result.Depth_Estimate.Grade_g_t.toFixed(2),
+                        `$${a.composite_score.toLocaleString()}`,
+                        `${a.result.Proximity_to_Known_Deposits.deposit} (${a.result.Proximity_to_Known_Deposits.distance_km} km)`
+                    ]);
+                    doc.autoTable({ startY: y, head: [headers], body: data });
+                    y = doc.lastAutoTable.finalY + 10;
+                }
+
+                if (y > 250) { doc.addPage(); y = 20; }
+            });
+
+            doc.save('xeltis_gold_exploration_report.pdf');
+        }
+
+        async function handleLogout() {
+            await supabase.auth.signOut();
+            window.location.href = 'login.html';
+        }
+
+        function toggleSubscriptionModal() {
+            const modal = document.getElementById('subscriptionModal');
+            if (modal.style.display === "flex") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "flex";
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            initMap();
+            validateCoordinates();
+
+            const sidebarLogoutLink = document.getElementById('sidebarLogoutLink');
+            if (sidebarLogoutLink) sidebarLogoutLink.addEventListener('click', (e) => { e.preventDefault(); handleLogout(); });
+            const mobileLogoutLink = document.getElementById('mobileLogoutLink');
+            if (mobileLogoutLink) mobileLogoutLink.addEventListener('click', (e) => { e.preventDefault(); handleLogout(); });
+
+            const hamburgerBtnMobile = document.getElementById('hamburgerBtnMobile');
+            const sidebar = document.getElementById('sidebar');
+            if (hamburgerBtnMobile) {
+                hamburgerBtnMobile.addEventListener('click', (e) => { e.stopPropagation(); sidebar.classList.toggle('open'); });
+            }
+            document.addEventListener('click', (e) => {
+                if (sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target) && (!hamburgerBtnMobile || !hamburgerBtnMobile.contains(e.target))) {
+                    sidebar.classList.remove('open');
+                }
+            });
+
+            document.getElementById('coordsInput').addEventListener('input', validateCoordinates);
+            document.getElementById('contrastToggle').addEventListener('click', () => {
+                document.body.classList.toggle('high-contrast');
+            });
+        });
+    </script>
+</body>
+</html>

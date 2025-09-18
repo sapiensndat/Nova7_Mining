@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "*.html", "use": "@vercel/static" },
+    { "src": "images/**", "use": "@vercel/static" },
+    { "src": "*.geojson", "use": "@vercel/static" },
+    { "src": "*.png", "use": "@vercel/static" },
+    { "src": "api/gold.py", "use": "@vercel/python" }
+  ],
+  "routes": [
+    {
+      "src": "/api/analyze_gold",
+      "dest": "/api/gold.py"
+    },
+    {
+      "src": "/([^/.]+)$",
+      "dest": "/$1.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ]
+}

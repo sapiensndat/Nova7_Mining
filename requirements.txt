@@ -1,0 +1,5 @@
+Flask==3.0.3
+gunicorn
+geopy==2.4.1
+earthengine-api==0.1.323
+flask-cors==3.0.10

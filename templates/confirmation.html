@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="pageTitle">Confirmation - Xeltis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --xeltis-gold: #FFD700;
+            --xeltis-dark: #000000;
+            --xeltis-white: #FFFFFF;
+            --xeltis-gray-light: #F3F2EF;
+            --xeltis-gray-medium: #CED0D4;
+            --xeltis-text-dark: #1F2937;
+            --xeltis-text-medium: #4B5563;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--xeltis-dark);
+            color: var(--xeltis-white);
+        }
+
+        .card-xeltis {
+            background-color: var(--xeltis-white);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+        }
+
+        .btn-primary-xeltis {
+            background-color: var(--xeltis-gold);
+            color: var(--xeltis-dark);
+            border-radius: 20px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+            text-decoration: none;
+        }
+
+        .btn-primary-xeltis:hover {
+            background-color: #E6C200;
+        }
+
+        .message-box {
+            border-radius: 6px;
+            padding: 1rem;
+            font-weight: 500;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .message-box.success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .message-box.error {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .xeltis-logo-container {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .xeltis-logo {
+            max-width: 120px;
+            height: auto;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-4xl">
+        <div class="xeltis-logo-container">
+            <img src="/static/images/xeltis-logo.png" alt="Xeltis Logo" class="xeltis-logo">
+            <h1 class="text-3xl font-bold text-gray-100 mt-4" data-i18n="confirmationHeader">Confirmation de votre compte</h1>
+        </div>
+        <div class="card-xeltis">
+            <div id="messageBox" class="message-box hidden"></div>
+            <div class="mt-8 text-center">
+                <a href="/login" class="btn-primary-xeltis" data-i18n="signInLink">Connectez-vous</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const translations = {
+            fr: {
+                pageTitle: "Confirmation - Xeltis",
+                confirmationHeader: "Confirmation de votre compte",
+                signInLink: "Connectez-vous",
+                successMessage: "Votre compte a été confirmé avec succès ! Vous pouvez maintenant vous connecter.",
+                errorMessage: "Échec de la confirmation : lien invalide ou expiré. Veuillez réessayer ou contacter le support.",
+                loadingMessage: "Vérification en cours..."
+            },
+            en: {
+                pageTitle: "Confirmation - Xeltis",
+                confirmationHeader: "Confirm Your Account",
+                signInLink: "Sign in",
+                successMessage: "Your account has been successfully confirmed! You can now sign in.",
+                errorMessage: "Confirmation failed: invalid or expired link. Please try again or contact support.",
+                loadingMessage: "Verifying..."
+            }
+        };
+
+        function getLanguage() {
+            const params = new URLSearchParams(window.location.search);
+            const lang = params.get('lang') || localStorage.getItem('lang') || 'fr';
+            localStorage.setItem('lang', lang);
+            return lang;
+        }
+
+        function applyTranslations(lang) {
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (translations[lang] && translations[lang][key]) {
+                    element.textContent = translations[lang][key];
+                }
+            });
+            document.documentElement.lang = lang;
+        }
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            const lang = getLanguage();
+            applyTranslations(lang);
+
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = translations[lang].loadingMessage;
+            messageBox.className = 'message-box success';
+            messageBox.classList.remove('hidden');
+
+            const SUPABASE_URL = 'https://qudbehodnhevjxmdwvta.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1ZGJlaG9kbmhldmp4bWR3dnRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1MjExODksImV4cCI6MjA3MDA5NzE4OX0.YnK8UKd76PBLh3L0zAv5fY0JFK6EWq-UBHLY8jXz55w';
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+            const params = new URLSearchParams(window.location.search);
+            const token = params.get('token');
+            const type = params.get('type');
+
+            if (token && type === 'email') {
+                try {
+                    const { error } = await supabase.auth.verifyOtp({
+                        token: token,
+                        type: 'email'
+                    });
+
+                    if (error) {
+                        console.error('Verification Error:', error);
+                        messageBox.textContent = translations[lang].errorMessage;
+                        messageBox.className = 'message-box error';
+                    } else {
+                        messageBox.textContent = translations[lang].successMessage;
+                        messageBox.className = 'message-box success';
+                    }
+                } catch (error) {
+                    console.error('Unexpected Error:', error);
+                    messageBox.textContent = translations[lang].errorMessage;
+                    messageBox.className = 'message-box error';
+                }
+            } else {
+                messageBox.textContent = translations[lang].errorMessage;
+                messageBox.className = 'message-box error';
+            }
+        });
+    </script>
+</body>
+</html>
