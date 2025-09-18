@@ -11,23 +11,21 @@ import time
 # -------------------------------
 # EARTH ENGINE INIT
 # -------------------------------
-try:
-    ee_credentials_json = os.getenv('EE_CREDENTIALS')
-    if ee_credentials_json:
-        # Parse JSON string from the environment variable
-        key_data = json.loads(ee_credentials_json)
-        # Use key_data directly for ServiceAccountCredentials
-        creds = ee.ServiceAccountCredentials(
-            email=key_data["client_email"],
-            key_data=key_data["private_key"]  # Pass private key directly
-        )
-        ee.Initialize(creds, project=key_data["project_id"])
-    else:
-        raise Exception("EE_CREDENTIALS environment variable not set. Cannot initialize Earth Engine in online deployment.")
-    print("✅ Earth Engine initialized successfully.")
-except Exception as e:
-    print(f"❌ Failed to initialize Earth Engine: {e}")
-    sys.exit(1)
+import ee, os, json, sys
+
+ee_credentials_b64 = os.getenv('EE_CREDENTIALS_BASE64')
+if not ee_credentials_b64:
+    print("❌ EE_CREDENTIALS_BASE64 not set"); sys.exit(1)
+
+ee_credentials_json = json.loads(
+    os.popen(f'echo "{ee_credentials_b64}" | base64 --decode').read()
+)
+creds = ee.ServiceAccountCredentials(
+    email=ee_credentials_json["client_email"],
+    key_data=ee_credentials_json["private_key"]
+)
+ee.Initialize(creds, project=ee_credentials_json["project_id"])
+print("✅ Earth Engine initialized successfully")
 
 app = Flask(__name__)
 CORS(app)
