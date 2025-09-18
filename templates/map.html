@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carte - Xeltis</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <!-- Inter Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome for Icons -->
@@ -412,6 +414,7 @@
     <script>
         const SUPABASE_URL = 'https://qudbehodnhevjxmdwvta.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1ZGJlaG9kbmhldmp4bWR3dnRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1MjExODksImV4cCI6MjA3MDA5NzE4OX0.YnK8UKd76PBLh3L0zAv5fY0JFK6EWq-UBHLY8jXz55w';
+
         let supabaseClient, user;
         let allResults = [];
         let map, markers = [], heatLayer;
@@ -546,6 +549,75 @@
                 showError('Error retrieving data from server.');
                 return [];
             }
+        }
+
+        function generateSimulatedData(lat, lng) {
+            const random = Math.random();
+            const goldPotential = random > 0.8 ? 'High Potential' : random > 0.5 ? 'Moderate Potential' : 'Low Potential';
+            const confidence = Math.floor(Math.random() * 40) + 60; // Fixed case: confidence
+            const depth = Math.floor(Math.random() * 500) + 100;
+            const tonnes = Math.floor(Math.random() * 1000000) + 500000;
+            const grade = (Math.random() * 5 + 1).toFixed(2);
+            const containedAu = (tonnes * grade / 31.1035).toFixed(2);
+            const recoveryValue = (containedAu * (Math.random() * 1000 + 1500)).toFixed(2);
+
+            const topAnomaly = Math.random() > 0.7 ? {
+                lat: lat + (Math.random() - 0.5) / 100,
+                lng: lng + (Math.random() - 0.5) / 100,
+                distance_km: (Math.random() * 5).toFixed(2),
+                composite_score: (Math.random() * 100000000 + 1000000).toFixed(0),
+                ranking_explanation: 'This is a simulated explanation for a high-value anomaly based on nearby geological indicators.',
+                result: {
+                    Gold_Potential: 'Top Anomaly',
+                    confidence: Math.floor(Math.random() * 10) + 90, // Fixed case: confidence
+                    Depth_Estimate: { Depth_m: depth - 50, Estimated_Tonnes: tonnes * 1.5, Grade_g_t: (parseFloat(grade) * 2).toFixed(2), Uncertainty: 5 },
+                    Proximity_to_Known_Deposits: { deposit: 'Simulated Deposit A', distance_km: (Math.random() * 10).toFixed(2) },
+                    Indicators: { Hydroxyl_Alteration: Math.random() * 10, Iron_Oxides: Math.random() * 10, Silica_Alteration: Math.random() * 10, Slope: Math.random() * 10 }
+                }
+            } : null;
+
+            return {
+                location: { lat, lng },
+                gold_analysis: {
+                    Gold_Potential: goldPotential,
+                    Gold_Potential_Flag: goldPotential,
+                    confidence, // Fixed case: confidence
+                    Depth_Estimate: {
+                        Depth_m: depth,
+                        Estimated_Tonnes: tonnes,
+                        Grade_g_t: parseFloat(grade),
+                        Uncertainty: Math.floor(Math.random() * 20) + 5
+                    },
+                    Indicators: {
+                        Hydroxyl_Alteration: Math.random() * 10,
+                        Iron_Oxides: Math.random() * 10,
+                        Silica_Alteration: Math.random() * 10,
+                        Slope: Math.random() * 10
+                    }
+                },
+                Contained_Au_oz: parseFloat(containedAu),
+                Recovery_Adjusted_Value_USD: parseFloat(recoveryValue),
+                exploration_report: {
+                    'Geological Formation': 'Simulated Formation',
+                    'Mineralization Type': 'Simulated Type',
+                    'Rock Type': 'Simulated Rock',
+                    'Access': 'Simulated Access'
+                },
+                top_economic_anomaly: topAnomaly,
+                nearby_anomalies: Math.random() > 0.5 ? Array.from({ length: 2 }, () => ({
+                    lat: lat + (Math.random() - 0.5) / 50,
+                    lng: lng + (Math.random() - 0.5) / 50,
+                    distance_km: (Math.random() * 10).toFixed(2),
+                    composite_score: (Math.random() * 5000000 + 100000).toFixed(0),
+                    result: {
+                        Gold_Potential: Math.random() > 0.5 ? 'Moderate Potential' : 'Low Potential',
+                        confidence: Math.floor(Math.random() * 30) + 50, // Fixed case: confidence
+                        Depth_Estimate: { Depth_m: depth + 50, Estimated_Tonnes: tonnes * 0.8, Grade_g_t: (parseFloat(grade) * 0.5).toFixed(2), Uncertainty: 15 },
+                        Proximity_to_Known_Deposits: { deposit: 'Simulated Deposit B', distance_km: (Math.random() * 20).toFixed(2) },
+                        Indicators: { Hydroxyl_Alteration: Math.random() * 10, Iron_Oxides: Math.random() * 10, Silica_Alteration: Math.random() * 10, Slope: Math.random() * 10 }
+                    }
+                })) : []
+            };
         }
 
         function showError(message) {
@@ -701,10 +773,14 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: { beginAtZero: true }
+                        y: {
+                            beginAtZero: true
+                        }
                     },
                     plugins: {
-                        legend: { display: false }
+                        legend: {
+                            display: false
+                        }
                     }
                 }
             });
@@ -751,10 +827,17 @@
                 const potential = data.gold_analysis.Gold_Potential_Flag;
                 let color;
                 switch (potential) {
-                    case 'High': color = 'red'; break;
-                    case 'Moderate': color = 'orange'; break;
-                    case 'Low': color = 'green'; break;
-                    default: color = 'gray';
+                    case 'High Potential':
+                        color = 'red';
+                        break;
+                    case 'Moderate Potential':
+                        color = 'orange';
+                        break;
+                    case 'Low Potential':
+                        color = 'green';
+                        break;
+                    default:
+                        color = 'gray';
                 }
 
                 const marker = L.circleMarker(latlng, {
