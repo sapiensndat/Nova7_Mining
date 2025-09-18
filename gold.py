@@ -17,11 +17,10 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # EARTH ENGINE INIT
 # -------------------------------
 try:
-    ee_credentials_b64 = os.getenv('EE_CREDENTIALS_BASE64')
-    if not ee_credentials_b64:
-        raise ValueError("❌ EE_CREDENTIALS_BASE64 environment variable not set.")
+    ee_credentials_json_string = os.getenv('EE_CREDENTIALS')
+    if not ee_credentials_json_string:
+        raise ValueError("❌ EE_CREDENTIALS environment variable not set.")
     
-    ee_credentials_json_string = base64.b64decode(ee_credentials_b64).decode('utf-8')
     ee_credentials_json = json.loads(ee_credentials_json_string)
 
     creds = ee.ServiceAccountCredentials(
