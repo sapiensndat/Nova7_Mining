@@ -18,10 +18,14 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # -------------------------------
 try:
     ee_credentials_json_string = os.getenv('EE_CREDENTIALS')
+    
     if not ee_credentials_json_string:
         raise ValueError("❌ EE_CREDENTIALS environment variable not set.")
     
-    ee_credentials_json = json.loads(ee_credentials_json_string)
+    # Strip any leading/trailing whitespace or quotes that might be added by the shell
+    clean_json_string = ee_credentials_json_string.strip().strip('"')
+
+    ee_credentials_json = json.loads(clean_json_string)
 
     creds = ee.ServiceAccountCredentials(
         email=ee_credentials_json["client_email"],
@@ -30,9 +34,14 @@ try:
     ee.Initialize(creds, project=ee_credentials_json["project_id"])
     logging.info("✅ Earth Engine initialized successfully")
 
+except json.JSONDecodeError as e:
+    logging.critical(f"❌ Failed to decode EE_CREDENTIALS JSON: {e}")
+    # Print the first 50 characters of the string for debugging, if it exists
+    log_value = ee_credentials_json_string[:50] + '...' if 'ee_credentials_json_string' in locals() else 'None'
+    logging.critical(f"❌ The value of EE_CREDENTIALS was: '{log_value}'")
+    sys.exit(1)
 except Exception as e:
-    logging.critical(f"❌ Failed to initialize Earth Engine: {e}")
-    # Exit with an error code, so Heroku knows to restart
+    logging.critical(f"❌ Failed to initialize Earth Engine for an unknown reason: {e}")
     sys.exit(1)
 
 app = Flask(__name__)
