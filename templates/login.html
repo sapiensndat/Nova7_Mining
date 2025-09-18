@@ -411,7 +411,7 @@
                         localStorage.setItem('xeltisUser', JSON.stringify(data.user));
                         
                         setTimeout(() => {
-                            window.location.href = `dashboard.html?lang=${currentLang}`;
+                            window.location.href = `/dashboard?lang=${currentLang}`;
                         }, 1500);
                     }
                 } catch (error) {
