@@ -342,21 +342,9 @@
             // These keys should be loaded from a secure backend or environment variables.
             // For a production application, please move these to a secure location.
             const SUPABASE_URL = 'https://qudbehodnhevjxmdwvta.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1ZGJlaG9kbmhldmp4bWR3dnRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1MjExODksImV4cCI6MjA3MDA5NzE4OX0.YnK8UKd76PBLh3L0zAv5fY0JFK6EWq-UBHLY8jXz55w';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            
-            let supabase;
-            try {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                console.log("Supabase client initialized.");
-            } catch (e) {
-                console.error("Error initializing Supabase client:", e.message);
-                const errorMsg = document.createElement('p');
-                errorMsg.textContent = "Error: Failed to initialize application. Please contact support.";
-                errorMsg.style.color = "red"; errorMsg.style.textAlign = "center"; errorMsg.style.padding = "1rem";
-                document.body.prepend(errorMsg);
-                return;
-            }
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1ZGJlaG9kbmhldmp4bWR3dnRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1MjExODksImV4cCI6MjA3MDA5NzE4OX0.YnK8UKd76PBLh3L0zAv5fY0JFK6EWq-UBHLY8jXz55w';
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log("Supabase client initialized.");
 
             const loginForm = document.getElementById("loginForm");
             const messageDiv = document.getElementById("messageDiv");
