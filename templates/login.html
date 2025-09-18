@@ -341,8 +341,9 @@
             // SECURITY WARNING: Hardcoding API keys in front-end code is a major security risk.
             // These keys should be loaded from a secure backend or environment variables.
             // For a production application, please move these to a secure location.
-            const SUPABASE_URL = 'https://your-supabase-url.supabase.co'; // Replace with your actual URL
-            const SUPABASE_ANON_KEY = 'your-supabase-anon-key'; // Replace with your actual key
+            const SUPABASE_URL = 'https://qudbehodnhevjxmdwvta.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1ZGJlaG9kbmhldmp4bWR3dnRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1MjExODksImV4cCI6MjA3MDA5NzE4OX0.YnK8UKd76PBLh3L0zAv5fY0JFK6EWq-UBHLY8jXz55w';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             
             let supabase;
             try {
