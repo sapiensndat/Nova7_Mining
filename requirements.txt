@@ -8,3 +8,4 @@ google-auth==2.17.3
 earthengine-api==0.1.341
 celery
 redis
+geopy==2.3.0
