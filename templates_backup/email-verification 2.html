@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vérification de l'e-mail - XELTIS LTD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --xeltis-dark: #000000;
+            --xeltis-orange: #F97316;
+            --xeltis-white: #FFFFFF;
+            --xeltis-gray-light: #F3F2EF;
+            --xeltis-gray-medium: #CED0D4;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--xeltis-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        .container {
+            background-color: var(--xeltis-white);
+            padding: 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        .message-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .message-icon.info { color: var(--xeltis-orange); }
+        .message-icon.success { color: #10B981; }
+        .message-icon.error { color: #EF4444; }
+        .btn-action {
+            background-color: var(--xeltis-orange);
+            color: var(--xeltis-white);
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+            border: none;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            display: inline-block;
+        }
+        .btn-action:hover {
+            background-color: #C05621;
+        }
+        .btn-action:disabled {
+            background-color: var(--xeltis-gray-medium);
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="iconContainer" class="mb-4">
+        </div>
+        <h1 id="statusTitle" class="text-2xl font-bold text-gray-900 mb-3">Chargement...</h1>
+        <p id="statusMessage" class="text-gray-700 mb-6">Vérification du statut de votre e-mail...</p>
+        <button id="mainActionButton" class="btn-action" style="display: none;">Renvoyer l'e-mail de vérification</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            const SUPABASE_URL = 'https://qudbehodnhevjxmdwvta.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1ZGJlaG9kbmhldmp4bWR3dnRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1MjExODksImV4cCI6MjA3MDA5NzE4OX0.YnK8UKd76PBLh3L0zAv5fY0JFK6EWq-UBHLY8jXz55w';
+
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+            const statusTitle = document.getElementById('statusTitle');
+            const statusMessage = document.getElementById('statusMessage');
+            const iconContainer = document.getElementById('iconContainer');
+            const mainActionButton = document.getElementById('mainActionButton');
+
+            function updateUI(title, message, iconClass, iconType = 'info', buttonText = '', buttonAction = null, enableButton = false) {
+                if (statusTitle) statusTitle.textContent = title;
+                if (statusMessage) statusMessage.textContent = message;
+                if (iconContainer) iconContainer.innerHTML = `<i class="${iconClass} message-icon ${iconType}"></i>`;
+                
+                if (mainActionButton) {
+                    mainActionButton.textContent = buttonText;
+                    mainActionButton.style.display = enableButton ? 'inline-block' : 'none';
+                    mainActionButton.disabled = !enableButton;
+                    
+                    const oldButton = mainActionButton;
+                    const newButton = oldButton.cloneNode(true);
+                    oldButton.parentNode.replaceChild(newButton, oldButton);
+                    
+                    if (buttonAction) {
+                        newButton.addEventListener('click', buttonAction);
+                    }
+                }
+            }
+
+            try {
+                const { data: { user }, error } = await supabase.auth.getUser();
+
+                if (error) {
+                    console.log("Error getting user after email verification link:", error.message);
+                    updateUI(
+                        "Vérification échouée",
+                        "Nous n'avons pas pu vérifier votre e-mail ou le lien a expiré. Veuillez essayer de vous connecter ou de renvoyer le lien.",
+                        "fas fa-exclamation-triangle",
+                        "error",
+                        "Renvoyer l'e-mail de vérification",
+                        async () => {
+                            mainActionButton.disabled = true;
+                            mainActionButton.textContent = 'Envoi...';
+                            const { error: resendError } = await supabase.auth.resend({
+                                type: 'signup',
+                                email: user ? user.email : ''
+                            });
+                            if (resendError) {
+                                updateUI("Échec du renvoi !", `Échec du renvoi : ${resendError.message}`, "fas fa-times-circle", "error", "Renvoyer l'e-mail de vérification", null, true);
+                            } else {
+                                updateUI("E-mail envoyé !", `Un nouveau lien de vérification a été envoyé.`, "fas fa-check-circle", "success", "Renvoyer l'e-mail de vérification", null, true);
+                            }
+                        },
+                        true
+                    );
+                    return;
+                }
+
+                if (user && user.email_confirmed_at) {
+                    console.log("Email is already verified or successfully verified:", user.email);
+                    updateUI(
+                        "E-mail vérifié !",
+                        "Votre e-mail a été vérifié avec succès. Vous pouvez maintenant vous connecter à la plateforme Nova7.",
+                        "fas fa-check-circle",
+                        "success",
+                        "Se connecter maintenant",
+                        () => { window.location.href = "login.html"; },
+                        true
+                    );
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                } else if (user) {
+                    console.log("User logged in but email not yet confirmed:", user.email);
+                    updateUI(
+                        "Presque terminé !",
+                        `Veuillez vérifier votre boîte de réception (${user.email}) et cliquer sur le lien de confirmation pour vérifier votre e-mail.`,
+                        "fas fa-envelope-open-text",
+                        "info",
+                        "Renvoyer l'e-mail de vérification",
+                        async () => {
+                            mainActionButton.disabled = true;
+                            mainActionButton.textContent = 'Envoi...';
+                            const { error: resendError } = await supabase.auth.resend({
+                                type: 'signup',
+                                email: user.email
+                            });
+                            if (resendError) {
+                                updateUI("Échec du renvoi !", `Échec du renvoi : ${resendError.message}`, "fas fa-times-circle", "error", "Renvoyer l'e-mail de vérification", null, true);
+                            } else {
+                                updateUI("E-mail envoyé !", `Un nouveau lien de vérification a été envoyé à ${user.email}.`, "fas fa-check-circle", "success", "Renvoyer l'e-mail de vérification", null, true);
+                            }
+                        },
+                        true
+                    );
+                } else {
+                    console.log("No user session found, and no explicit error. Please use email link.");
+                    updateUI(
+                        "Action requise",
+                        "Veuillez utiliser le lien de vérification envoyé à votre e-mail pour confirmer votre compte.",
+                        "fas fa-info-circle",
+                        "info",
+                        "",
+                        null,
+                        false
+                    );
+                }
+            } catch (e) {
+                console.error("An unexpected error occurred during user retrieval:", e);
+                updateUI(
+                    "Erreur",
+                    "Une erreur inattendue est survenue. Veuillez réessayer ou contacter le support à support@xeltis.com.",
+                    "fas fa-times-circle",
+                    "error",
+                    "Renvoyer l'e-mail de vérification",
+                    async () => {
+                        mainActionButton.disabled = true;
+                        mainActionButton.textContent = 'Envoi...';
+                        const emailForResend = prompt("Veuillez entrer votre e-mail pour renvoyer le lien de vérification :");
+                        if (emailForResend) {
+                            const { error: resendError } = await supabase.auth.resend({
+                                type: 'signup',
+                                email: emailForResend
+                            });
+                            if (resendError) {
+                                updateUI("Échec du renvoi !", `Échec du renvoi : ${resendError.message}`, "fas fa-times-circle", "error", "Renvoyer l'e-mail de vérification", null, true);
+                            } else {
+                                updateUI("E-mail envoyé !", `Un nouveau lien de vérification a été envoyé à ${emailForResend}.`, "fas fa-check-circle", "success", "Renvoyer l'e-mail de vérification", null, true);
+                            }
+                        } else {
+                            updateUI("Échec du renvoi !", "E-mail requis pour le renvoi.", "fas fa-times-circle", "error", "Renvoyer l'e-mail de vérification", null, true);
+                        }
+                        mainActionButton.textContent = "Renvoyer l'e-mail de vérification";
+                    },
+                    true
+                );
+            }
+        });
+    </script>
+</body>
+</html>

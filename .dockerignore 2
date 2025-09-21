@@ -1,0 +1,27 @@
+!jovial-style-470913-i9-2fa18b2326a2.json
+
+Ignore Fly.io CLI configuration
+fly.toml
+
+Ignore source control
+.git/
+
+Ignore Python specific files
+pycache/
+*.pyc
+
+Ignore Node.js build assets and dependencies
+node_modules/
+
+Ignore local documents and heavy data files
+*.geojson
+*.log
+*.sqlite
+*.DS_Store
+*.pyo
+
+Ignore temporary or local files from the project
+Based on your tree output, these are likely unnecessary on the server
+templates_backup/
+server.js
+vercel.json

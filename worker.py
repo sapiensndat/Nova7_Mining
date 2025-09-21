@@ -1,4 +1,4 @@
-from celery import Celery
+from worker import celery_app  # import the Celery app from worker.py
 import os
 import ee
 from geopy.distance import geodesic

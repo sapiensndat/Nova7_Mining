@@ -4,25 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carte - Xeltis</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Inter Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Leaflet CSS and JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <link rel="icon" href="/static/favicon.ico">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
-    <!-- PDF Generation Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.14/jspdf.plugin.autotable.min.js"></script>
-    <!-- Chart.js for charts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Supabase CDN for auth -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
+    <script async src="https://js.stripe.com/v3/buy-button.js"></script>
     <style>
         :root {
             --xeltis-gold: #FFD700;
@@ -215,6 +206,8 @@
         .accordion-content.open {
             display: block;
         }
+
+        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -273,7 +266,8 @@
             <i class="fas fa-bars text-2xl"></i>
         </button>
         <a href="dashboard.html">
-            <img src="/static/xeltis-logo.png" alt="Xeltis Logo" class="sidebar-logo-img" style="filter: brightness(0) invert(1);">
+            <img src="/Users/sapiensndatabaye/Library/Mobile Documents/com~apple~CloudDocs/Desktop/APPS/xeltis-vite/Nova7_Mining/xeltis-logo-CIxL2od-.png" alt="Xeltis Logo" class="sidebar-logo-img" style="filter: brightness(0) invert(1);" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+            <span style="display:none;" class="text-xl font-semibold text-xeltis-dark">Xeltis</span>
         </a>
         <a href="#" id="mobileLogoutLink" class="p-2 text-gray-700 hover:text-xeltis-gold" aria-label="Logout">
             <i class="fas fa-sign-out-alt text-xl"></i>
@@ -283,7 +277,7 @@
     <aside id="sidebar" class="sidebar-nova7">
         <div class="sidebar-header">
             <a href="dashboard.html" class="flex items-center">
-                <img src="/static/xeltis-logo.png" alt="Xeltis Logo" class="sidebar-logo-img" style="filter: brightness(0) invert(1);">
+                <img src="/Users/sapiensndatabaye/Library/Mobile Documents/com~apple~CloudDocs/Desktop/APPS/xeltis-vite/Nova7_Mining/xeltis-logo-CIxL2od-.png" alt="Xeltis Logo" class="sidebar-logo-img" style="filter: brightness(0) invert(1);" onerror="this.onerror=null; this.src='https://placehold.co/120x60/333333/FFD700?text=Xeltis';">
             </a>
         </div>
         <nav class="flex-grow">
@@ -321,7 +315,7 @@
 
     <main class="main-content-area py-8">
         <div class="profile-card">
-            <h1 class="profile-section-title">Analyse Géologique</h1>
+            <h1 class="profile-section-title"></h1>
 
             <div id="summary" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <div class="summary-card">
@@ -402,9 +396,41 @@
                 <h2 class="profile-section-title">Our Products</h2>
                 <div class="product-buttons">
                     <div class="product-card">
-                        <h3 class="font-semibold mb-2">Subscription Info</h3>
-                        <p class="mb-4">This modal would contain subscription information and payment buttons.</p>
-                        <p class="text-sm text-gray-500">The Stripe buy buttons have been removed as requested.</p>
+                        <h3 class="font-semibold mb-2">Single Verification</h3>
+                        <p class="mb-4">€99.00</p>
+                        <stripe-buy-button
+                            buy-button-id="buy_btn_1S6emQK0Qj7AR2nDfZJXQr7Q"
+                            publishable-key="pk_live_51S6RtqK0Qj7AR2nD1iXKiYZ2QAonC6I5JpDkO1DTQnwjKdGPjCSmsv3EOV6wR1DdzSTq0Fkp29hMW36s7uEtxjbr00ZK8XfXGn">
+                        </stripe-buy-button>
+                    </div>
+
+                    <div class="product-card">
+                        <h3 class="font-semibold mb-2">Nova7 Free</h3>
+                        <p class="mb-4">€0.00 / month</p>
+                        <stripe-buy-button
+                            buy-button-id="buy_btn_1S6emQK0Qj7AR2nDfZJXQr7Q"
+                            publishable-key="pk_live_51S6RtqK0Qj7AR2nD1iXKiYZ2QAonC6I5JpDkO1DTQnwjKdGPjCSmsv3EOV6wR1DdzSTq0Fkp29hMW36s7uEtxjbr00ZK8XfXGn">
+                        </stripe-buy-button>
+                    </div>
+
+                    <div class="product-card">
+                        <h3 class="font-semibold mb-2">Nova7 Basic</h3>
+                        <p class="mb-4">€499.00 / month</p>
+                        <stripe-buy-button
+                            buy-button-id="buy_btn_1S6ekCK0Qj7AR2nDCKjY1r0k"
+                            publishable-key="pk_live_51S6RtqK0Qj7AR2nD1iXKiYZ2QAonC6I5JpDkO1DTQnwjKdGPjCSmsv3EOV6wR1DdzSTq0Fkp29hMW36s7uEtxjbr00ZK8XfXGn"
+                            class="w-full flex justify-center">
+                        </stripe-buy-button>
+                    </div>
+
+                    <div class="product-card">
+                        <h3 class="font-semibold mb-2">Nova7 Pro</h3>
+                        <p class="mb-4">€1,999.00 / month</p>
+                        <stripe-buy-button
+                            buy-button-id="buy_btn_1S6efPK0Qj7AR2nD9JDYk3RH"
+                            publishable-key="pk_live_51S6RtqK0Qj7AR2nD1iXKiYZ2QAonC6I5JpDkO1DTQnwjKdGPjCSmsv3EOV6wR1DdzSTq0Fkp29hMW36s7uEtxjbr00ZK8XfXGn"
+                            class="w-full flex justify-center">
+                        </stripe-buy-button>
                     </div>
                 </div>
             </div>
@@ -412,39 +438,21 @@
     </div>
 
     <script>
+        // Initialize Supabase client
+        const backendUrl = 'https://new-backend-url.com';
         const SUPABASE_URL = 'https://qudbehodnhevjxmdwvta.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1ZGJlaG9kbmhldmp4bWR3dnRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1MjExODksImV4cCI6MjA3MDA5NzE4OX0.YnK8UKd76PBLh3L0zAv5fY0JFK6EWq-UBHLY8jXz55w';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let supabaseClient, user;
         let allResults = [];
         let map, markers = [], heatLayer;
         let isAnalyzing = false;
         let heatmapVisible = true;
 
-        function showCustomAlert(message) {
-            const modal = document.getElementById('subscriptionModal');
-            const content = document.getElementById('product-buttons-container');
-            content.innerHTML = `
-                <span class="close-btn" onclick="toggleSubscriptionModal()">&times;</span>
-                <p class="text-xl font-bold mb-4">Alert</p>
-                <p>${message}</p>
-            `;
-            modal.style.display = 'flex';
-        }
-
-        async function initSupabase() {
-            try {
-                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                const { data: { user: currentUser }, error } = await supabaseClient.auth.getUser();
-                if (error || !currentUser) {
-                    console.warn('User not authenticated, redirecting to login.html');
-                    window.location.href = 'login.html';
-                }
-                user = currentUser;
-                console.log('Supabase initialized and user authenticated:', user);
-            } catch (error) {
-                console.error('Supabase initialization failed:', error);
-                showError('Could not connect to the authentication service. Please try again later.');
+        async function checkAuth() {
+            const { data: { user }, error } = await supabase.auth.getUser();
+            if (error || !user) {
+                window.location.href = 'login.html';
             }
         }
 
@@ -516,11 +524,33 @@
             markers = [];
             if (heatLayer) map.removeLayer(heatLayer);
 
-            const fetchedResults = await fetchFromFlaskAPI(lines);
-            allResults = fetchedResults;
+            const cache = JSON.parse(localStorage.getItem('goldExplorationCache') || '{}');
+            for (const line of lines) {
+                const [lat, lng] = line.split(',').map(Number);
+                const cacheKey = `${lat},${lng}`;
+                if (cache[cacheKey] && Date.now() - cache[cacheKey].timestamp < 24 * 60 * 60 * 1000) {
+                    allResults.push({ lat, lng, data: cache[cacheKey].data });
+                    continue;
+                }
+                try {
+                    // This is the corrected line
+                    const res = await fetch(`${backendUrl}/api/analyze_gold?lat=${lat}&lng=${lng}`);
+                    if (!res.ok) throw new Error(`API error: ${res.statusText}`);
+                    const data = await res.json();
+                    if (!data.location || !data.gold_analysis || !data.exploration_report) {
+                        throw new Error('Incomplete API response');
+                    }
+                    allResults.push({ lat, lng, data });
+                    cache[cacheKey] = { data, timestamp: Date.now() };
+                } catch (err) {
+                    console.error('API error', err);
+                    showError(`Error fetching data for ${lat}, ${lng}: ${err.message}`);
+                }
+            }
+            localStorage.setItem('goldExplorationCache', JSON.stringify(cache));
 
             if (allResults.length === 0) {
-                showError('No valid data retrieved. Please check coordinates or try again.');
+                showError('No valid data retrieved. Please check coordinates or API status.');
                 document.getElementById('results').innerHTML = '';
             } else {
                 displayResults();
@@ -532,92 +562,6 @@
             isAnalyzing = false;
             analyzeBtn.disabled = false;
             analyzeSpinner.classList.add('hidden');
-        }
-
-        async function fetchFromFlaskAPI(coordsArray) {
-            try {
-                const response = await Promise.all(coordsArray.map(async line => {
-                    const [lat, lng] = line.split(',').map(Number);
-                    const res = await fetch(`/api/analyze_gold?lat=${lat}&lng=${lng}`);
-                    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-                    const data = await res.json();
-                    return { lat, lng, data };
-                }));
-                return response;
-            } catch (err) {
-                console.error('Error fetching data from Flask API:', err);
-                showError('Error retrieving data from server.');
-                return [];
-            }
-        }
-
-        function generateSimulatedData(lat, lng) {
-            const random = Math.random();
-            const goldPotential = random > 0.8 ? 'High Potential' : random > 0.5 ? 'Moderate Potential' : 'Low Potential';
-            const confidence = Math.floor(Math.random() * 40) + 60; // Fixed case: confidence
-            const depth = Math.floor(Math.random() * 500) + 100;
-            const tonnes = Math.floor(Math.random() * 1000000) + 500000;
-            const grade = (Math.random() * 5 + 1).toFixed(2);
-            const containedAu = (tonnes * grade / 31.1035).toFixed(2);
-            const recoveryValue = (containedAu * (Math.random() * 1000 + 1500)).toFixed(2);
-
-            const topAnomaly = Math.random() > 0.7 ? {
-                lat: lat + (Math.random() - 0.5) / 100,
-                lng: lng + (Math.random() - 0.5) / 100,
-                distance_km: (Math.random() * 5).toFixed(2),
-                composite_score: (Math.random() * 100000000 + 1000000).toFixed(0),
-                ranking_explanation: 'This is a simulated explanation for a high-value anomaly based on nearby geological indicators.',
-                result: {
-                    Gold_Potential: 'Top Anomaly',
-                    confidence: Math.floor(Math.random() * 10) + 90, // Fixed case: confidence
-                    Depth_Estimate: { Depth_m: depth - 50, Estimated_Tonnes: tonnes * 1.5, Grade_g_t: (parseFloat(grade) * 2).toFixed(2), Uncertainty: 5 },
-                    Proximity_to_Known_Deposits: { deposit: 'Simulated Deposit A', distance_km: (Math.random() * 10).toFixed(2) },
-                    Indicators: { Hydroxyl_Alteration: Math.random() * 10, Iron_Oxides: Math.random() * 10, Silica_Alteration: Math.random() * 10, Slope: Math.random() * 10 }
-                }
-            } : null;
-
-            return {
-                location: { lat, lng },
-                gold_analysis: {
-                    Gold_Potential: goldPotential,
-                    Gold_Potential_Flag: goldPotential,
-                    confidence, // Fixed case: confidence
-                    Depth_Estimate: {
-                        Depth_m: depth,
-                        Estimated_Tonnes: tonnes,
-                        Grade_g_t: parseFloat(grade),
-                        Uncertainty: Math.floor(Math.random() * 20) + 5
-                    },
-                    Indicators: {
-                        Hydroxyl_Alteration: Math.random() * 10,
-                        Iron_Oxides: Math.random() * 10,
-                        Silica_Alteration: Math.random() * 10,
-                        Slope: Math.random() * 10
-                    }
-                },
-                Contained_Au_oz: parseFloat(containedAu),
-                Recovery_Adjusted_Value_USD: parseFloat(recoveryValue),
-                exploration_report: {
-                    'Geological Formation': 'Simulated Formation',
-                    'Mineralization Type': 'Simulated Type',
-                    'Rock Type': 'Simulated Rock',
-                    'Access': 'Simulated Access'
-                },
-                top_economic_anomaly: topAnomaly,
-                nearby_anomalies: Math.random() > 0.5 ? Array.from({ length: 2 }, () => ({
-                    lat: lat + (Math.random() - 0.5) / 50,
-                    lng: lng + (Math.random() - 0.5) / 50,
-                    distance_km: (Math.random() * 10).toFixed(2),
-                    composite_score: (Math.random() * 5000000 + 100000).toFixed(0),
-                    result: {
-                        Gold_Potential: Math.random() > 0.5 ? 'Moderate Potential' : 'Low Potential',
-                        confidence: Math.floor(Math.random() * 30) + 50, // Fixed case: confidence
-                        Depth_Estimate: { Depth_m: depth + 50, Estimated_Tonnes: tonnes * 0.8, Grade_g_t: (parseFloat(grade) * 0.5).toFixed(2), Uncertainty: 15 },
-                        Proximity_to_Known_Deposits: { deposit: 'Simulated Deposit B', distance_km: (Math.random() * 20).toFixed(2) },
-                        Indicators: { Hydroxyl_Alteration: Math.random() * 10, Iron_Oxides: Math.random() * 10, Silica_Alteration: Math.random() * 10, Slope: Math.random() * 10 }
-                    }
-                })) : []
-            };
         }
 
         function showError(message) {
@@ -640,10 +584,10 @@
                 const nearbyAnomalies = r.data.nearby_anomalies || [];
 
                 const card = document.createElement('div');
-                card.className = 'bg-white rounded-lg shadow-md p-4 mb-4 text-gray-800';
+                card.className = 'bg-white rounded-lg shadow-md p-4 mb-4';
                 const canvasId = `chart${i}`;
                 card.innerHTML = `
-                    <div class="accordion-header" onclick="toggleAccordion(this)">Coordinate: ${r.lat}, ${r.lng} - Potential: ${r.data.gold_analysis.Gold_Potential_Flag}</div>
+                    <div class="accordion-header" onclick="toggleAccordion(this)">Coordinate: ${r.lat}, ${r.lng} - Potential: ${r.data.Gold_Potential_Flag} <span class="text-xl">${report.Gold_Potential_Flag.split(' ')[0]}</span></div>
                     <div class="accordion-content">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -652,7 +596,7 @@
                                 <p><strong>Contained Au:</strong> ${r.data.Contained_Au_oz ? r.data.Contained_Au_oz.toLocaleString() + ' oz' : 'N/A'}</p>
                                 <p><strong>Recovery Value:</strong> ${r.data.Recovery_Adjusted_Value_USD ? '$' + r.data.Recovery_Adjusted_Value_USD.toLocaleString() : 'N/A'}</p>
                                 <p><strong>Gold Potential:</strong> ${r.data.gold_analysis.Gold_Potential}</p>
-                                <p><strong>Confidence:</strong> ${r.data.gold_analysis.confidence}%</p>
+                                <p><strong>Confidence:</strong> ${r.data.gold_analysis.Confidence}%</p>
                                 <p><strong>Depth:</strong> ${d.Depth_m} m</p>
                                 <p><strong>Tonnes:</strong> ${d.Estimated_Tonnes.toLocaleString()}</p>
                                 <p><strong>Grade:</strong> ${d.Grade_g_t.toFixed(2)} g/t</p>
@@ -677,10 +621,10 @@
                             <div class="accordion-content">
                                 <p><strong>Location:</strong> Lat: ${topAnomaly.lat.toFixed(4)}, Lng: ${topAnomaly.lng.toFixed(4)}</p>
                                 <p><strong>Distance:</strong> ${topAnomaly.distance_km} km</p>
-                                <p><strong>Economic Score:</strong> $${parseInt(topAnomaly.composite_score).toLocaleString()}</p>
+                                <p><strong>Economic Score:</strong> $${topAnomaly.composite_score.toLocaleString()}</p>
                                 <p><strong>Explanation:</strong> ${topAnomaly.ranking_explanation}</p>
                                 <p><strong>Gold Potential:</strong> ${topAnomaly.result.Gold_Potential}</p>
-                                <p><strong>Confidence:</strong> ${topAnomaly.result.confidence}%</p>
+                                <p><strong>Confidence:</strong> ${topAnomaly.result.Confidence}%</p>
                                 <p><strong>Depth:</strong> ${topAnomaly.result.Depth_Estimate.Depth_m} m</p>
                                 <p><strong>Tonnes:</strong> ${topAnomaly.result.Depth_Estimate.Estimated_Tonnes.toLocaleString()}</p>
                                 <p><strong>Grade:</strong> ${topAnomaly.result.Depth_Estimate.Grade_g_t.toFixed(2)} g/t</p>
@@ -694,231 +638,161 @@
                                 <button class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 mt-2" onclick="zoomToAnomaly(${topAnomaly.lat}, ${topAnomaly.lng})" aria-label="Zoom to Top Anomaly">Zoom to Anomaly</button>
                             </div>
                         ` : '<p class="mt-4">No top economic anomaly found.</p>'}
-                        ${nearbyAnomalies.length > 0 ? `
-                            <div class="accordion-header mt-4" onclick="toggleAccordion(this)">Nearby Anomalies</div>
-                            <div class="accordion-content">
-                                <div class="overflow-x-auto">
-                                    <table class="table-auto w-full">
-                                        <thead>
-                                            <tr class="bg-gray-200">
-                                                <th>Lat</th>
-                                                <th>Lng</th>
-                                                <th>Distance (km)</th>
-                                                <th>Potential</th>
-                                                <th>Confidence (%)</th>
-                                                <th>Tonnes</th>
-                                                <th>Grade (g/t)</th>
-                                                <th>Score (USD)</th>
-                                                <th>Proximity</th>
-                                                <th>Action</th>
+                        <div class="accordion-header mt-4" onclick="toggleAccordion(this)">Nearby Anomalies</div>
+                        <div class="accordion-content">
+                            <div class="overflow-x-auto">
+                                <table class="table-auto w-full">
+                                    <thead>
+                                        <tr class="bg-gray-200">
+                                            <th>Lat</th>
+                                            <th>Lng</th>
+                                            <th>Distance (km)</th>
+                                            <th>Potential</th>
+                                            <th>Confidence (%)</th>
+                                            <th>Tonnes</th>
+                                            <th>Grade (g/t)</th>
+                                            <th>Score (USD)</th>
+                                            <th>Proximity</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${nearbyAnomalies.map((anomaly, j) => `
+                                            <tr>
+                                                <td>${anomaly.lat.toFixed(4)}</td>
+                                                <td>${anomaly.lng.toFixed(4)}</td>
+                                                <td>${anomaly.distance_km}</td>
+                                                <td>${anomaly.result.Gold_Potential}</td>
+                                                <td>${anomaly.result.Confidence}</td>
+                                                <td>${anomaly.result.Depth_Estimate.Estimated_Tonnes.toLocaleString()}</td>
+                                                <td>${anomaly.result.Depth_Estimate.Grade_g_t.toFixed(2)}</td>
+                                                <td>$${anomaly.composite_score.toLocaleString()}</td>
+                                                <td>${anomaly.result.Proximity_to_Known_Deposits.deposit} (${anomaly.result.Proximity_to_Known_Deposits.distance_km} km)</td>
+                                                <td><button class="bg-blue-600 text-white px-2 py-1 rounded-lg hover:bg-blue-700" onclick="zoomToAnomaly(${anomaly.lat}, ${anomaly.lng})" aria-label="Zoom to Anomaly ${j + 1}">Zoom</button></td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            ${nearbyAnomalies.map((anomaly, j) => `
-                                                <tr>
-                                                    <td>${anomaly.lat.toFixed(4)}</td>
-                                                    <td>${anomaly.lng.toFixed(4)}</td>
-                                                    <td>${anomaly.distance_km}</td>
-                                                    <td>${anomaly.result.Gold_Potential}</td>
-                                                    <td>${anomaly.result.confidence}</td>
-                                                    <td>${anomaly.result.Depth_Estimate.Estimated_Tonnes.toLocaleString()}</td>
-                                                    <td>${anomaly.result.Depth_Estimate.Grade_g_t.toFixed(2)}</td>
-                                                    <td>$${parseInt(anomaly.composite_score).toLocaleString()}</td>
-                                                    <td>${anomaly.result.Proximity_to_Known_Deposits.deposit} (${anomaly.result.Proximity_to_Known_Deposits.distance_km} km)</td>
-                                                    <td><button class="bg-blue-600 text-white px-2 py-1 rounded-lg hover:bg-blue-700" onclick="zoomToAnomaly(${anomaly.lat}, ${anomaly.lng})" aria-label="Zoom to Anomaly ${j + 1}">Zoom</button></td>
-                                                </tr>
-                                            `).join('')}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-                        ` : ''}
                     </div>
                 `;
                 container.appendChild(card);
-                if (g && Object.keys(g).length > 0) {
-                    createIndicatorChart(canvasId, g);
-                }
-            });
-            const firstAccordion = container.querySelector('.accordion-header');
-            if(firstAccordion) firstAccordion.click();
-        }
 
-        function createIndicatorChart(canvasId, indicators) {
-            const ctx = document.getElementById(canvasId).getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Hydroxyl Alteration', 'Iron Oxides', 'Silica Alteration', 'Slope'],
-                    datasets: [{
-                        label: 'Indicator Score',
-                        data: [indicators.Hydroxyl_Alteration, indicators.Iron_Oxides, indicators.Silica_Alteration, indicators.Slope],
-                        backgroundColor: [
-                            'rgba(255, 215, 0, 0.6)',
-                            'rgba(255, 140, 0, 0.6)',
-                            'rgba(173, 216, 230, 0.6)',
-                            'rgba(128, 0, 128, 0.6)'
-                        ],
-                        borderColor: [
-                            'rgba(255, 215, 0, 1)',
-                            'rgba(255, 140, 0, 1)',
-                            'rgba(173, 216, 230, 1)',
-                            'rgba(128, 0, 128, 1)'
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
+                const ctx = document.getElementById(canvasId).getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Hydroxyl', 'Iron Oxides', 'Silica', 'Slope'],
+                        datasets: [{
+                            label: 'Geological Indicators',
+                            data: [g.Hydroxyl_Alteration, g.Iron_Oxides, g.Silica_Alteration, g.Slope],
+                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
+                        }]
                     },
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
-                }
+                    options: { responsive: true, plugins: { title: { display: true, text: 'Geological Indicators' } }, scales: { y: { beginAtZero: true } } }
+                });
+            });
+
+            document.querySelectorAll('.accordion-header').forEach(header => {
+                header.click();
             });
         }
 
         function toggleAccordion(header) {
             const content = header.nextElementSibling;
-            const allHeaders = document.querySelectorAll('.accordion-header');
-            allHeaders.forEach(h => {
-                const c = h.nextElementSibling;
-                if (h !== header && c.classList.contains('open')) {
-                    c.classList.remove('open');
-                }
-            });
             content.classList.toggle('open');
         }
-        
+
         function zoomToAnomaly(lat, lng) {
-            map.setView([lat, lng], 14);
+            map.setView([lat, lng], 12);
         }
 
         function toggleHeatmap() {
-            if (heatLayer) {
-                if (map.hasLayer(heatLayer)) {
-                    map.removeLayer(heatLayer);
-                    heatmapVisible = false;
-                } else {
-                    map.addLayer(heatLayer);
-                    heatmapVisible = true;
-                }
+            heatmapVisible = !heatmapVisible;
+            if (heatmapVisible && heatLayer) {
+                heatLayer.addTo(map);
+            } else if (heatLayer) {
+                map.removeLayer(heatLayer);
             }
         }
-        
+
         function updateMap() {
+            let heatData = [];
             markers.forEach(m => map.removeLayer(m));
             markers = [];
-            const heatData = [];
-            let bounds = new L.LatLngBounds();
+
+            if (allResults.length > 0) {
+                const { lat, lng } = allResults[0];
+                map.setView([lat, lng], 10);
+            }
 
             allResults.forEach(r => {
-                const latlng = [r.lat, r.lng];
-                const data = r.data;
-                
-                const potential = data.gold_analysis.Gold_Potential_Flag;
-                let color;
-                switch (potential) {
-                    case 'High Potential':
-                        color = 'red';
-                        break;
-                    case 'Moderate Potential':
-                        color = 'orange';
-                        break;
-                    case 'Low Potential':
-                        color = 'green';
-                        break;
-                    default:
-                        color = 'gray';
+                const color = r.data.Gold_Potential_Flag === "High" ? "red" :
+                              r.data.Gold_Potential_Flag === "Moderate" ? "orange" : "green";
+                const marker = L.circleMarker([r.lat, r.lng], { color, radius: 8 }).addTo(map)
+                    .bindPopup(`<b>Queried Coordinate</b><br>Lat: ${r.lat}, Lng: ${r.lng}<br>Potential: ${r.data.Gold_Potential_Flag}<br>Contained Au: ${r.data.Contained_Au_oz.toLocaleString()} oz<br>Recovery Value: $${r.data.Recovery_Adjusted_Value_USD.toLocaleString()}`);
+                markers.push(marker);
+
+                const intensity = r.data.Gold_Potential_Flag === "High" ? 1 :
+                                 r.data.Gold_Potential_Flag === "Moderate" ? 0.6 : 0.3;
+                heatData.push([r.lat, r.lng, intensity]);
+
+                (r.data.nearby_anomalies || []).forEach(anomaly => {
+                    const anomalyColor = anomaly.result.Gold_Potential === "High" ? "red" :
+                                        anomaly.result.Gold_Potential === "Moderate" ? "orange" : "green";
+                    const anomalyMarker = L.circleMarker([anomaly.lat, anomaly.lng], { color: anomalyColor, radius: 6, opacity: 0.5 }).addTo(map)
+                    .bindPopup(`<b>Nearby Anomaly</b><br>Lat: ${anomaly.lat.toFixed(4)}, Lng: ${anomaly.lng.toFixed(4)}<br>Potential: ${anomaly.result.Gold_Potential}<br>Score: $${anomaly.composite_score.toLocaleString()}<br>Tonnes: ${anomaly.result.Depth_Estimate.Estimated_Tonnes.toLocaleString()}<br>Grade: ${anomaly.result.Depth_Estimate.Grade_g_t.toFixed(2)} g/t`);
+                    markers.push(anomalyMarker);
+                    const anomalyIntensity = anomaly.result.Gold_Potential === "High" ? 0.8 :
+                                            anomaly.result.Gold_Potential === "Moderate" ? 0.5 : 0.2;
+                    heatData.push([anomaly.lat, anomaly.lng, anomalyIntensity]);
+                });
+
+                if (r.data.top_economic_anomaly) {
+                    const top = r.data.top_economic_anomaly;
+                    const topMarker = L.circleMarker([top.lat, top.lng], { color: 'purple', radius: 10 }).addTo(map)
+                        .bindPopup(`<b>Top Economic Anomaly</b><br>Lat: ${top.lat.toFixed(4)}, Lng: ${top.lng.toFixed(4)}<br>Score: $${top.composite_score.toLocaleString()}<br>${top.ranking_explanation}<br>Tonnes: ${top.result.Depth_Estimate.Estimated_Tonnes.toLocaleString()}<br>Grade: ${top.result.Depth_Estimate.Grade_g_t.toFixed(2)} g/t`);
+                    markers.push(topMarker);
+                    heatData.push([top.lat, top.lng, 1]);
                 }
-
-                const marker = L.circleMarker(latlng, {
-                    radius: 8,
-                    fillColor: color,
-                    color: '#000',
-                    weight: 1,
-                    opacity: 1,
-                    fillOpacity: 0.8
-                }).addTo(map);
-
-                const popupContent = `
-                    <b>Coordinates:</b> ${r.lat.toFixed(4)}, ${r.lng.toFixed(4)}<br>
-                    <b>Potential:</b> ${data.gold_analysis.Gold_Potential}<br>
-                    <b>Confidence:</b> ${data.gold_analysis.confidence}%<br>
-                    <b>Value:</b> $${parseInt(data.Recovery_Adjusted_Value_USD).toLocaleString()}<br>
-                    <b>Tonnes:</b> ${data.gold_analysis.Depth_Estimate.Estimated_Tonnes.toLocaleString()}<br>
-                `;
-                marker.bindPopup(popupContent);
-                markers.push(marker);
-                bounds.extend(latlng);
-
-                heatData.push([r.lat, r.lng, data.Recovery_Adjusted_Value_USD / 1000000]);
             });
 
-            allResults.filter(r => r.data.top_economic_anomaly).forEach(r => {
-                const anomaly = r.data.top_economic_anomaly;
-                const latlng = [anomaly.lat, anomaly.lng];
-                const marker = L.circleMarker(latlng, {
-                    radius: 12,
-                    fillColor: 'purple',
-                    color: '#000',
-                    weight: 2,
-                    opacity: 1,
-                    fillOpacity: 1
-                }).addTo(map);
-                const popupContent = `
-                    <b>Top Anomaly:</b> ${anomaly.lat.toFixed(4)}, ${anomaly.lng.toFixed(4)}<br>
-                    <b>Distance:</b> ${anomaly.distance_km} km<br>
-                    <b>Economic Score:</b> $${parseInt(anomaly.composite_score).toLocaleString()}<br>
-                    <b>Potential:</b> ${anomaly.result.Gold_Potential}
-                `;
-                marker.bindPopup(popupContent);
-                markers.push(marker);
-                bounds.extend(latlng);
-            });
-
-            if (heatLayer) map.removeLayer(heatLayer);
-            if (heatData.length > 0 && heatmapVisible) {
-                heatLayer = L.heatLayer(heatData, {
-                    radius: 25,
-                    blur: 15,
-                    maxZoom: 17,
-                    gradient: { 0.0: 'blue', 0.4: 'cyan', 0.6: 'lime', 0.8: 'yellow', 1.0: 'red' }
-                }).addTo(map);
+            if (heatData.length && heatmapVisible) {
+                heatLayer = L.heatLayer(heatData, { radius: 25, blur: 15, maxZoom: 10 }).addTo(map);
             }
-
-            if (bounds.isValid()) {
-                map.fitBounds(bounds, { padding: [50, 50] });
+            if (markers.length) {
+                const group = new L.featureGroup(markers);
+                map.fitBounds(group.getBounds().pad(0.2));
             }
         }
-        
-        function updateSummary() {
-            const totalCoords = allResults.length;
-            const totalDepth = allResults.reduce((sum, r) => sum + r.data.gold_analysis.Depth_Estimate.Depth_m, 0);
-            const totalGold = allResults.reduce((sum, r) => sum + (r.data.Contained_Au_oz || 0), 0);
-            const totalValue = allResults.reduce((sum, r) => sum + (r.data.Recovery_Adjusted_Value_USD || 0), 0);
-            const avgDepth = totalCoords > 0 ? (totalDepth / totalCoords).toFixed(2) : 0;
 
-            document.getElementById('totalCoords').textContent = totalCoords;
-            document.getElementById('avgDepth').textContent = avgDepth;
-            document.getElementById('totalGold').textContent = totalGold.toLocaleString(undefined, { maximumFractionDigits: 2 });
-            document.getElementById('totalValue').textContent = totalValue.toLocaleString();
+        function updateSummary() {
+            let totalCoords = allResults.length;
+            let avgDepth = 0, totalGold = 0, totalValue = 0;
+
+            allResults.forEach(r => {
+                const d = r.data.gold_analysis.Depth_Estimate;
+                avgDepth += d.Depth_m || 0;
+                totalGold += r.data.Contained_Au_oz || 0;
+                totalValue += r.data.Recovery_Adjusted_Value_USD || 0;
+            });
+
+            avgDepth = totalCoords ? (avgDepth / totalCoords).toFixed(2) : 0;
+            totalGold = totalGold.toFixed(2);
+            totalValue = totalValue.toLocaleString();
+
+            document.getElementById('totalCoords').innerText = totalCoords;
+            document.getElementById('avgDepth').innerText = avgDepth;
+            document.getElementById('totalGold').innerText = totalGold;
+            document.getElementById('totalValue').innerText = totalValue;
         }
 
         function updateComparison() {
             const table = document.getElementById('comparisonTable');
-            const comparisonDiv = document.getElementById('comparison');
             table.innerHTML = '';
             if (allResults.length > 1) {
-                comparisonDiv.classList.remove('hidden');
+                document.getElementById('comparison').classList.remove('hidden');
                 allResults.forEach(r => {
                     const d = r.data.gold_analysis.Depth_Estimate;
                     const row = document.createElement('tr');
@@ -926,21 +800,21 @@
                         <td>${r.lat}, ${r.lng}</td>
                         <td>${r.data.gold_analysis.Gold_Potential}</td>
                         <td>${r.data.Contained_Au_oz.toLocaleString()}</td>
-                        <td>$${parseInt(r.data.Recovery_Adjusted_Value_USD).toLocaleString()}</td>
-                        <td>${r.data.gold_analysis.confidence}</td>
+                        <td>$${r.data.Recovery_Adjusted_Value_USD.toLocaleString()}</td>
+                        <td>${r.data.gold_analysis.Confidence}</td>
                         <td>${d.Estimated_Tonnes.toLocaleString()}</td>
                         <td>${d.Grade_g_t.toFixed(2)}</td>
                     `;
                     table.appendChild(row);
                 });
             } else {
-                comparisonDiv.classList.add('hidden');
+                document.getElementById('comparison').classList.add('hidden');
             }
         }
 
         async function downloadPDF() {
             if (allResults.length === 0) {
-                showCustomAlert('No results to generate PDF');
+                showError('No results to generate PDF');
                 return;
             }
             const { jsPDF } = window.jspdf;
@@ -948,38 +822,31 @@
             doc.setFontSize(18);
             doc.setTextColor(255, 215, 0);
             doc.text("Xeltis Gold Exploration Report", 14, 20);
-            doc.addImage('/static/xeltis-logo.png', 'PNG', 160, 10, 40, 20);
+            doc.addImage('/Users/sapiensndatabaye/Library/Mobile Documents/com~apple~CloudDocs/Desktop/APPS/xeltis-vite/Nova7_Mining/xeltis-logo-CIxL2od-.png', 'PNG', 160, 10, 40, 20);
             doc.setFontSize(12);
             doc.setTextColor(0, 0, 0);
-            
             let y = 40;
 
-            for (let i = 0; i < allResults.length; i++) {
-                const r = allResults[i];
+            allResults.forEach((r, i) => {
                 const d = r.data.gold_analysis.Depth_Estimate;
                 const g = r.data.gold_analysis.Indicators;
                 const report = r.data.exploration_report;
                 const topAnomaly = r.data.top_economic_anomaly;
                 const nearbyAnomalies = r.data.nearby_anomalies || [];
 
-                if (i > 0) {
-                    doc.addPage();
-                    y = 20;
-                }
-                
                 doc.setFontSize(14);
                 doc.text(`Coordinate ${i + 1}: ${r.lat}, ${r.lng}`, 14, y); y += 6;
                 doc.setFontSize(12);
-                doc.text(`Potential: ${r.data.gold_analysis.Gold_Potential_Flag}`, 14, y); y += 6;
+                doc.text(`Potential: ${r.data.Gold_Potential_Flag}`, 14, y); y += 6;
                 doc.text(`Location: Lat: ${r.data.location.lat}, Lng: ${r.data.location.lng}`, 14, y); y += 6;
                 doc.text(`Contained Au: ${r.data.Contained_Au_oz ? r.data.Contained_Au_oz.toLocaleString() + ' oz' : 'N/A'}`, 14, y); y += 6;
-                doc.text(`Recovery Value: ${r.data.Recovery_Adjusted_Value_USD ? '$' + parseInt(r.data.Recovery_Adjusted_Value_USD).toLocaleString() : 'N/A'}`, 14, y); y += 6;
+                doc.text(`Recovery Value: ${r.data.Recovery_Adjusted_Value_USD ? '$' + r.data.Recovery_Adjusted_Value_USD.toLocaleString() : 'N/A'}`, 14, y); y += 6;
                 doc.text(`Gold Potential: ${r.data.gold_analysis.Gold_Potential}`, 14, y); y += 6;
-                doc.text(`Confidence: ${r.data.gold_analysis.confidence}%`, 14, y); y += 6;
+                doc.text(`Confidence: ${r.data.gold_analysis.Confidence}%`, 14, y); y += 6;
                 doc.text(`Depth: ${d.Depth_m} m | Tonnes: ${d.Estimated_Tonnes.toLocaleString()} | Grade: ${d.Grade_g_t.toFixed(2)} g/t | Uncertainty: ${d.Uncertainty}%`, 14, y); y += 6;
                 doc.text(`Indicators: Hydroxyl ${g.Hydroxyl_Alteration.toFixed(2)}, Iron Oxides ${g.Iron_Oxides.toFixed(2)}, Silica ${g.Silica_Alteration.toFixed(2)}, Slope ${g.Slope.toFixed(2)}`, 14, y); y += 6;
 
-                const canvas = document.getElementById(`chart${i}`);
+                const canvas = document.querySelectorAll('canvas')[i];
                 if (canvas) {
                     const imgData = canvas.toDataURL('image/png');
                     doc.addImage(imgData, 'PNG', 14, y, 180, 60);
@@ -997,10 +864,10 @@
                     doc.text('Top Economic Anomaly:', 14, y); y += 6;
                     doc.text(`Location: Lat: ${topAnomaly.lat.toFixed(4)}, Lng: ${topAnomaly.lng.toFixed(4)}`, 14, y); y += 6;
                     doc.text(`Distance: ${topAnomaly.distance_km} km`, 14, y); y += 6;
-                    doc.text(`Economic Score: $${parseInt(topAnomaly.composite_score).toLocaleString()}`, 14, y); y += 6;
+                    doc.text(`Economic Score: $${topAnomaly.composite_score.toLocaleString()}`, 14, y); y += 6;
                     doc.text(`Explanation: ${topAnomaly.ranking_explanation}`, 14, y); y += 6;
                     doc.text(`Gold Potential: ${topAnomaly.result.Gold_Potential}`, 14, y); y += 6;
-                    doc.text(`Confidence: ${topAnomaly.result.confidence}%`, 14, y); y += 6;
+                    doc.text(`Confidence: ${topAnomaly.result.Confidence}%`, 14, y); y += 6;
                     doc.text(`Depth: ${topAnomaly.result.Depth_Estimate.Depth_m} m`, 14, y); y += 6;
                     doc.text(`Tonnes: ${topAnomaly.result.Depth_Estimate.Estimated_Tonnes.toLocaleString()}`, 14, y); y += 6;
                     doc.text(`Grade: ${topAnomaly.result.Depth_Estimate.Grade_g_t.toFixed(2)} g/t`, 14, y); y += 6;
@@ -1010,38 +877,32 @@
                 }
 
                 if (nearbyAnomalies.length) {
-                    doc.text('Nearby Anomalies:', 14, y);
-                    y += 6;
-                    const headers = [['Lat', 'Lng', 'Distance (km)', 'Potential', 'Confidence (%)', 'Tonnes', 'Grade (g/t)', 'Score (USD)', 'Proximity']];
+                    doc.text('Nearby Anomalies:', 14, y); y += 6;
+                    const headers = ['Lat', 'Lng', 'Distance (km)', 'Potential', 'Confidence (%)', 'Tonnes', 'Grade (g/t)', 'Score (USD)', 'Proximity'];
                     const data = nearbyAnomalies.map(a => [
                         a.lat.toFixed(4),
                         a.lng.toFixed(4),
                         a.distance_km,
                         a.result.Gold_Potential,
-                        a.result.confidence,
+                        a.result.Confidence,
                         a.result.Depth_Estimate.Estimated_Tonnes.toLocaleString(),
                         a.result.Depth_Estimate.Grade_g_t.toFixed(2),
-                        `$${parseInt(a.composite_score).toLocaleString()}`,
+                        `$${a.composite_score.toLocaleString()}`,
                         `${a.result.Proximity_to_Known_Deposits.deposit} (${a.result.Proximity_to_Known_Deposits.distance_km} km)`
                     ]);
-                    doc.autoTable({ startY: y, head: headers, body: data, theme: 'striped' });
+                    doc.autoTable({ startY: y, head: [headers], body: data });
                     y = doc.lastAutoTable.finalY + 10;
                 }
-            }
+
+                if (y > 250) { doc.addPage(); y = 20; }
+            });
 
             doc.save('xeltis_gold_exploration_report.pdf');
         }
 
         async function handleLogout() {
-            if (supabaseClient) {
-                const { error } = await supabaseClient.auth.signOut();
-                if (error) {
-                    console.error('Error logging out:', error.message);
-                    showError('Error logging out. Please try again.');
-                } else {
-                    window.location.href = 'login.html';
-                }
-            }
+            await supabase.auth.signOut();
+            window.location.href = 'login.html';
         }
 
         function toggleSubscriptionModal() {
@@ -1052,9 +913,9 @@
                 modal.style.display = "flex";
             }
         }
-        
+
         document.addEventListener('DOMContentLoaded', () => {
-            initSupabase();
+            checkAuth();
             initMap();
             validateCoordinates();
 
