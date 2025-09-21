@@ -11,3 +11,5 @@ celery==5.2.7
 redis==4.5.5
 geopy==2.3.0
 Flask-Cors==3.0.10
+importlib_metadata<6git add requirements.txt
+git commit -m "Fix EntryPoints error by pinning importlib_metadata < 6"
