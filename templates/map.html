@@ -4,23 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carte - Xeltis</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Inter Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Leaflet CSS and JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <link rel="icon" href="/static/favicon.ico">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
-    <!-- PDF Generation Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.14/jspdf.plugin.autotable.min.js"></script>
-    <!-- Chart.js for charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Supabase CDN for auth -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
@@ -448,7 +441,7 @@
             }
         }
 
-        function initMap(lat = 28.8833, lng = -2.325) {
+        function initMap(lat = -1.401453, lng = 36.944993) {
             map = L.map('map', { zoomControl: true }).setView([lat, lng], 10);
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                 attribution: '&copy; <a href="https://carto.com/attributions">CartoDB</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -516,7 +509,50 @@
             markers = [];
             if (heatLayer) map.removeLayer(heatLayer);
 
-            const fetchedResults = await fetchFromFlaskAPI(lines);
+            const fetchedResults = [];
+            
+            const tasks = lines.map(line => {
+                const [lat, lng] = line.split(',').map(Number);
+                return { lat, lng, taskId: null, result: null };
+            });
+
+            try {
+                await Promise.all(tasks.map(async task => {
+                    const res = await fetch(`/api/analyze_gold?lat=${task.lat}&lng=${task.lng}`);
+                    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                    const data = await res.json();
+                    task.taskId = data.task_id;
+                }));
+
+                let allTasksComplete = false;
+                while (!allTasksComplete) {
+                    allTasksComplete = true;
+                    await Promise.all(tasks.map(async task => {
+                        if (task.taskId && !task.result) {
+                            const statusRes = await fetch(`/api/tasks/${task.taskId}`);
+                            if (!statusRes.ok) throw new Error(`HTTP error! status: ${statusRes.status}`);
+                            const statusData = await statusRes.json();
+                            if (statusData.status === 'completed') {
+                                task.result = statusData.result;
+                                fetchedResults.push({ lat: task.lat, lng: task.lng, data: task.result });
+                            } else {
+                                allTasksComplete = false;
+                            }
+                        }
+                    }));
+                    if (!allTasksComplete) {
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching data from Flask API:', err);
+                showError('Error retrieving data from server.');
+                isAnalyzing = false;
+                analyzeBtn.disabled = false;
+                analyzeSpinner.classList.add('hidden');
+                return;
+            }
+
             allResults = fetchedResults;
 
             if (allResults.length === 0) {
@@ -534,92 +570,6 @@
             analyzeSpinner.classList.add('hidden');
         }
 
-        async function fetchFromFlaskAPI(coordsArray) {
-            try {
-                const response = await Promise.all(coordsArray.map(async line => {
-                    const [lat, lng] = line.split(',').map(Number);
-                    const res = await fetch(`/api/analyze_gold?lat=${lat}&lng=${lng}`);
-                    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-                    const data = await res.json();
-                    return { lat, lng, data };
-                }));
-                return response;
-            } catch (err) {
-                console.error('Error fetching data from Flask API:', err);
-                showError('Error retrieving data from server.');
-                return [];
-            }
-        }
-
-        function generateSimulatedData(lat, lng) {
-            const random = Math.random();
-            const goldPotential = random > 0.8 ? 'High Potential' : random > 0.5 ? 'Moderate Potential' : 'Low Potential';
-            const confidence = Math.floor(Math.random() * 40) + 60; // Fixed case: confidence
-            const depth = Math.floor(Math.random() * 500) + 100;
-            const tonnes = Math.floor(Math.random() * 1000000) + 500000;
-            const grade = (Math.random() * 5 + 1).toFixed(2);
-            const containedAu = (tonnes * grade / 31.1035).toFixed(2);
-            const recoveryValue = (containedAu * (Math.random() * 1000 + 1500)).toFixed(2);
-
-            const topAnomaly = Math.random() > 0.7 ? {
-                lat: lat + (Math.random() - 0.5) / 100,
-                lng: lng + (Math.random() - 0.5) / 100,
-                distance_km: (Math.random() * 5).toFixed(2),
-                composite_score: (Math.random() * 100000000 + 1000000).toFixed(0),
-                ranking_explanation: 'This is a simulated explanation for a high-value anomaly based on nearby geological indicators.',
-                result: {
-                    Gold_Potential: 'Top Anomaly',
-                    confidence: Math.floor(Math.random() * 10) + 90, // Fixed case: confidence
-                    Depth_Estimate: { Depth_m: depth - 50, Estimated_Tonnes: tonnes * 1.5, Grade_g_t: (parseFloat(grade) * 2).toFixed(2), Uncertainty: 5 },
-                    Proximity_to_Known_Deposits: { deposit: 'Simulated Deposit A', distance_km: (Math.random() * 10).toFixed(2) },
-                    Indicators: { Hydroxyl_Alteration: Math.random() * 10, Iron_Oxides: Math.random() * 10, Silica_Alteration: Math.random() * 10, Slope: Math.random() * 10 }
-                }
-            } : null;
-
-            return {
-                location: { lat, lng },
-                gold_analysis: {
-                    Gold_Potential: goldPotential,
-                    Gold_Potential_Flag: goldPotential,
-                    confidence, // Fixed case: confidence
-                    Depth_Estimate: {
-                        Depth_m: depth,
-                        Estimated_Tonnes: tonnes,
-                        Grade_g_t: parseFloat(grade),
-                        Uncertainty: Math.floor(Math.random() * 20) + 5
-                    },
-                    Indicators: {
-                        Hydroxyl_Alteration: Math.random() * 10,
-                        Iron_Oxides: Math.random() * 10,
-                        Silica_Alteration: Math.random() * 10,
-                        Slope: Math.random() * 10
-                    }
-                },
-                Contained_Au_oz: parseFloat(containedAu),
-                Recovery_Adjusted_Value_USD: parseFloat(recoveryValue),
-                exploration_report: {
-                    'Geological Formation': 'Simulated Formation',
-                    'Mineralization Type': 'Simulated Type',
-                    'Rock Type': 'Simulated Rock',
-                    'Access': 'Simulated Access'
-                },
-                top_economic_anomaly: topAnomaly,
-                nearby_anomalies: Math.random() > 0.5 ? Array.from({ length: 2 }, () => ({
-                    lat: lat + (Math.random() - 0.5) / 50,
-                    lng: lng + (Math.random() - 0.5) / 50,
-                    distance_km: (Math.random() * 10).toFixed(2),
-                    composite_score: (Math.random() * 5000000 + 100000).toFixed(0),
-                    result: {
-                        Gold_Potential: Math.random() > 0.5 ? 'Moderate Potential' : 'Low Potential',
-                        confidence: Math.floor(Math.random() * 30) + 50, // Fixed case: confidence
-                        Depth_Estimate: { Depth_m: depth + 50, Estimated_Tonnes: tonnes * 0.8, Grade_g_t: (parseFloat(grade) * 0.5).toFixed(2), Uncertainty: 15 },
-                        Proximity_to_Known_Deposits: { deposit: 'Simulated Deposit B', distance_km: (Math.random() * 20).toFixed(2) },
-                        Indicators: { Hydroxyl_Alteration: Math.random() * 10, Iron_Oxides: Math.random() * 10, Silica_Alteration: Math.random() * 10, Slope: Math.random() * 10 }
-                    }
-                })) : []
-            };
-        }
-
         function showError(message) {
             const errorDiv = document.createElement('div');
             errorDiv.className = 'toast';
@@ -633,6 +583,11 @@
             container.innerHTML = '';
 
             allResults.forEach((r, i) => {
+                if (!r || !r.data || !r.data.gold_analysis || !r.data.gold_analysis.Depth_Estimate) {
+                    console.error("Incomplete data received for result index", i, r);
+                    return;
+                }
+
                 const d = r.data.gold_analysis.Depth_Estimate;
                 const g = r.data.gold_analysis.Indicators;
                 const report = r.data.exploration_report;
@@ -652,7 +607,7 @@
                                 <p><strong>Contained Au:</strong> ${r.data.Contained_Au_oz ? r.data.Contained_Au_oz.toLocaleString() + ' oz' : 'N/A'}</p>
                                 <p><strong>Recovery Value:</strong> ${r.data.Recovery_Adjusted_Value_USD ? '$' + r.data.Recovery_Adjusted_Value_USD.toLocaleString() : 'N/A'}</p>
                                 <p><strong>Gold Potential:</strong> ${r.data.gold_analysis.Gold_Potential}</p>
-                                <p><strong>Confidence:</strong> ${r.data.gold_analysis.confidence}%</p>
+                                <p><strong>Confidence:</strong> ${r.data.gold_analysis.Confidence}%</p>
                                 <p><strong>Depth:</strong> ${d.Depth_m} m</p>
                                 <p><strong>Tonnes:</strong> ${d.Estimated_Tonnes.toLocaleString()}</p>
                                 <p><strong>Grade:</strong> ${d.Grade_g_t.toFixed(2)} g/t</p>
@@ -680,7 +635,7 @@
                                 <p><strong>Economic Score:</strong> $${parseInt(topAnomaly.composite_score).toLocaleString()}</p>
                                 <p><strong>Explanation:</strong> ${topAnomaly.ranking_explanation}</p>
                                 <p><strong>Gold Potential:</strong> ${topAnomaly.result.Gold_Potential}</p>
-                                <p><strong>Confidence:</strong> ${topAnomaly.result.confidence}%</p>
+                                <p><strong>Confidence:</strong> ${topAnomaly.result.Confidence}%</p>
                                 <p><strong>Depth:</strong> ${topAnomaly.result.Depth_Estimate.Depth_m} m</p>
                                 <p><strong>Tonnes:</strong> ${topAnomaly.result.Depth_Estimate.Estimated_Tonnes.toLocaleString()}</p>
                                 <p><strong>Grade:</strong> ${topAnomaly.result.Depth_Estimate.Grade_g_t.toFixed(2)} g/t</p>
@@ -720,7 +675,7 @@
                                                     <td>${anomaly.lng.toFixed(4)}</td>
                                                     <td>${anomaly.distance_km}</td>
                                                     <td>${anomaly.result.Gold_Potential}</td>
-                                                    <td>${anomaly.result.confidence}</td>
+                                                    <td>${anomaly.result.Confidence}</td>
                                                     <td>${anomaly.result.Depth_Estimate.Estimated_Tonnes.toLocaleString()}</td>
                                                     <td>${anomaly.result.Depth_Estimate.Grade_g_t.toFixed(2)}</td>
                                                     <td>$${parseInt(anomaly.composite_score).toLocaleString()}</td>
@@ -852,7 +807,7 @@
                 const popupContent = `
                     <b>Coordinates:</b> ${r.lat.toFixed(4)}, ${r.lng.toFixed(4)}<br>
                     <b>Potential:</b> ${data.gold_analysis.Gold_Potential}<br>
-                    <b>Confidence:</b> ${data.gold_analysis.confidence}%<br>
+                    <b>Confidence:</b> ${data.gold_analysis.Confidence}%<br>
                     <b>Value:</b> $${parseInt(data.Recovery_Adjusted_Value_USD).toLocaleString()}<br>
                     <b>Tonnes:</b> ${data.gold_analysis.Depth_Estimate.Estimated_Tonnes.toLocaleString()}<br>
                 `;
@@ -927,7 +882,7 @@
                         <td>${r.data.gold_analysis.Gold_Potential}</td>
                         <td>${r.data.Contained_Au_oz.toLocaleString()}</td>
                         <td>$${parseInt(r.data.Recovery_Adjusted_Value_USD).toLocaleString()}</td>
-                        <td>${r.data.gold_analysis.confidence}</td>
+                        <td>${r.data.gold_analysis.Confidence}</td>
                         <td>${d.Estimated_Tonnes.toLocaleString()}</td>
                         <td>${d.Grade_g_t.toFixed(2)}</td>
                     `;
@@ -975,7 +930,7 @@
                 doc.text(`Contained Au: ${r.data.Contained_Au_oz ? r.data.Contained_Au_oz.toLocaleString() + ' oz' : 'N/A'}`, 14, y); y += 6;
                 doc.text(`Recovery Value: ${r.data.Recovery_Adjusted_Value_USD ? '$' + parseInt(r.data.Recovery_Adjusted_Value_USD).toLocaleString() : 'N/A'}`, 14, y); y += 6;
                 doc.text(`Gold Potential: ${r.data.gold_analysis.Gold_Potential}`, 14, y); y += 6;
-                doc.text(`Confidence: ${r.data.gold_analysis.confidence}%`, 14, y); y += 6;
+                doc.text(`Confidence: ${r.data.gold_analysis.Confidence}%`, 14, y); y += 6;
                 doc.text(`Depth: ${d.Depth_m} m | Tonnes: ${d.Estimated_Tonnes.toLocaleString()} | Grade: ${d.Grade_g_t.toFixed(2)} g/t | Uncertainty: ${d.Uncertainty}%`, 14, y); y += 6;
                 doc.text(`Indicators: Hydroxyl ${g.Hydroxyl_Alteration.toFixed(2)}, Iron Oxides ${g.Iron_Oxides.toFixed(2)}, Silica ${g.Silica_Alteration.toFixed(2)}, Slope ${g.Slope.toFixed(2)}`, 14, y); y += 6;
 
@@ -1000,7 +955,7 @@
                     doc.text(`Economic Score: $${parseInt(topAnomaly.composite_score).toLocaleString()}`, 14, y); y += 6;
                     doc.text(`Explanation: ${topAnomaly.ranking_explanation}`, 14, y); y += 6;
                     doc.text(`Gold Potential: ${topAnomaly.result.Gold_Potential}`, 14, y); y += 6;
-                    doc.text(`Confidence: ${topAnomaly.result.confidence}%`, 14, y); y += 6;
+                    doc.text(`Confidence: ${topAnomaly.result.Confidence}%`, 14, y); y += 6;
                     doc.text(`Depth: ${topAnomaly.result.Depth_Estimate.Depth_m} m`, 14, y); y += 6;
                     doc.text(`Tonnes: ${topAnomaly.result.Depth_Estimate.Estimated_Tonnes.toLocaleString()}`, 14, y); y += 6;
                     doc.text(`Grade: ${topAnomaly.result.Depth_Estimate.Grade_g_t.toFixed(2)} g/t`, 14, y); y += 6;
@@ -1018,7 +973,7 @@
                         a.lng.toFixed(4),
                         a.distance_km,
                         a.result.Gold_Potential,
-                        a.result.confidence,
+                        a.result.Confidence,
                         a.result.Depth_Estimate.Estimated_Tonnes.toLocaleString(),
                         a.result.Depth_Estimate.Grade_g_t.toFixed(2),
                         `$${parseInt(a.composite_score).toLocaleString()}`,
