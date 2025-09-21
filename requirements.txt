@@ -5,8 +5,9 @@ Werkzeug==2.3.7
 google-api-python-client==2.80.0
 google-auth-httplib2==0.1.0
 google-auth==2.17.3
+google-cloud-storage==2.9.0
 earthengine-api==0.1.341
-celery
-redis
+celery==5.2.7
+redis==4.5.5
 geopy==2.3.0
-Flask-CORS==3.0.10
+Flask-Cors==3.0.10
