@@ -66,4 +66,5 @@ geographiclib==2.0
 zipp==3.15.0
 
 # Supabase (latest stable)
-supabase==2.19.0supabase==2.8.4
+supabase==2.19.0
+supabase==2.8.4
