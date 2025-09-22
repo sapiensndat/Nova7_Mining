@@ -63,4 +63,4 @@ geopy==2.3.0
 geographiclib==2.0
 
 # Python metadata (handled by the pin at the top)
-zipp==3.15.0
+zipp==3.15.0supabase==2.8.4
